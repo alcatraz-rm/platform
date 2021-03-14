@@ -17,6 +17,10 @@ media/
 *$py.class
 
 
+# local env
+set-env.sh
+
+
 # C extensions
 *.so
 
