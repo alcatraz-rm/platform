@@ -3,6 +3,20 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+### Django ###
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+*.sqlite3
+db.sqlite3-journal
+media/
+*.py[cod]
+*$py.class
+
+
 # C extensions
 *.so
 
