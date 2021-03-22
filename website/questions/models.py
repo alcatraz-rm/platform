@@ -26,6 +26,26 @@ class Problem(models.Model):
     is_anonymous = models.BooleanField(default=False, verbose_name='Is problem anonymous?', )
 
 
+class Response(models.Model):
+    # perhaps should change on_delete param
+    problem = models.ForeignKey(Problem, on_delete=models.SET_DEFAULT, null=False, blank=False,
+                                verbose_name='Problem', default=None, )
+
+    body = models.TextField(max_length=2048, null=False, blank=False, verbose_name='Body', )
+
+    # perhaps should change on_delete param
+    author = models.ForeignKey('authorization.User', on_delete=models.SET_DEFAULT, null=False, blank=False,
+                             verbose_name='Author', default=None, )
+
+    # date when the response was created
+    created_at = models.DateField(auto_now_add=True, verbose_name='Publication date', )
+
+    anonymous = models.BooleanField()
+
+    # this action makes question resolved
+    final = models.BooleanField()
+
+
 class Science(models.Model):
     # TODO: add sciences
     name = models.CharField(verbose_name='Science name', null=False, blank=False, choices=(('science_1', 'science_1'),
