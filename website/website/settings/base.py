@@ -89,3 +89,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# options: request or question
+REQUEST = 'REQUEST'
+QUESTION = 'QUESTION'
+
+PROBLEM_TYPE_OPTIONS = [
+    (REQUEST, 'Request'),
+    (QUESTION, 'Question'),
+]
