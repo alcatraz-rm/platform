@@ -1,12 +1,12 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-# read about django user model overriding
-class User(models.Model):
+class User(AbstractUser):
     email = models.EmailField(max_length=64, null=False, blank=False, verbose_name="Email", )
 
     # warning
-    password = models.CharField(max_length=64, null=False, blank=False, verbose_name="Password (warning)", )
+    # password = models.CharField(max_length=64, null=False, blank=False, verbose_name="Password (warning)", )
 
     name = models.CharField(max_length=64, null=False, blank=False, verbose_name="Name", )
 

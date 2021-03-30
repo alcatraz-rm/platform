@@ -8,7 +8,7 @@ class Problem(models.Model):
     body = models.TextField(max_length=2048, null=False, blank=False, verbose_name='Body', )
 
     # perhaps should change on_delete param
-    user = models.ForeignKey('authorization.User', on_delete=models.SET_DEFAULT, null=True, blank=False,
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_DEFAULT, null=True, blank=False,
                              verbose_name='User', default=None, )
 
     # date when this post was created

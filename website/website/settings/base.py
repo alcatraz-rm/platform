@@ -89,6 +89,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+AUTH_USER_MODEL = 'authorization.User'
+
 # options: request or question
 REQUEST = 'REQUEST'
 QUESTION = 'QUESTION'
