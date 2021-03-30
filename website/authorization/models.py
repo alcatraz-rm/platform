@@ -5,9 +5,6 @@ from django.db import models
 class User(AbstractUser):
     email = models.EmailField(max_length=64, null=False, blank=False, verbose_name="Email", )
 
-    # warning
-    # password = models.CharField(max_length=64, null=False, blank=False, verbose_name="Password (warning)", )
-
     name = models.CharField(max_length=64, null=False, blank=False, verbose_name="Name", )
 
     phone = models.CharField(max_length=16, null=True, blank=False, default=None, verbose_name="Mobile Phone", )

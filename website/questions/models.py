@@ -34,8 +34,8 @@ class Response(models.Model):
     body = models.TextField(max_length=2048, null=False, blank=False, verbose_name='Body', )
 
     # perhaps should change on_delete param
-    author = models.ForeignKey('authorization.User', on_delete=models.SET_DEFAULT, null=False, blank=False,
-                             verbose_name='Author', default=None, )
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_DEFAULT, null=False, blank=False,
+                               verbose_name='Author', default=None, )
 
     # date when the response was created
     created_at = models.DateField(auto_now_add=True, verbose_name='Publication date', )
