@@ -1,8 +1,9 @@
 import os
 from pathlib import Path
 
-BASE_DIR = os.path.join(Path(__file__).resolve().parent.parent, '..')
 
+# BASE_DIR = os.path.join(Path(__file__).resolve().parent.parent, '..')
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', ]
 
