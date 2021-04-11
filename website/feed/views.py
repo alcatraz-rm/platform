@@ -1,8 +1,8 @@
-from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
 
-from questions.models import Problem, Response
+from questions.models import Problem
 
 
 def problem_list(request):
@@ -26,7 +26,6 @@ def problem_list(request):
 
 
 class ProblemListView(ListView):
-
     queryset = Problem.objects.all()
 
     context_object_name = 'posts'
@@ -37,7 +36,6 @@ class ProblemListView(ListView):
 
 
 def problem_detail(request, post_id):
-
     post = get_object_or_404(Problem, id=post_id)
 
     responses = post.comments.all()

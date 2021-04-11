@@ -10,7 +10,5 @@ urlpatterns = [
     path("login/", auth_views.user_login_view, name="login"),
     path("sing-up/", auth_views.sing_up_view, name="sing-up"),
     # path("feed/", feed_views.fe)
-    url(r'^feed/', include(('feed.urls', 'feed'),
-                           namespace='feed',
-                           )),
+    url(r'^feed/', include(('feed.urls', 'feed'), namespace='feed',)),
 ]

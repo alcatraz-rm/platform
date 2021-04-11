@@ -25,6 +25,8 @@ def sing_up_view(request):
 
 
 def user_login_view(request):
+    template = 'authorization/login.html'
+
     if request.method == 'POST':
         form = LoginForm(request.POST)
 
@@ -37,13 +39,12 @@ def user_login_view(request):
                 if user.is_active:
                     login(request, user)
 
-                    return HttpResponse('Authenticated successfully')
-                    # return redirect(to=)
-                else:
-                    return HttpResponse('Disabled account')
-            else:
-                return HttpResponse('Invalid login')
+                    return redirect(to='/feed/')
+                # else:
+                #     return HttpResponse('Disabled account')
+            # else:
+            #     return HttpResponse('Invalid login')
     else:
         form = LoginForm()
 
-    return render(request, 'authorization/login.html', {'form': form})
+    return render(request, template, {'form': form})
