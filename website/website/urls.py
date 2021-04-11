@@ -3,6 +3,7 @@ from django.contrib.auth import views as dj_auth_views
 from django.urls import path
 
 from authorization import views as auth_views
+from feed import views as feed_views
 
 
 urlpatterns = [
@@ -10,4 +11,5 @@ urlpatterns = [
     # path("login/", dj_auth_views.LoginView.as_view(), name="login"),
     path("login/", auth_views.user_login_view, name="login"),
     path("sing-up/", auth_views.sing_up_view, name="sing-up"),
+    # path("feed/", feed_views.fe)
 ]

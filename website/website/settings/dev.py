@@ -9,11 +9,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "website_data",
-        # "USER": DATABASE_USER,
-        # "PASSWORD": DATABASE_PASSWORD,
-        "USER": "connector",
-        "PASSWORD": "polniyLohAga",
-        "HOST": "72.11.207.5",
+        "USER": DATABASE_USER,
+        "PASSWORD": DATABASE_PASSWORD,
+        "HOST": DATABASE_HOST,
         "PORT": "5432",
     }
 }

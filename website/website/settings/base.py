@@ -15,7 +15,7 @@ INTERNAL_IPS = [
 
 DATABASE_USER = os.getenv('DATABASE_USER')
 DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD')
-
+DATABASE_HOST = os.getenv('DATABASE_HOST')
 
 # Application definition
 
@@ -91,6 +91,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'authorization.User'
+
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/admin'
 
