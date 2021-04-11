@@ -4,6 +4,7 @@ from django.urls import path
 
 from authorization import views as auth_views
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path("login/", dj_auth_views.LoginView.as_view(), name="login"),
@@ -11,4 +12,5 @@ urlpatterns = [
     path("sing-up/", auth_views.sing_up_view, name="sing-up"),
     # path("feed/", feed_views.fe)
     url(r'^feed/', include(('feed.urls', 'feed'), namespace='feed',)),
+    path('logout/', auth_views.user_logout_view, name="logout")
 ]

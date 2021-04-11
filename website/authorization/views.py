@@ -1,6 +1,7 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.conf import settings
 
 from .forms import SingUpForm, LoginForm
 
@@ -40,11 +41,14 @@ def user_login_view(request):
                     login(request, user)
 
                     return redirect(to='/feed/')
-                # else:
-                #     return HttpResponse('Disabled account')
-            # else:
-            #     return HttpResponse('Invalid login')
     else:
         form = LoginForm()
 
     return render(request, template, {'form': form})
+
+
+def user_logout_view(request):
+    logout(request)
+
+    return redirect(to=settings.LOGIN_URL)
+
