@@ -37,8 +37,8 @@ def user_login_view(request):
                 if user.is_active:
                     login(request, user)
 
-                    # return HttpResponse('Authenticated successfully')
-                    return redirect(to=)
+                    return HttpResponse('Authenticated successfully')
+                    # return redirect(to=)
                 else:
                     return HttpResponse('Disabled account')
             else:
