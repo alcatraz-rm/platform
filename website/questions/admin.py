@@ -17,15 +17,9 @@ class ProblemAdmin(admin.ModelAdmin):
 
     list_filter = ['created_at', 'problem_type', 'is_closed', 'is_anonymous']
 
-    ordering = ['created_at', 'title']
+    ordering = ['-created_at', 'title']
 
     date_hierarchy = 'created_at'
-
-    # raw_id_fields = ('user',)
-
-    '''list_select_related = (
-        'user',
-    )'''
 
 
 @admin.register(Section)

@@ -27,7 +27,6 @@ def sing_up_view(request):
 
 def user_login_view(request):
     template = 'authorization/login.html'
-
     if request.method == 'POST':
         form = LoginForm(request.POST)
 

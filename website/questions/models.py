@@ -29,6 +29,9 @@ class Problem(models.Model):
     def get_absolute_url(self):
         return reverse('feed:problem_detail', args=[self.id])
 
+    def __str__(self):
+        return 'Problem by {} titled as {}'.format(self.user, self.title)
+
 
 class Response(models.Model):
     # perhaps should change on_delete param

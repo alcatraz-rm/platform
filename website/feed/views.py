@@ -1,6 +1,7 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView
+
 
 from questions.models import Problem
 
@@ -26,7 +27,7 @@ def problem_list(request):
 
 
 class ProblemListView(ListView):
-    queryset = Problem.objects.all()
+    queryset = Problem.objects.all().order_by('-created_at')
 
     context_object_name = 'posts'
 

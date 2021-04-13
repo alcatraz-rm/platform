@@ -13,9 +13,12 @@ INTERNAL_IPS = [
 ]
 
 
-DATABASE_USER = os.getenv('DATABASE_USER')
+"""DATABASE_USER = os.getenv('DATABASE_USER')
 DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD')
-DATABASE_HOST = os.getenv('DATABASE_HOST')
+DATABASE_HOST = os.getenv('DATABASE_HOST')"""
+DATABASE_USER = 'connector'
+DATABASE_PASSWORD = 'polniyLohAga'
+DATABASE_HOST = '72.11.207.5'
 
 # Application definition
 

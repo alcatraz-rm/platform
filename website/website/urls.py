@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.urls import path
 
 from authorization import views as auth_views
+from questions.views import add_problem_view
 
 
 urlpatterns = [
@@ -12,5 +13,6 @@ urlpatterns = [
     path("sing-up/", auth_views.sing_up_view, name="sing-up"),
     # path("feed/", feed_views.fe)
     url(r'^feed/', include(('feed.urls', 'feed'), namespace='feed',)),
-    path('logout/', auth_views.user_logout_view, name="logout")
+    path('logout/', auth_views.user_logout_view, name="logout"),
+    url(r'^create/$', add_problem_view, name='create'),
 ]
