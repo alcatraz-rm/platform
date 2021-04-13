@@ -13,7 +13,7 @@ class Problem(models.Model):
                              verbose_name='User', default=None, related_name='question_problems')
 
     # date when this post was created
-    created_at = models.DateField(auto_now_add=True, verbose_name='Publication date', )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Publication date', )
 
     topics = models.ManyToManyField(to='Section', verbose_name='Topics', related_name='topics', )
 
@@ -57,25 +57,25 @@ class Response(models.Model):
 
 
 class Science(models.Model):
-    # TODO: add sciences
-    name = models.CharField(verbose_name='Science name', null=False, blank=False, choices=(('science_1', 'science_1'),
-                                                                                           ('science_2', 'science_2')),
-                            max_length=64, )
+    name = models.CharField(verbose_name='Science name', null=False, blank=False, max_length=64, )
+
+    def __str__(self):
+        return self.name
 
 
 class Subject(models.Model):
-    # TODO: add subjects
     science = models.ForeignKey(to='Science', on_delete=models.CASCADE, null=False, blank=False, )
 
-    name = models.CharField(verbose_name='Subject name', null=False, blank=False, choices=(('sub_1', 'sub_1'),
-                                                                                           ('sub_2', 'sub_2')),
-                            max_length=64, )
+    name = models.CharField(verbose_name='Subject name', null=False, blank=False, max_length=64, )
+
+    def __str__(self):
+        return self.name + ' | ' + self.science.name
 
 
 class Section(models.Model):
-    # TODO: add sections
     subject = models.ForeignKey(to='Subject', on_delete=models.CASCADE, null=False, blank=False, )
 
-    name = models.CharField(verbose_name='Section name', null=False, blank=False, choices=(('section_1', 'section_1'),
-                                                                                           ('section_2', 'section_2')),
-                            max_length=64, )
+    name = models.CharField(verbose_name='Section name', null=False, blank=False, max_length=64, )
+
+    def __str__(self):
+        return self.name + ' | ' + self.subject.name + ' | ' + self.subject.science.name

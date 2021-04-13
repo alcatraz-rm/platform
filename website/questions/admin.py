@@ -30,6 +30,7 @@ class ProblemAdmin(admin.ModelAdmin):
 
 @admin.register(Section)
 class SectionAdmin(admin.ModelAdmin):
+    list_display = ['name']
 
     fieldsets = (
         (None, {'fields': ('name', 'subject')}),
@@ -37,15 +38,18 @@ class SectionAdmin(admin.ModelAdmin):
 
 
 @admin.register(Subject)
-class SectionAdmin(admin.ModelAdmin):
+class SubjectAdmin(admin.ModelAdmin):
+    list_display = ('name', 'science', )
 
     fieldsets = (
-        (None, {'fields': ('name', 'science')}),
+        (None, {'fields': ('name', 'science', )}),
     )
 
 
 @admin.register(Science)
-class SectionAdmin(admin.ModelAdmin):
+class ScienceAdmin(admin.ModelAdmin):
+    list_display = ['name']
+
     fieldsets = (
 
         (None, {'fields': ('name',)}),
