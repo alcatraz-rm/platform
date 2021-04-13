@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Share your problem!{% endblock %}
+
+{% block content %}
+    <h1>Share your problem with others! Maybe someone will help you!</h1>
+    <form action="." method="post">
+        {{ form.as_p }}
+        {% csrf_token %}
+        <input type="submit" value="Share it!">
+    </form>
+{% endblock %}

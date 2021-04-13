@@ -7,6 +7,17 @@
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
+    <div class="header">
+        <a class="nav-link btn" href="{% url 'feed:problem_list' %}" role="button">Helpmate</a>
+        <span class="user">
+            {% if request.user.is_authenticated %}
+                Hello, {{ request.user.username }},
+                <a class="nav-link btn" href="{% url 'logout' %}" role="button">Logout</a>
+            {% else %}
+                <a class="nav-link btn" href="{% url 'login' %}" role="button">Log-in</a>
+            {% endif %}
+        </span>
+    </div>
     <main>
         {% block content %}{% endblock %}
     </main>

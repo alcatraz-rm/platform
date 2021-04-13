@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Problems{% endblock %}
 {% block content %}
-    <a class="nav-link btn" href="{% url 'logout' %}" role="button">Logout</a>
+    <a href="{% url 'create' %}" role="button">Create a problem!</a>
     <h1>Problems</h1>
     {% for post in posts %}
         <h2>
@@ -9,7 +9,12 @@
         </h2>
         {{ post.body|truncatewords:30|linebreaks }}
         <p class="date">
-            Published at {{ post.created_at }} by {{ post.user }}
+            Published at {{ post.created_at }} by
+            {% if post.is_anonymous %}
+                anonymous
+            {% else %}
+                {{ post.user }}
+            {% endif %}
         </p>
         <h3>{{ post.comments.all.count }} комментариев.</h3>
     {% endfor %}

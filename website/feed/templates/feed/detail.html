@@ -1,10 +1,14 @@
 {% extends "base.html" %}
 {% block title %}{{ post.title }}{% endblock %}
 {% block content %}
-    <a class="nav-link btn" href="{% url 'logout' %}" role="button">Logout</a>
     <h1>{{ post.title }}</h1>
     <p class="date">
-        Published at {{ post.created_at }} by {{ post.user }}
+        Published at {{ post.created_at }} by
+        {% if post.is_anonymous %}
+            anonymous
+        {% else %}
+            {{ post.user }}
+        {% endif %}
     </p>
     {{ post.body|linebreaks }}
     {% with responses.count as total_comments %}
