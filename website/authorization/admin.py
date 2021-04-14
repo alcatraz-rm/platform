@@ -8,7 +8,7 @@ from .models import User
 class UserAdmin(DJUserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('phone', 'recovery_email', 'telegram',
+        ('Personal info', {'fields': ('first_name', 'last_name', 'phone', 'recovery_email', 'telegram',
                                       'vk', 'bio', 'department', 'stage')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
                                     'user_permissions')}),
@@ -16,7 +16,7 @@ class UserAdmin(DJUserAdmin):
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
 
-    list_display = ['email', 'name', 'phone', 'recovery_email',
+    list_display = ['email', 'get_full_name', 'phone', 'recovery_email',
                     'telegram', 'vk', 'bio', 'department', 'stage']
 
-    filter_horizontal = ['interests']
+    filter_horizontal = ['interests', 'user_permissions']

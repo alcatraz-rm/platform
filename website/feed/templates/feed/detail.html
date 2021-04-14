@@ -2,15 +2,11 @@
 {% block title %}{{ post.title }}{% endblock %}
 {% block content %}
     <h1>{{ post.title }}</h1>
-    <p class="date">
-        Published at {{ post.created_at }} by
-        {% if post.is_anonymous %}
-            anonymous
-        {% else %}
-            {{ post.user }}
-        {% endif %}
+    {% include "post_mata_inf.html" %}
+    <p class="post-body">
+        Описание:
+        {{ post.body|linebreaks }}
     </p>
-    {{ post.body|linebreaks }}
     {% with responses.count as total_comments %}
     <h2>
         {{ total_comments }} comment{{ total_comments|pluralize }}

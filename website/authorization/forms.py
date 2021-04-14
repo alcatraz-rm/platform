@@ -3,7 +3,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate
 
-from authorization.models import User
+from .models import User
+from questions.models import Section
+from questions.forms import CustomMMCF
 
 
 class LoginForm(forms.Form):
@@ -31,15 +33,22 @@ class LoginForm(forms.Form):
 
 
 class SingUpForm(UserCreationForm):
-    email = forms.EmailField(max_length=64, help_text='Your email')
-
-    name = forms.CharField(max_length=64, help_text='Your name')
-
-    telegram = forms.CharField(max_length=32, help_text='Your telegram @nickname')
-
-    vk = forms.URLField(max_length=256, help_text='Your VK-page url')
-
     class Meta:
         model = User
 
-        fields = ('username', 'email', 'name', 'password1', 'password2', 'vk', 'telegram')
+        fields = ('username', 'email', 'recovery_email',
+                  'first_name', 'last_name', 'department', 'stage', 'bio',
+                  'password1', 'password2', 'vk', 'telegram', 'interests')
+
+    first_name = forms.CharField(max_length=150, help_text='Your name', required=False)
+
+    last_name = forms.CharField(max_length=150, help_text='Your last name', required=False)
+
+    telegram = forms.CharField(max_length=32, help_text='Your telegram @nickname', required=False)
+
+    vk = forms.URLField(max_length=256, help_text='Your VK-page url', required=False)
+
+    interests = CustomMMCF(queryset=Section.objects.all(),
+                           widget=forms.CheckboxSelectMultiple,
+                           required=True, help_text="Please, choose at least ONE."
+                           )

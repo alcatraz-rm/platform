@@ -8,14 +8,7 @@
             <a href="{{ post.get_absolute_url }}">{{ post.title }}</a>
         </h2>
         {{ post.body|truncatewords:30|linebreaks }}
-        <p class="date">
-            Published at {{ post.created_at }} by
-            {% if post.is_anonymous %}
-                anonymous
-            {% else %}
-                {{ post.user }}
-            {% endif %}
-        </p>
+        {% include "post_mata_inf.html" %}
         <h3>{{ post.comments.all.count }} комментариев.</h3>
     {% endfor %}
 
