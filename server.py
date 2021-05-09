@@ -10,7 +10,7 @@ from aiogram.types import ContentTypes
 
 from aiogram import Bot, Dispatcher, executor, types
 
-API_TOKEN = os.getenv("API_TOKEN")
+from config import *
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -27,7 +27,7 @@ async def handle_help(message: types.Message):
     """
         This handler will be called when user sends `/help` command
         """
-    await message.answer("Help...")
+    await message.answer(HELP_MESSAGE)
 
 
 @dp.message_handler(commands=['start'], state="*")
@@ -35,7 +35,7 @@ async def send_welcome(message: types.Message):
     """
     This handler will be called when user sends `/start` command
     """
-    pass
+    await message.answer(HELP_MESSAGE)
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
