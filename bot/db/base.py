@@ -1,10 +1,7 @@
 from peewee import *
-import os
 
-DATABASE_USER = os.getenv('DATABASE_USER')
-DATABASE_PASSWORD = os.getenv('DATABASE_PASSWORD')
-DATABASE_HOST = os.getenv('DATABASE_HOST')
-DATABASE_NAME = os.getenv('DATABASE_NAME')
+from bot.config import DATABASE_PASSWORD, DATABASE_NAME, DATABASE_HOST, DATABASE_USER
+
 
 db = PostgresqlDatabase(
     database=DATABASE_NAME,
