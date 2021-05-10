@@ -39,3 +39,6 @@ HELP_MESSAGE = """Доступные команды:
 
 9. /user - немного информации о товарище"""
 
+REGISTRATION_EXIT_SENTENCES = " Type /exit to cancel registration."
+
+REGISTRATION_CANCELED_MESSAGE = """Знакомство не удалось... Захочешь вернуться к этому, пиши /register."""
