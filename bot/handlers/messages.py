@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 
 from bot import constants
 from bot.config import dp
-from bot.states import RegistrationProcessStates
+from bot.states import RegistrationProcessStates, NewQuestionStates
 import bot.keyboards.replay as kb
 from bot.db.services import account_service
 from bot.handlers.commands import send_welcome
@@ -56,4 +56,26 @@ async def registration_name(message: types.Message, state: FSMContext):
     await message.answer("Твой адрес эл. почты (только для лохов из НГУ)." + constants.REGISTRATION_EXIT_SENTENCES,
                          reply_markup=kb.ReplyKeyboardRemove())
     await RegistrationProcessStates.next()
+
+
+# /new process
+
+@dp.message_handler(state=NewQuestionStates.waiting_for_type)
+async def new_question_type(message: types.Message, state: FSMContext):
+    if message.text not in ['Вопрос', 'Обсуждение']:
+        await message.answer('Выбери корректный тип, используя клавиатуру.', reply_markup=kb.get_question_type_km())
+        return
+
+    answer = ''
+    if message.text == 'Вопрос':
+        await state.set_data({'type': 'question'})
+        answer = 'Введи название вопроса. Постарайся быть максмально конкретным.'
+    elif message.text == 'Обсуждение':
+        await state.set_data({'type': 'discussion'})
+        answer = 'Введи название обсуждения. Постарайся быть максмально конкретным.'
+
+    await message.answer(answer)
+    await NewQuestionStates.next()
+
+
 

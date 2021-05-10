@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 
 from bot import constants
 from bot.config import dp
-from bot.states import RegistrationProcessStates
+from bot.states import RegistrationProcessStates, NewQuestionStates
 import bot.keyboards.replay as kb
 from bot.db.services import account_service
 
@@ -13,6 +13,15 @@ async def handle_exit(message: types.Message, state: FSMContext):
     await message.answer(constants.REGISTRATION_CANCELED_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
     await state.reset_data()
     await state.finish()
+
+
+@dp.message_handler(commands=["new"], state="*")
+async def handle_new(message: types.Message):
+    if account_service.is_user_exist(t_id=message.from_user.id):
+        await message.answer("Выберите тип.", reply_markup=kb.get_question_type_km())
+        await NewQuestionStates.waiting_for_type.set()
+    else:
+        await message.answer("Зарегестрируйтесь, чтобы задать вопрос или создать обсуждение.")
 
 
 @dp.message_handler(commands=["register"], state="*")

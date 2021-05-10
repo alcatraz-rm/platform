@@ -18,3 +18,12 @@ def get_degree_km():
         keyboard.add(dep[1])
 
     return keyboard
+
+
+def get_question_type_km():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+
+    keyboard.add("Вопрос")
+    keyboard.add("Обсуждение")
+
+    return keyboard
