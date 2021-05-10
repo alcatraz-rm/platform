@@ -66,17 +66,34 @@ START_SENTENCES:
   заботать очередную поточку. Или же Вы сами можете кому-то помочь развеять непонимание, закрепив свое понимание и получив опыт объянения. Для начала необходимо создать аккаунт"""
   //кнопка register//
 
-   START_MESSAGE = """йоу, с возращением, бро. Все команды достуны по /help"""
+   START_MESSAGE = """йоу, с возращением, бро {{ name }}. Все команды достуны по /help"""
 
 
 ME_SENTENCES:
      
         
     ME_MESSAGE = """Твой профиль:
-    Имя:
-    Почта(НГУ).вижутолькоЯ:
-    Интересы:
-    Факультет:
-    Степень обучения:"""
+    Имя: {{ name }}
+    Почта(НГУ).вижутолькоЯ:{{ address }}
+    Интересы: {{ interests }}
+    Факультет: {{ department}}
+    Степень обучения: {{ degree level }}
+    """
 
     ME_MESSAGE = """ Создайте аккаунт моментально. """ //кнопка register//
+    
+    
+FEED_SENTENCES:
+    
+    
+    FEED_MESSAGE = """Выбери, какие вопросы и обсуждения хочешь посмотреть: """ //кнопки all, my interests// 
+    FEED_ALL_MESSAGE = """?: {{question}}, data: {{data}}, sum of replies: {{sum_replies}}""" //кнопка с NUMBER_QUESTION //
+    FEED_MY_INTERESTS_MESSAGE = """?: {{question}}, {{data}}, sum of replies: {{sum_replies}}"""
+    FEED_NUMBER_QUESTION_MESSAGE = """?: {{question}},  author: {{name}}, data: {{data}}, sum of replies: {{sum_replies}}, comments: {{replies}}""" //кнопка /detail //
+    FEED_NUMBER_QUESTION_DETAIL_MESSAGE =  //кнопки: /report, /reply / //
+    FEED_NUMBER_QUESTION_DETAIL_REPORT_MESSAGE = """вопрос отправлен на проверку, спасибо """
+    
+    
+    
+    
+    
