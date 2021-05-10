@@ -78,4 +78,7 @@ async def new_question_type(message: types.Message, state: FSMContext):
     await NewQuestionStates.next()
 
 
+@dp.message_handler(state=NewQuestionStates.waiting_for_title)
+async def new_question_title(message: types.Message, state: FSMContext):
+    pass
 

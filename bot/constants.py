@@ -45,7 +45,7 @@ REGISTRATION_EXIT_SENTENCES = " Type /exit to cancel registration."
 REGISTRATION_CANCELED_MESSAGE = """Знакомство не удалось... Захочешь вернуться к этому, пиши /register."""
 
 
-REGISTRATION_SENTENCES:
+# REGISTRATION_SENTENCES:
 
 
   REGISTRATION_REGISTER_MESSAGE = """Мы знакомы, теперь мы на Ты. Все команды доступны по /help :)""" 
@@ -56,7 +56,8 @@ REGISTRATION_SENTENCES:
   REGISTRATION_EXIT_MESSAGE = """Неавторизованный пользователь. Для регистрации пишите /register."""
 
 
-START_SENTENCES:
+# START_SENTENCES:
+
 
     what can do this bot? //кнопка start//
 Я - бот студентов МЕХМАТА! Нахожу и соединяю людей по учебным вопросам. Создав аккаунт, задавай свои вопросы или 
@@ -69,7 +70,7 @@ START_SENTENCES:
    START_MESSAGE = """йоу, с возращением, бро {{ name }}. Все команды достуны по /help"""
 
 
-ME_SENTENCES:
+# ME_SENTENCES:
      
         
     ME_MESSAGE = """Твой профиль:
@@ -83,7 +84,7 @@ ME_SENTENCES:
     ME_MESSAGE = """ Создайте аккаунт моментально. """ //кнопка register//
     
     
-FEED_SENTENCES:
+# FEED_SENTENCES:
     
     
     FEED_MESSAGE = """Выбери, какие вопросы и обсуждения хочешь посмотреть: """ //кнопки all, my interests// 
@@ -94,7 +95,7 @@ FEED_SENTENCES:
     FEED_NUMBER_QUESTION_DETAIL_REPORT_MESSAGE = """вопрос отправлен на проверку, спасибо """
     
    
-SETTINGS_SENTENCES:
+# SETTINGS_SENTENCES:
     
     
     SETTINGS_UNREGISTERED_MESSAGE = """Ты пока что не зарегистрирова, чтобы зарегистрироваться, отправь /register"""
@@ -109,7 +110,7 @@ SETTINGS_SENTENCES:
     SETTINGS_EXIT_MESSAGE = """Настройка прервана"""
 
     
-NEW_SENTENCES:
+# NEW_SENTENCES:
     
     
     NEW_QUESTION_MESSAGE = """Сформулируй название вопроса. Будь конкретен""" //кнопка exit// """Введи вопрос. Не задавай вопросов, которые допускают спорные или субъективные ответы, а также вопросов, которые могут привести к обсуждению (для таких вопросов создай обуждение)""" //кнопка exit// 
