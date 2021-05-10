@@ -14,6 +14,31 @@ from bot.handlers.commands import send_welcome
         print(cs.split(':')[1])
 '''
 
+'''
+# Attempt to make a generic handler...
+
+@dp.message_handler(state=RegistrationProcessStates.all_states)
+async def registration_process(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    current_state = current_state.strip(':')[1]
+    user_data = await state.get_data()
+    user_data[current_state] = message.text
+    if current_state == 'degree_level':
+        telegram_data = message.from_user
+        account_service.add_new_user(t_id=telegram_data.id,
+                                     t_username=telegram_data.username,
+                                     name=user_data['name'],
+                                     email=user_data['email'],
+                                     department=user_data['department'],
+                                     degree_level=user_data['degree_level'],
+                                     )
+        await message.answer("Регистрация прошла успешно! Добро пожаловать!", reply_markup=kb.ReplyKeyboardRemove())
+        await state.finish()
+        await send_welcome(message)
+
+    else:
+'''
+
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_degree_level)
 async def registration_complete(message: types.Message, state: FSMContext):
@@ -82,3 +107,7 @@ async def new_question_type(message: types.Message, state: FSMContext):
 async def new_question_title(message: types.Message, state: FSMContext):
     pass
 
+
+@dp.message_handler(state="*")
+async def handle_any_other_message(message: types.Message, state: FSMContext):
+    await send_welcome(message)
