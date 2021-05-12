@@ -18,7 +18,7 @@ DATABASE_HOST = os.getenv('DATABASE_HOST')
 DATABASE_NAME = os.getenv('DATABASE_NAME')
 
 # Cfg related constants
-STATE_EXPIRE_TIME_IN_SEC = 24 * 3600
+ADMINS_IDS = [401961508, ]
 
 # Configure logging
 logging.basicConfig(format=u'%(filename)+13s [ LINE:%(lineno)-4s] %(levelname)-8s [%(asctime)s] %(message)s',
