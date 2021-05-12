@@ -143,5 +143,6 @@ NEW_DISCUSSION_DISCIPLINE_MESSAGE = """Выбери дисциплину {{list 
 NEW_DISCUSSION_THEME_SAVED_MESSAGE = """Тема успешно сохранена. Чтобы добавить ещё одну тему, используй кнопку /add. Чтобы завершить выбор тем, используй кнопку /finish""" #кнопки / add / finish / exit 
 NEW_DISCUSSION_THEME_FINISH_MESSAGE = """Процесс выбора тем завершён""" #кнопка exit
 NEW_DISCUSSION_END_MESSAGE = """Обсуждение сохранёно и отправлено на модерацию. По итогам проверки тебе придёт сообщение с результатом. ID обсуждения: {{id}}"""
-NEW_EXIT_MESSAGE = """Cоздание (вопроса/обсуждения) отменено"""
+NEW_EXIT_QUESTION_MESSAGE = """Cоздание вопроса отменено"""
+NEW_EXIT_DISCUSSION_MESSAGE = """Cоздание обсуждения отменено"""
 
