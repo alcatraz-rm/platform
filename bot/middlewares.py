@@ -3,7 +3,7 @@ from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram import Dispatcher, types
 from datetime import datetime as dt
 
-STATE_EXPIRE_TIME_IN_SEC = 10
+STATE_EXPIRE_TIME_IN_SEC = 24 * 3600
 
 
 class StateValidationMiddleware(BaseMiddleware):

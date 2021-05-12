@@ -9,7 +9,7 @@ from bot.db.services import account_service
 
 
 @dp.message_handler(user_id=ADMINS_IDS,
-                    commands=["science", "subject", "section"],
+                    commands=["science", "subject"],
                     state=AdminPanelStates.waiting_for_command)
 async def handle_admin_add_interest(message: types.Message, state: FSMContext):
     command = message.text
@@ -20,15 +20,12 @@ async def handle_admin_add_interest(message: types.Message, state: FSMContext):
     elif command == '/subject':
         await message.answer("Напишите название предмета.", reply_markup=kb.ReplyKeyboardRemove())
         await AdminPanelStates.waiting_for_subject.set()
-    elif command == '/section':
-        await message.answer("Напишите название раздела.", reply_markup=kb.ReplyKeyboardRemove())
-        await AdminPanelStates.waiting_for_section.set()
 
 
 @dp.message_handler(user_id=ADMINS_IDS, commands=["add"], state=AdminPanelStates.waiting_for_command)
 async def handle_admin_add(message: types.Message, state: FSMContext):
 
-    await message.answer("Что добавить? /science, /subject, /section.", reply_markup=kb.ReplyKeyboardRemove())
+    await message.answer("Что добавить? /science, /subject.", reply_markup=kb.ReplyKeyboardRemove())
 
 
 @dp.message_handler(user_id=ADMINS_IDS, commands=["exit"], state=AdminPanelStates.all_states)
@@ -43,6 +40,11 @@ async def handle_admin_exit(message: types.Message, state: FSMContext):
 async def handle_admin(message: types.Message, state: FSMContext):
     await message.answer("Админ команды: /add, /exit.", reply_markup=kb.ReplyKeyboardRemove())
     await AdminPanelStates.waiting_for_command.set()
+
+
+@dp.message_handler(commands=["interests"], state="*")
+async def handle_interest(message: types.Message, state: FSMContext):
+    await message.answer("Выберите интересную вам науку.", reply_markup=kb.get_science_list_km())
 
 
 @dp.message_handler(commands=["exit"], state=RegistrationProcessStates.all_states)
