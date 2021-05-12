@@ -27,3 +27,4 @@ def get_all_subjects(science_name: str):
     subjects = [record.name for record in query]
 
     return subjects
+

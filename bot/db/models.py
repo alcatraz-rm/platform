@@ -19,10 +19,6 @@ class Subject(BaseModel):
         return self.name + ' | ' + self.science.name
 
 
-class Interest(BaseModel):
-    subject = ForeignKeyField(Subject)
-
-
 class UserModel(BaseModel):
     """
         Fields: name, e-mail, interests, bio, department, degree-level + t_id, t_username.
@@ -34,8 +30,6 @@ class UserModel(BaseModel):
     name = CharField()
 
     email = CharField()
-
-    interests = ForeignKeyField(Interest, backref='users')
 
     department = CharField(choices=constants.DEPARTMENT_OPTIONS)
 
@@ -54,8 +48,6 @@ class Problem(BaseModel):
 
     created_at = DateTimeField()
 
-    topics = ForeignKeyField(Interest, backref='problems')
-
     is_closed = BooleanField(default=False)
 
     is_anonymous = BooleanField(default=False)
@@ -73,3 +65,15 @@ class Response(BaseModel):
     is_anonymous = BooleanField(default=False)
 
     is_final = BooleanField(default=False)
+
+
+class Interest(BaseModel):
+    user = ForeignKeyField(UserModel)
+
+    subject = ForeignKeyField(Subject)
+
+
+class Topic(BaseModel):
+    problem = ForeignKeyField(Problem)
+
+    subject = ForeignKeyField(Subject)
