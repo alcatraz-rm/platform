@@ -1,6 +1,6 @@
 from peewee import DoesNotExist
 
-from bot.db.models import Subject, Science, Section
+from bot.db.models import Subject, Science
 
 
 def add_new_science(name: str):
@@ -13,14 +13,6 @@ def add_new_subject(name: str, science_name: str):
         Subject.create(name=name, science=science_obj)
     else:
         raise DoesNotExist("Science with name {} doesn't exist.".format(science_name))
-
-
-def add_new_section(name: str, subject_name: str):
-    subject_obj = Subject.get_or_none(name=subject_name)
-    if subject_obj is not None:
-        Section.create(name=name, subject=subject_obj)
-    else:
-        raise DoesNotExist("Subject with name {} doesn't exist.".format(subject_name))
 
 
 def get_all_sciences():
@@ -36,9 +28,3 @@ def get_all_subjects(science_name: str):
 
     return subjects
 
-
-def get_all_sections(subject_name: str):
-    query = Section.select().join(Subject).where(Subject.name == subject_name)
-    sections = [record.name for record in query]
-
-    return sections

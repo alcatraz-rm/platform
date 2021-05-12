@@ -18,6 +18,7 @@ async def on_shutdown(dp: Dispatcher):
 
 
 if __name__ == '__main__':
+    # helper.migrate_db()
     executor.on_startup(on_startup)
     executor.on_shutdown(on_startup)
     executor.start_polling(dp)

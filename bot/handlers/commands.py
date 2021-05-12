@@ -41,7 +41,6 @@ async def handle_admin_exit(message: types.Message, state: FSMContext):
 
 @dp.message_handler(user_id=ADMINS_IDS, commands=["admin"], state="*")
 async def handle_admin(message: types.Message, state: FSMContext):
-
     await message.answer("Админ команды: /add, /exit.", reply_markup=kb.ReplyKeyboardRemove())
     await AdminPanelStates.waiting_for_command.set()
 

@@ -51,13 +51,3 @@ def get_subject_list_km(science: str):
 
     return keyboard
 
-
-def get_section_list_km(subject: str):
-    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-
-    section_list = get_all_sections(subject_name=subject)
-
-    for section in section_list:
-        keyboard.add(section)
-
-    return keyboard
