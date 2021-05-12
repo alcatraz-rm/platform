@@ -2,7 +2,8 @@ from aiogram.dispatcher.handler import SkipHandler
 from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram import Dispatcher, types
 from datetime import datetime as dt
-from bot.config import STATE_EXPIRE_TIME_IN_SEC as EXPIRE_TIME_SECONDS
+
+STATE_EXPIRE_TIME_IN_SEC = 24 * 3600
 
 
 class StateValidationMiddleware(BaseMiddleware):
@@ -21,7 +22,7 @@ class StateValidationMiddleware(BaseMiddleware):
         if 'time' in data:
             # print('time is here!')
             time_delta = (dt.now() - data['time']).total_seconds()
-            if time_delta >= EXPIRE_TIME_SECONDS:
+            if time_delta >= STATE_EXPIRE_TIME_IN_SEC:
                 await state.reset_state()
                 # TODO: create massage for that.
                 await message.answer("Вы отвечали слишко долго. Предыдущая операция отмена. Вызываю команду /start.")
