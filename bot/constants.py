@@ -1,4 +1,4 @@
-# j  # constants
+#constants
 
 PROBLEM_TYPE_OPTIONS = [
     ('REQUEST', 'Request'),
