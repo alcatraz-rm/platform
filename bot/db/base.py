@@ -1,4 +1,5 @@
 from peewee import *
+from playhouse.migrate import *
 
 from bot.config import DATABASE_PASSWORD, DATABASE_NAME, DATABASE_HOST, DATABASE_USER
 
@@ -9,6 +10,8 @@ db = PostgresqlDatabase(
     password=DATABASE_PASSWORD,
     host=DATABASE_HOST,
 )
+
+migrator = PostgresqlMigrator(db)
 
 
 class BaseModel(Model):
