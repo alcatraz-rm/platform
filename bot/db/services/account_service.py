@@ -2,6 +2,8 @@ from peewee import DoesNotExist
 
 from bot.db.models import UserModel
 
+from typing import Optional
+
 # TODO
 '''
     def email_validation(self, email: str):
@@ -27,3 +29,9 @@ def is_user_exist(t_id) -> bool:
         return False
 
     return True
+
+
+def get_user(t_id: int) -> Optional[UserModel]:
+
+    return UserModel.get(t_id=t_id)
+

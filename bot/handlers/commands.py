@@ -3,32 +3,36 @@ from aiogram.dispatcher import FSMContext
 
 from bot import constants
 from bot.config import dp, ADMINS_IDS
-from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates
+from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates
 import bot.keyboards.replay as kb
 from bot.db.services import account_service
 
 
 @dp.message_handler(user_id=ADMINS_IDS,
-                    commands=["science", "subject", "section"],
+                    commands=["science", "subject"],
                     state=AdminPanelStates.waiting_for_command)
 async def handle_admin_add_interest(message: types.Message, state: FSMContext):
     command = message.text
-    print(command)
     if command == '/science':
         await message.answer("Напишите название науки.", reply_markup=kb.ReplyKeyboardRemove())
         await AdminPanelStates.waiting_for_science.set()
     elif command == '/subject':
         await message.answer("Напишите название предмета.", reply_markup=kb.ReplyKeyboardRemove())
         await AdminPanelStates.waiting_for_subject.set()
-    elif command == '/section':
-        await message.answer("Напишите название раздела.", reply_markup=kb.ReplyKeyboardRemove())
-        await AdminPanelStates.waiting_for_section.set()
 
 
 @dp.message_handler(user_id=ADMINS_IDS, commands=["add"], state=AdminPanelStates.waiting_for_command)
 async def handle_admin_add(message: types.Message, state: FSMContext):
 
-    await message.answer("Что добавить? /science, /subject, /section.", reply_markup=kb.ReplyKeyboardRemove())
+    await message.answer("Что добавить? /science, /subject.", reply_markup=kb.ReplyKeyboardRemove())
+
+
+@dp.message_handler(commands=["exit"], state=InterestsInputStates.all_states)
+async def handle_admin_exit(message: types.Message, state: FSMContext):
+
+    await message.answer("Интересы добавлены.", reply_markup=kb.ReplyKeyboardRemove())
+    await state.reset_state()
+    await send_welcome(message)
 
 
 @dp.message_handler(user_id=ADMINS_IDS, commands=["exit"], state=AdminPanelStates.all_states)
@@ -43,6 +47,12 @@ async def handle_admin_exit(message: types.Message, state: FSMContext):
 async def handle_admin(message: types.Message, state: FSMContext):
     await message.answer("Админ команды: /add, /exit.", reply_markup=kb.ReplyKeyboardRemove())
     await AdminPanelStates.waiting_for_command.set()
+
+
+@dp.message_handler(commands=["interests"], state="*")
+async def handle_interest(message: types.Message, state: FSMContext):
+    await message.answer("Выберите интересную вам науку.", reply_markup=kb.get_science_list_km())
+    await InterestsInputStates.waiting_for_science.set()
 
 
 @dp.message_handler(commands=["exit"], state=RegistrationProcessStates.all_states)
@@ -69,11 +79,22 @@ async def handle_register(message: types.Message):
     """
 
     if account_service.is_user_exist(t_id=message.from_user.id):
-        await message.answer(constants.WELCOME_MESSAGE)
+        await message.answer(constants.REGISTRATION_SKIP_MESSAGE)
     else:
-        await message.answer("Say your name!" + constants.REGISTRATION_EXIT_SENTENCES,
+        await message.answer(constants.REGISTRATION_START_MESSAGE)
+        await message.answer(constants.REGISTRATION_REGISTER_NECESSARY_ONE_MESSAGE +
+                             constants.REGISTRATION_EXIT_SENTENCES,
                              reply_markup=kb.ReplyKeyboardRemove())
         await RegistrationProcessStates.waiting_for_name.set()
+
+
+@dp.message_handler(commands=["about"], state="*")
+async def send_about(message: types.Message):
+    """
+    This handler will be called when user sends `/about` command
+    """
+
+    await message.answer(constants.ABOUT_MESSAGE)
 
 
 @dp.message_handler(commands=["help"], state="*")
@@ -90,9 +111,12 @@ async def send_welcome(message: types.Message):
     """
     This handler will be called when user sends `/start` command
     """
-    if account_service.is_user_exist(message.from_user.id):
+    user = account_service.get_user(t_id=message.from_user.id)
+
+    if user is not None:
+        await message.answer(constants.START_MET_MESSAGE.format(name=user.name))
         await message.answer(constants.HELP_MESSAGE)
     else:
-        await message.answer('Who da fuck r u?', reply_markup=kb.ReplyKeyboardRemove())
+        await message.answer(constants.ABOUT_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
         await handle_register(message)
 
