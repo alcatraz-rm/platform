@@ -71,11 +71,22 @@ async def handle_register(message: types.Message):
     """
 
     if account_service.is_user_exist(t_id=message.from_user.id):
-        await message.answer(constants.WELCOME_MESSAGE)
+        await message.answer(constants.REGISTRATION_SKIP_MESSAGE)
     else:
-        await message.answer("Say your name!" + constants.REGISTRATION_EXIT_SENTENCES,
+        await message.answer(constants.REGISTRATION_START_MESSAGE)
+        await message.answer(constants.REGISTRATION_REGISTER_NECESSARY_ONE_MESSAGE +
+                             constants.REGISTRATION_EXIT_SENTENCES,
                              reply_markup=kb.ReplyKeyboardRemove())
         await RegistrationProcessStates.waiting_for_name.set()
+
+
+@dp.message_handler(commands=["about"], state="*")
+async def send_about(message: types.Message):
+    """
+    This handler will be called when user sends `/about` command
+    """
+
+    await message.answer(constants.ABOUT_MESSAGE)
 
 
 @dp.message_handler(commands=["help"], state="*")
@@ -92,9 +103,12 @@ async def send_welcome(message: types.Message):
     """
     This handler will be called when user sends `/start` command
     """
-    if account_service.is_user_exist(message.from_user.id):
+    user = account_service.get_user(t_id=message.from_user.id)
+
+    if user is not None:
+        await message.answer(constants.START_MET_MESSAGE.format(name=user.name))
         await message.answer(constants.HELP_MESSAGE)
     else:
-        await message.answer('Who da fuck r u?', reply_markup=kb.ReplyKeyboardRemove())
+        await message.answer(constants.ABOUT_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
         await handle_register(message)
 
