@@ -19,8 +19,7 @@ class NewQuestionStates(StatesGroup):
 
 class InterestsInputStates(StatesGroup):
     waiting_for_science = State('science')
-    waiting_for_section = State('section')
-    waiting_for_subsection = State('subsection')
+    waiting_for_subject = State('subject')
 
 
 class AdminPanelStates(StatesGroup):
@@ -28,3 +27,4 @@ class AdminPanelStates(StatesGroup):
     waiting_for_science = State()
     waiting_for_subject = State()
     waiting_for_section = State()
+

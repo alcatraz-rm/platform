@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 
 from bot import constants
 from bot.config import dp, ADMINS_IDS
-from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates
+from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates
 import bot.keyboards.replay as kb
 from bot.db.services import account_service
 
@@ -13,7 +13,6 @@ from bot.db.services import account_service
                     state=AdminPanelStates.waiting_for_command)
 async def handle_admin_add_interest(message: types.Message, state: FSMContext):
     command = message.text
-    print(command)
     if command == '/science':
         await message.answer("Напишите название науки.", reply_markup=kb.ReplyKeyboardRemove())
         await AdminPanelStates.waiting_for_science.set()
@@ -26,6 +25,14 @@ async def handle_admin_add_interest(message: types.Message, state: FSMContext):
 async def handle_admin_add(message: types.Message, state: FSMContext):
 
     await message.answer("Что добавить? /science, /subject.", reply_markup=kb.ReplyKeyboardRemove())
+
+
+@dp.message_handler(commands=["exit"], state=InterestsInputStates.all_states)
+async def handle_admin_exit(message: types.Message, state: FSMContext):
+
+    await message.answer("Интересы добавлены.", reply_markup=kb.ReplyKeyboardRemove())
+    await state.reset_state()
+    await send_welcome(message)
 
 
 @dp.message_handler(user_id=ADMINS_IDS, commands=["exit"], state=AdminPanelStates.all_states)
@@ -45,6 +52,7 @@ async def handle_admin(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=["interests"], state="*")
 async def handle_interest(message: types.Message, state: FSMContext):
     await message.answer("Выберите интересную вам науку.", reply_markup=kb.get_science_list_km())
+    await InterestsInputStates.waiting_for_science.set()
 
 
 @dp.message_handler(commands=["exit"], state=RegistrationProcessStates.all_states)

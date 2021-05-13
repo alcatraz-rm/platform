@@ -2,8 +2,8 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from bot import constants
-from bot.config import dp
-from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates
+from bot.config import dp, ADMINS_IDS
+from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates
 import bot.keyboards.replay as kb
 from bot.db.services import account_service, queston_service
 from bot.handlers.commands import send_welcome, handle_admin
@@ -40,7 +40,7 @@ async def registration_process(message: types.Message, state: FSMContext):
 '''
 
 
-@dp.message_handler(user_id=401961508, state=AdminPanelStates.waiting_for_subject)
+@dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_subject)
 async def handle_admin_add_subject(message: types.Message, state: FSMContext):
     subject = message.text
     # go to science selection and save subject here
@@ -49,7 +49,7 @@ async def handle_admin_add_subject(message: types.Message, state: FSMContext):
     await state.set_state(AdminPanelStates.waiting_for_science)
 
 
-@dp.message_handler(user_id=401961508, state=AdminPanelStates.waiting_for_science)
+@dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_science)
 async def handle_admin_add_science(message: types.Message, state: FSMContext):
     science = message.text
     data = await state.get_data()
@@ -78,6 +78,34 @@ async def handle_admin_add_science(message: types.Message, state: FSMContext):
         await state.reset_data()
         await state.set_state(AdminPanelStates.waiting_for_command)
         await handle_admin(message, state)
+
+
+@dp.message_handler(state=InterestsInputStates.waiting_for_subject)
+async def add_interests_subject(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    science_name = data['science_name']
+    subject_name = message.text
+    if queston_service.is_valid(queston_service.Subject, subject_name):
+        user_obj = account_service.get_user(t_id=message.from_user.id)
+        queston_service.assign_interest(user_obj, subject_name)
+        await message.answer(constants.SETTINGS_ADD_FINISH_MESSAGE.format(interest=subject_name),
+                             reply_markup=kb.get_science_list_km())
+        await InterestsInputStates.waiting_for_science.set()
+    else:
+        await message.answer("Ошибка! Такого предмета нет. Выбири из списка.",
+                             reply_markup=kb.get_subject_list_km(science=science_name))
+
+
+@dp.message_handler(state=InterestsInputStates.waiting_for_science)
+async def add_interests_science(message: types.Message, state: FSMContext):
+    science_name = message.text
+    if queston_service.is_valid(queston_service.Science, science_name):
+        await state.update_data(science_name=science_name)
+        await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name))
+        await InterestsInputStates.waiting_for_subject.set()
+    else:
+        await message.answer("Ошибка! Такой науки нет. Выбири из списка.",
+                             reply_markup=kb.get_science_list_km())
 
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_degree_level)

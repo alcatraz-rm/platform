@@ -23,7 +23,9 @@ def get_all_sciences():
 
 
 def get_all_subjects(science_name: str):
-    query = Subject.select().join(Science).where(Science.name == science_name)
+    query = (Subject.select()
+             .join(Science)
+             .where(Science.name == science_name))
     subjects = [record.name for record in query]
 
     return subjects
@@ -53,12 +55,14 @@ def add_new_response(problem_id: int, body: str, user_t_id: int, is_anonymous: b
                     )
 
 
-def assign_interest(user: UserModel, subject: Subject):
+def assign_interest(user: UserModel, subject_name: str):
+    subject = Subject.get_or_none(name=subject_name)
     # TODO: must check if there is no None values
     Interest.create(user=user, subject=subject)
 
 
-def assign_topic(problem: Problem, subject: Subject):
+def assign_topic(problem: Problem, subject_name: str):
+    subject = Subject.get_or_none(name=subject_name)
     # TODO: must check if there is no None values
     Topic.create(problem=problem, subject=subject)
 
@@ -80,3 +84,8 @@ def get_all_topics_for_problem(problem_id: int):
 
     return [record.name for record in query]
 
+
+def is_valid(Clazz: Science.__class__, name: str) -> bool:
+    if Clazz.get_or_none(name=name) is None:
+        return False
+    return True
