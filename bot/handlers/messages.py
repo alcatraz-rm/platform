@@ -88,7 +88,8 @@ async def add_interests_subject(message: types.Message, state: FSMContext):
     if queston_service.is_valid(queston_service.Subject, subject_name):
         user_obj = account_service.get_user(t_id=message.from_user.id)
         queston_service.assign_interest(user_obj, subject_name)
-        await message.answer(constants.SETTINGS_ADD_FINISH_MESSAGE.format(interest=subject_name),
+        await message.answer(constants.SETTINGS_ADD_FINISH_MESSAGE.format(interest=subject_name) +
+                             "\nДля выхода напишите /exit.",
                              reply_markup=kb.get_science_list_km())
         await InterestsInputStates.waiting_for_science.set()
     else:
