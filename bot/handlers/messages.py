@@ -3,10 +3,12 @@ from aiogram.dispatcher import FSMContext
 
 from bot import constants
 from bot.config import dp, ADMINS_IDS
+from bot.db.services.queston_service import get_all_sciences, get_all_subjects
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates
 import bot.keyboards.replay as kb
 from bot.db.services import account_service, queston_service
 from bot.handlers.commands import send_welcome, handle_admin
+from bot.constants import *
 
 '''
     Getting current state 'name':
@@ -157,23 +159,125 @@ async def registration_name(message: types.Message, state: FSMContext):
 @dp.message_handler(state=NewQuestionStates.waiting_for_type)
 async def new_question_type(message: types.Message, state: FSMContext):
     if message.text not in ['Вопрос', 'Обсуждение']:
-        await message.answer('Выбери корректный тип, используя клавиатуру.', reply_markup=kb.get_question_type_km())
+        await message.answer(NEW_INCORRECT_TYPE, reply_markup=kb.get_question_type_km())
         return
 
     answer = ''
     if message.text == 'Вопрос':
         await state.set_data({'type': 'question'})
-        answer = 'Введи название вопроса. Постарайся быть максмально конкретным.'
+        answer = NEW_QUESTION_MESSAGE
     elif message.text == 'Обсуждение':
         await state.set_data({'type': 'discussion'})
-        answer = 'Введи название обсуждения. Постарайся быть максмально конкретным.'
+        answer = NEW_DISCUSSION_MESSAGE
 
-    await message.answer(answer)
+    await message.answer(answer, reply_markup=kb.get_exit_km())
     await NewQuestionStates.next()
 
 
 @dp.message_handler(state=NewQuestionStates.waiting_for_title)
 async def new_question_title(message: types.Message, state: FSMContext):
+    problem_data = await state.get_data()
+
+    type_ = problem_data.get('type')
+    await state.set_data({'title': message})
+
+    answer = ''
+    if type_ == 'question':
+        answer = NEW_QUESTION_PROBLEM_MESSAGE
+    elif type_ == 'discussion':
+        answer = NEW_DISCUSSION_PROBLEM_MESSAGE
+
+    await message.answer(answer, reply_markup=kb.get_exit_km())
+    await NewQuestionStates.next()
+
+
+@dp.message_handler(state=NewQuestionStates.waiting_for_body)
+async def new_question_body(message: types.Message, state: FSMContext):
+    problem_data = await state.get_data()
+    type_ = problem_data.get('type')
+    await state.set_data({'body': message.text})
+
+    select_topics_message = ''
+    select_science_message = ''
+    if type_ == 'question':
+        select_topics_message = NEW_QUESTION_THEME_MESSAGE
+        select_science_message = NEW_QUESTION_SCIENCE_MESSAGE
+    elif type_ == 'discussion':
+        select_topics_message = NEW_DISCUSSION_THEME_MESSAGE
+        select_science_message = NEW_DISCUSSION_SCIENCE_MESSAGE
+
+    await message.answer(select_topics_message)
+    await message.answer(select_science_message, reply_markup=kb.get_science_list_km())
+    
+    await InterestsInputStates.waiting_for_science.set()
+
+
+@dp.message_handler(state=InterestsInputStates.waiting_for_science)
+async def new_question_science(message: types.Message, state: FSMContext):
+    sciences = get_all_sciences()
+    current_science = message.text.strip()
+
+    if current_science not in sciences:
+        pass
+
+    problem_data = await state.get_data()
+    type_ = problem_data.get('type')
+    
+    await state.set_data({'current_science': current_science})
+
+    answer = ''
+    if type_ == 'question':
+        answer = NEW_QUESTION_DISCIPLINE_MESSAGE
+    elif type_ == 'discussion':
+        answer = NEW_DISCUSSION_DISCIPLINE_MESSAGE
+
+    await message.answer(answer, reply_markup=kb.get_subject_list_km(current_science))
+    await InterestsInputStates.waiting_for_subject.set()
+
+
+@dp.message_handler(state=InterestsInputStates.waiting_for_subject)
+async def new_question_subject(message: types.Message, state: FSMContext):
+    problem_data = await state.get_data()
+    science = problem_data.get('current_science')
+
+    subjects = get_all_subjects(science)
+    current_subject = message.text.strip()
+
+    if current_subject not in subjects:
+        pass
+
+    problem_data = await state.get_data()
+    type_ = problem_data.get('type')
+
+    if 'topics' in problem_data:
+        await state.update_data(topics=problem_data.get('topics') + (science, current_subject))
+    else:
+        await state.set_data({'topics': [(science, current_subject)]})
+
+    await state.update_data(current_science=None)
+
+    new_topic_message = ''
+    topics_limit = 0
+    process_finished_message = ''
+    if type_ == 'question':
+        new_topic_message = NEW_QUESTION_THEME_SAVED_MESSAGE
+        process_finished_message = NEW_QUESTION_THEME_FINISH_MESSAGE
+        topics_limit = 3
+    elif type_ == 'discussion':
+        new_topic_message = NEW_DISCUSSION_THEME_SAVED_MESSAGE
+        process_finished_message = NEW_DISCUSSION_THEME_FINISH_MESSAGE
+        topics_limit = 5
+
+    if len(problem_data.get('topics') + 1) == topics_limit:
+        pass
+
+    await message.answer(new_topic_message, reply_markup=kb.get_add_finish_exit_km())
+    await NewQuestionStates.waiting_for_new_topic_or_quit.set()
+
+
+@dp.message_handler(state=NewQuestionStates.waiting_for_new_topic_or_quit)
+async def new_question_title(message: types.Message, state: FSMContext):
+    # loop
     pass
 
 

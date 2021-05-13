@@ -26,6 +26,24 @@ def get_question_type_km():
 
     keyboard.add("Вопрос")
     keyboard.add("Обсуждение")
+    keyboard.add("/exit")
+
+    return keyboard
+
+
+def get_exit_km():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.add("/exit")
+
+    return keyboard
+
+
+def get_add_finish_exit_km():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+
+    keyboard.add('/add')
+    keyboard.add('/finish')
+    keyboard.add('/exit')
 
     return keyboard
 
@@ -38,6 +56,8 @@ def get_science_list_km():
     for science in science_list:
         keyboard.add(science)
 
+    keyboard.add('/exit')
+
     return keyboard
 
 
@@ -48,6 +68,8 @@ def get_subject_list_km(science: str):
 
     for subject in subject_list:
         keyboard.add(subject)
+
+    keyboard.add('/exit')
 
     return keyboard
 

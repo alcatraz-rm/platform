@@ -6,6 +6,7 @@ from bot.config import dp, ADMINS_IDS
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates
 import bot.keyboards.replay as kb
 from bot.db.services import account_service
+from bot.constants import *
 
 
 @dp.message_handler(user_id=ADMINS_IDS,
@@ -65,10 +66,20 @@ async def handle_exit(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=["new"], state="*")
 async def handle_new(message: types.Message):
     if account_service.is_user_exist(t_id=message.from_user.id):
-        await message.answer("Выберите тип.", reply_markup=kb.get_question_type_km())
+        await message.answer(NEW_SELECT_TYPE, reply_markup=kb.get_question_type_km())
         await NewQuestionStates.waiting_for_type.set()
     else:
-        await message.answer("Зарегестрируйтесь, чтобы задать вопрос или создать обсуждение.")
+        await message.answer(NEW_REGISTRATION_REQUIRED)
+
+
+@dp.message_handler(commands=["add", "finish"], state=NewQuestionStates.waiting_for_new_topic_or_quit)
+async def handle_new(message: types.Message, state: FSMContext):
+    command = message.get_command()
+
+    if command == 'add':
+        pass
+    elif command == 'finish':
+        pass
 
 
 @dp.message_handler(commands=["register"], state="*")

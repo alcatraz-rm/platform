@@ -123,13 +123,15 @@ SETTINGS_EXIT_MESSAGE_1 = """Настройка прервана"""
 
 # Создание вопроса / обсуждения:
 
-
+NEW_SELECT_TYPE = """Выбери тип."""  # кнопка вопрос, обсуждение
+NEW_REGISTRATION_REQUIRED = """Зарегистрируйся, чтобы создавать вопросы и обсуждения."""
+NEW_INCORRECT_TYPE = """Выбери корректный тип, используя клавиатуру."""
 NEW_QUESTION_MESSAGE = """Сформулируй название вопроса. Будь конкретен"""  # кнопка exit
 NEW_QUESTION_PROBLEM_MESSAGE = """Введи вопрос. Не задавай вопросов, которые допускают спорные или субъективные 
 ответы, а также вопросов, которые могут привести к обсуждению (для таких вопросов создай обуждение)"""  # кнопка exit
 NEW_QUESTION_THEME_MESSAGE = """Выбери не более 3 тем для совего вопроса"""  # кнопка exit
-NEW_QUESTION_SCIENCE_MESSAGE = """Выбери науку {list of sciences}"""  # кнопка exit
-NEW_QUESTION_DISCIPLINE_MESSAGE = """Выбери дисциплину {list of disciplines}"""  # кнопка exit / skip
+NEW_QUESTION_SCIENCE_MESSAGE = """Выбери науку"""  # кнопка exit
+NEW_QUESTION_DISCIPLINE_MESSAGE = """Выбери дисциплину"""  # кнопка exit / skip
 NEW_QUESTION_THEME_SAVED_MESSAGE = """Тема успешно сохранена. Чтобы добавить ещё одну тему, используй кнопку /add. 
 Чтобы завершить выбор тем, используй кнопку /finish"""  # кнопки / add / finish / exit
 NEW_QUESTION_THEME_FINISH_MESSAGE = """Процесс выбора тем завершён"""  # кнопка exit
@@ -141,8 +143,8 @@ NEW_DISCUSSION_PROBLEM_MESSAGE = """Опиши проблему, которую 
 проблеме, с которой столкнулся. Подробно опиши, чего хочешь добиться, что уже сделал и что предлагаешь обсудить"""  #
 # кнопка exit
 NEW_DISCUSSION_THEME_MESSAGE = """Выбери не более 5 тем для совего вопроса"""  # кнопка exit
-NEW_DISCUSSION_SCIENCE_MESSAGE = """Выбери науку {list of sciences}"""  # кнопка exit
-NEW_DISCUSSION_DISCIPLINE_MESSAGE = """Выбери дисциплину {list of disciplines}"""  # кнопка exit / skip
+NEW_DISCUSSION_SCIENCE_MESSAGE = """Выбери науку"""  # кнопка exit
+NEW_DISCUSSION_DISCIPLINE_MESSAGE = """Выбери дисциплину"""  # кнопка exit / skip
 NEW_DISCUSSION_THEME_SAVED_MESSAGE = """Тема успешно сохранена. Чтобы добавить ещё одну тему, используй кнопку /add. 
 Чтобы завершить выбор тем, используй кнопку /finish"""  # кнопки / add / finish / exit
 NEW_DISCUSSION_THEME_FINISH_MESSAGE = """Процесс выбора тем завершён"""  # кнопка exit
