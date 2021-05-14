@@ -75,12 +75,27 @@ async def handle_new(message: types.Message):
 @dp.message_handler(commands=["add", "finish"], state=NewQuestionStates.waiting_for_new_topic_or_quit)
 async def handle_new(message: types.Message, state: FSMContext):
     command = message.get_command()
+    problem_data = await state.get_data()
+    type_ = problem_data.get('type')
+    answer = ''
 
     if command == 'add':
-        pass
-    elif command == 'finish':
-        pass
+        if type_ == 'question':
+            answer = NEW_QUESTION_DISCIPLINE_MESSAGE
+        elif type_ == 'discussion':
+            answer = NEW_DISCUSSION_DISCIPLINE_MESSAGE
 
+        await message.answer(answer, reply_markup=kb.get_science_list_km())
+        await InterestsInputStates.waiting_for_science.set()
+
+    elif command == 'finish':
+        if type_ == 'discussion':
+            await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
+        elif type_ == 'question':
+            await message.answer(NEW_QUESTION_THEME_FINISH_MESSAGE)
+            await message.answer(NEW_QUESTION_ANON_MESSAGE, reply_markup=kb.get_yes_no_km())
+
+            await NewQuestionStates.waiting_for_anonymous_or_not_answer.set()
 
 @dp.message_handler(commands=["register"], state="*")
 async def handle_register(message: types.Message):

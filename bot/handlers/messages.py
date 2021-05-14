@@ -269,16 +269,49 @@ async def new_question_subject(message: types.Message, state: FSMContext):
         topics_limit = 5
 
     if len(problem_data.get('topics') + 1) == topics_limit:
-        pass
+        if type_ == 'discussion':
+            await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
+        elif type_ == 'question':
+            await message.answer(NEW_QUESTION_THEME_FINISH_MESSAGE)
+            await message.answer(NEW_QUESTION_ANON_MESSAGE, reply_markup=kb.get_yes_no_km())
+
+            await NewQuestionStates.waiting_for_anonymous_or_not_answer.set()
+        return
 
     await message.answer(new_topic_message, reply_markup=kb.get_add_finish_exit_km())
     await NewQuestionStates.waiting_for_new_topic_or_quit.set()
 
 
-@dp.message_handler(state=NewQuestionStates.waiting_for_new_topic_or_quit)
-async def new_question_title(message: types.Message, state: FSMContext):
-    # loop
-    pass
+@dp.message_handler(state=NewQuestionStates.waiting_for_anonymous_or_not_answer)
+async def handle_new_anonymous_question_answer(message: types.Message, state: FSMContext):
+    answer = message.text.strip()
+    problem_data = await state.get_data()
+    type_ = problem_data.get('type')
+
+    if type_ == 'question':
+        process_finished_message = NEW_QUESTION_END_MESSAGE
+    else:
+        process_finished_message = NEW_DISCUSSION_END_MESSAGE
+
+    if answer == 'Да':
+        await state.update_data(anonymous_question=True)
+
+        # TODO: problem saving logic
+        problem_id = 0  # id from db
+
+        await message.answer(process_finished_message.format(id=problem_id))
+
+    elif answer == 'Нет':
+        await state.update_data(anonymous_question=False)
+
+        # TODO: problem saving logic
+        problem_id = 0  # id from db
+
+        await message.answer(process_finished_message.format(id=problem_id))
+        await state.reset_state()
+
+    else:
+        await message.answer(NEW_QUESTION_SELECT_YES_OR_NO, reply_markup=kb.get_yes_no_km())
 
 
 @dp.message_handler(state="*")

@@ -48,6 +48,16 @@ def get_add_finish_exit_km():
     return keyboard
 
 
+def get_yes_no_km():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+
+    keyboard.add('Да')
+    keyboard.add('Нет')
+    keyboard.add('/exit')
+
+    return keyboard
+
+
 def get_science_list_km():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 
