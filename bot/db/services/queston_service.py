@@ -93,24 +93,29 @@ def assign_topic(problem: Problem, subject_name: str):
 
 def get_all_interests_for_user(user_id: int):
     predicate = (UserModel.t_id == user_id)
-    query = ((Interest
-              .select(Interest, UserModel, Subject)
-              .join(UserModel, on=(Interest.user == UserModel.id))
-              .switch(Interest)
-              .join(Subject, on=(Interest.subject == Subject.id))
-              .where(predicate)
-              ))
-    print([record.subject.name for record in query])
-    return [record.subject.name for record in query]
+    query_interests = ((Interest
+                        .select(Interest, UserModel, Subject)
+                        .join(UserModel, on=(Interest.user == UserModel.id))
+                        .switch(Interest)
+                        .join(Subject, on=(Interest.subject == Subject.id))
+                        .where(predicate)
+                        ))
+
+    return [record.subject.name for record in query_interests]
 
 
 def get_all_topics_for_problem(problem_id: int):
-    query = (Subject.select()
-             .join(Interest)
-             .join(Problem)
-             .where(Problem.id == problem_id))
+    predicate = (Problem.id == problem_id)
 
-    return [record.name for record in query]
+    query_topics = (Topic
+                    .select(Topic, Problem, Subject)
+                    .join(Problem, on=(Topic.problem == Problem.id))
+                    .switch(Topic)
+                    .join(Subject, on=(Topic.subject == Subject.id))
+                    .where(predicate)
+                    )
+
+    return [record.subject.name for record in query_topics]
 
 
 def is_valid(Clazz: Science.__class__, name: str) -> bool:
