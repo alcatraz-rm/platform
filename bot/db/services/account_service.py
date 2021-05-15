@@ -33,5 +33,5 @@ def is_user_exist(t_id) -> bool:
 
 def get_user(t_id: int) -> Optional[UserModel]:
 
-    return UserModel.get(t_id=t_id)
+    return UserModel.get_or_none(t_id=t_id)
 

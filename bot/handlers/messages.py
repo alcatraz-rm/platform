@@ -57,7 +57,6 @@ async def handle_admin_add_science(message: types.Message, state: FSMContext):
     data = await state.get_data()
 
     subject = data.get('subject')
-    section = data.get('section')
     if subject is not None:
         # checking if its from handle_admin_add_subject
         # save subject in db
