@@ -3,7 +3,6 @@ from aiogram.dispatcher import FSMContext
 
 from bot import constants
 from bot.config import dp, ADMINS_IDS
-from bot.db.services.queston_service import get_all_sciences, get_all_subjects
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates
 import bot.keyboards.replay as kb
 from bot.db.services import account_service, queston_service
@@ -88,7 +87,7 @@ async def add_interests_subject(message: types.Message, state: FSMContext):
     subject_name = message.text
     if queston_service.is_valid(queston_service.Subject, subject_name):
         user_obj = account_service.get_user(t_id=message.from_user.id)
-        queston_service.assign_interest(user_obj, subject_name)
+        account_service.assign_interest(user_obj, subject_name)
         await message.answer(constants.SETTINGS_ADD_FINISH_MESSAGE.format(interest=subject_name) +
                              "\nДля выхода напишите /exit.",
                              reply_markup=kb.get_science_list_km())
@@ -104,7 +103,7 @@ async def add_interests_science(message: types.Message, state: FSMContext):
     if queston_service.is_valid(queston_service.Science, science_name):
         await state.update_data(science_name=science_name)
         await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name,
-                                                                            exclude_list=queston_service
+                                                                            exclude_list=account_service
                                                                             .get_all_interests_for_user(
                                                                                 message.from_user.id)))
         await InterestsInputStates.waiting_for_subject.set()
@@ -216,7 +215,7 @@ async def new_question_body(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=InterestsInputStates.waiting_for_science)
 async def new_question_science(message: types.Message, state: FSMContext):
-    sciences = get_all_sciences()
+    sciences = queston_service.get_all_sciences()
     current_science = message.text.strip()
 
     if current_science not in sciences:
@@ -242,7 +241,7 @@ async def new_question_subject(message: types.Message, state: FSMContext):
     problem_data = await state.get_data()
     science = problem_data.get('current_science')
 
-    subjects = get_all_subjects(science)
+    subjects = queston_service.get_all_subjects(science)
     current_subject = message.text.strip()
 
     if current_subject not in subjects:
