@@ -97,6 +97,7 @@ async def handle_new(message: types.Message, state: FSMContext):
 
             await NewQuestionStates.waiting_for_anonymous_or_not_answer.set()
 
+
 @dp.message_handler(commands=["register"], state="*")
 async def handle_register(message: types.Message):
     """

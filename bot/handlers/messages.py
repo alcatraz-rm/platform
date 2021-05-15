@@ -57,7 +57,6 @@ async def handle_admin_add_science(message: types.Message, state: FSMContext):
     data = await state.get_data()
 
     subject = data.get('subject')
-    section = data.get('section')
     if subject is not None:
         # checking if its from handle_admin_add_subject
         # save subject in db
@@ -104,7 +103,10 @@ async def add_interests_science(message: types.Message, state: FSMContext):
     science_name = message.text
     if queston_service.is_valid(queston_service.Science, science_name):
         await state.update_data(science_name=science_name)
-        await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name))
+        await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name,
+                                                                            exclude_list=queston_service
+                                                                            .get_all_interests_for_user(
+                                                                                message.from_user.id)))
         await InterestsInputStates.waiting_for_subject.set()
     else:
         await message.answer("Ошибка! Такой науки нет. Выбири из списка.",
