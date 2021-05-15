@@ -7,6 +7,7 @@ from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelS
 import bot.keyboards.replay as kb
 from bot.db.services import account_service
 from bot.constants import *
+from bot.utils import remove_non_service_data
 
 
 @dp.message_handler(user_id=ADMINS_IDS,
@@ -32,7 +33,7 @@ async def handle_admin_add(message: types.Message, state: FSMContext):
 async def handle_admin_exit(message: types.Message, state: FSMContext):
 
     await message.answer("Интересы добавлены.", reply_markup=kb.ReplyKeyboardRemove())
-    await state.reset_state()
+    await state.reset_state(with_data=False)
     await send_welcome(message)
 
 
@@ -40,7 +41,8 @@ async def handle_admin_exit(message: types.Message, state: FSMContext):
 async def handle_admin_exit(message: types.Message, state: FSMContext):
 
     await message.answer("Выход из админки.", reply_markup=kb.ReplyKeyboardRemove())
-    await state.reset_state()
+    await state.reset_state(with_data=False)
+
     await send_welcome(message)
 
 
@@ -59,7 +61,7 @@ async def handle_interest(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=["exit"], state=RegistrationProcessStates.all_states)
 async def handle_exit(message: types.Message, state: FSMContext):
     await message.answer(constants.REGISTRATION_CANCELED_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
-    await state.reset_data()
+    await state.set_data(remove_non_service_data(data))
     await state.finish()
 
 

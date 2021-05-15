@@ -8,6 +8,7 @@ import bot.keyboards.replay as kb
 from bot.db.services import account_service, queston_service
 from bot.handlers.commands import send_welcome, handle_admin
 from bot.constants import *
+from bot.utils import remove_non_service_data
 
 '''
     Getting current state 'name':
@@ -67,7 +68,7 @@ async def handle_admin_add_science(message: types.Message, state: FSMContext):
         except queston_service.DoesNotExist:
             await message.answer("Ошибка! Что-то пошло не так...", reply_markup=kb.ReplyKeyboardRemove())
 
-        await state.reset_data()
+        await state.set_data(remove_non_service_data(data))
         await state.set_state(AdminPanelStates.waiting_for_command)
         await handle_admin(message, state)
 
@@ -75,7 +76,7 @@ async def handle_admin_add_science(message: types.Message, state: FSMContext):
         # save science in db
         queston_service.add_new_science(name=science)
         await message.answer("Наука \"{}\" добавлена.".format(science), reply_markup=kb.ReplyKeyboardRemove())
-        await state.reset_data()
+        await state.set_data(remove_non_service_data(data))
         await state.set_state(AdminPanelStates.waiting_for_command)
         await handle_admin(message, state)
 
@@ -309,7 +310,8 @@ async def handle_new_anonymous_question_answer(message: types.Message, state: FS
         problem_id = 0  # id from db
 
         await message.answer(process_finished_message.format(id=problem_id))
-        await state.reset_state()
+        await state.set_data(remove_non_service_data(problem_data))
+        await state.reset_state(with_data=False)
 
     else:
         await message.answer(NEW_QUESTION_SELECT_YES_OR_NO, reply_markup=kb.get_yes_no_km())

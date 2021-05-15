@@ -1,6 +1,7 @@
 from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
 from bot.constants import DEPARTMENT_OPTIONS, DEGREE_LEVEL_OPTIONS
 from bot.db.services.queston_service import *
+import typing
 
 
 def get_department_km():
@@ -71,7 +72,7 @@ def get_science_list_km():
     return keyboard
 
 
-def get_subject_list_km(science: str, exclude_list=None):
+def get_subject_list_km(science: str, exclude_list: typing.Optional[list, set] = None):
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 
     subject_list = get_all_subjects(science_name=science)
@@ -83,4 +84,3 @@ def get_subject_list_km(science: str, exclude_list=None):
     keyboard.add('/exit')
 
     return keyboard
-
