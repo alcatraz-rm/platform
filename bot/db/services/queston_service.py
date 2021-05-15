@@ -57,7 +57,7 @@ def add_new_response(problem_id: int, body: str, user_t_id: int, is_anonymous: b
 
 def assign_interest(user: UserModel, subject_name: str):
     subject = Subject.get_or_none(name=subject_name)
-    predicate = (UserModel.id == user.id)
+    '''predicate = (UserModel.id == user.id)
 
     query_interests = (Interest
                        .select(Interest, UserModel, Subject)
@@ -66,10 +66,12 @@ def assign_interest(user: UserModel, subject_name: str):
                        .join(Subject, on=(Interest.subject == Subject.id))
                        .where(predicate)
                        )
-    user_interests = [record.subject.name for record in query_interests]
+    user_interests = [record.subject.name for record in query_interests]'''
+
+    user_interests = get_all_interests_for_user(user.t_id)
 
     if subject_name not in user_interests:
-        Interest.create(user=user, subject=subject)
+        Interest.create(user=user.id, subject=subject)
 
 
 def assign_topic(problem: Problem, subject_name: str):
@@ -90,12 +92,16 @@ def assign_topic(problem: Problem, subject_name: str):
 
 
 def get_all_interests_for_user(user_id: int):
-    query = (Subject.select()
-             .join(Interest)
-             .join(UserModel)
-             .where(UserModel.id == user_id))
-
-    return [record.name for record in query]
+    predicate = (UserModel.t_id == user_id)
+    query = ((Interest
+              .select(Interest, UserModel, Subject)
+              .join(UserModel, on=(Interest.user == UserModel.id))
+              .switch(Interest)
+              .join(Subject, on=(Interest.subject == Subject.id))
+              .where(predicate)
+              ))
+    print([record.subject.name for record in query])
+    return [record.subject.name for record in query]
 
 
 def get_all_topics_for_problem(problem_id: int):
