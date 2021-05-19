@@ -3,9 +3,10 @@ from aiogram.dispatcher import FSMContext
 
 from bot import constants
 from bot.config import dp, ADMINS_IDS
-from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates
+from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, QuestionDetailStates
 import bot.keyboards.replay as kb
-from bot.db.services import account_service
+import bot.keyboards.inline as inline_kb
+from bot.db.services import account_service, queston_service
 from bot.constants import *
 from bot.utils import remove_non_service_data
 
@@ -61,7 +62,7 @@ async def handle_interest(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=["exit"], state=RegistrationProcessStates.all_states)
 async def handle_exit(message: types.Message, state: FSMContext):
     await message.answer(constants.REGISTRATION_CANCELED_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
-    await state.set_data(remove_non_service_data(data))
+    await state.set_data(remove_non_service_data(await state.get_data()))
     await state.finish()
 
 
@@ -123,7 +124,7 @@ async def send_about(message: types.Message):
     This handler will be called when user sends `/about` command
     """
 
-    await message.answer(constants.ABOUT_MESSAGE)
+    await message.answer(constants.ABOUT_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
 
 
 @dp.message_handler(commands=["help"], state="*")
@@ -132,7 +133,7 @@ async def send_help(message: types.Message):
     This handler will be called when user sends `/help` command
     """
 
-    await message.answer(constants.HELP_MESSAGE)
+    await message.answer(constants.HELP_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
 
 
 @dp.message_handler(commands=['start'], state="*")
@@ -143,7 +144,7 @@ async def send_welcome(message: types.Message):
     user = account_service.get_user(t_id=message.from_user.id)
 
     if user is not None:
-        await message.answer(constants.START_MET_MESSAGE.format(name=user.name))
+        await message.answer(constants.START_MET_MESSAGE.format(name=user.name), reply_markup=kb.ReplyKeyboardRemove())
         await message.answer(constants.HELP_MESSAGE)
     else:
         await message.answer(constants.ABOUT_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())

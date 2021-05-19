@@ -1,6 +1,7 @@
 from peewee import DoesNotExist
 from datetime import datetime as dt
 from bot.db.models import Subject, Science, Problem, Response, Topic, Interest, UserModel
+import typing
 
 
 def add_new_science(name: str):
@@ -53,6 +54,10 @@ def add_new_response(problem_id: int, body: str, user_t_id: int, is_anonymous: b
                     created_at=dt.now(),
                     is_anonymous=is_anonymous,
                     )
+
+
+def get_problem_by_id(q_id) -> typing.Optional[Problem]:
+    return Problem.get_or_none(id=q_id)
 
 
 def assign_topic(problem: Problem, subject_name: str):

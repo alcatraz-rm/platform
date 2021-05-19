@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 
 from bot import constants
 from bot.config import dp, ADMINS_IDS
-from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates
+from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, QuestionDetailStates
 import bot.keyboards.replay as kb
 from bot.db.services import account_service, queston_service
 from bot.handlers.commands import send_welcome, handle_admin
@@ -16,30 +16,20 @@ from bot.utils import remove_non_service_data
         print(cs.split(':')[1])
 '''
 
-'''
-# Attempt to make a generic handler...
 
-@dp.message_handler(state=RegistrationProcessStates.all_states)
-async def registration_process(message: types.Message, state: FSMContext):
-    current_state = await state.get_state()
-    current_state = current_state.strip(':')[1]
-    user_data = await state.get_data()
-    user_data[current_state] = message.text
-    if current_state == 'degree_level':
-        telegram_data = message.from_user
-        account_service.add_new_user(t_id=telegram_data.id,
-                                     t_username=telegram_data.username,
-                                     name=user_data['name'],
-                                     email=user_data['email'],
-                                     department=user_data['department'],
-                                     degree_level=user_data['degree_level'],
-                                     )
-        await message.answer("Регистрация прошла успешно! Добро пожаловать!", reply_markup=kb.ReplyKeyboardRemove())
-        await state.finish()
-        await send_welcome(message)
-
-    else:
-'''
+@dp.message_handler(state=QuestionDetailStates.waiting_for_response)
+async def handle_response_body(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    problem_id = data["problem_id"]
+    response_body = message.text
+    user_t_id = message.from_user.id
+    queston_service.add_new_response(problem_id=problem_id,
+                                     body=response_body,
+                                     user_t_id=user_t_id,
+                                     is_anonymous=False)
+    await state.set_data(remove_non_service_data(data))
+    # ???
+    await send_welcome(message)
 
 
 @dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_subject)
