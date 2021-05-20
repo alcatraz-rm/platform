@@ -30,6 +30,6 @@ class StateValidationMiddleware(BaseMiddleware):
                 raise SkipHandler()
 
         n = dt.now()
-        await state.update_data(time=n)
+        await state.update_data(_time=n)
         # print("For user {} time set to {}.".format(message.from_user.username, n))
         # print(await state.get_state())

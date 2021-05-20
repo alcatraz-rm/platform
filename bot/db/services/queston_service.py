@@ -1,6 +1,7 @@
 from peewee import DoesNotExist
 from datetime import datetime as dt
 from bot.db.models import Subject, Science, Problem, Response, Topic, Interest, UserModel
+import typing
 
 
 def add_new_science(name: str):
@@ -55,23 +56,8 @@ def add_new_response(problem_id: int, body: str, user_t_id: int, is_anonymous: b
                     )
 
 
-def assign_interest(user: UserModel, subject_name: str):
-    subject = Subject.get_or_none(name=subject_name)
-    '''predicate = (UserModel.id == user.id)
-
-    query_interests = (Interest
-                       .select(Interest, UserModel, Subject)
-                       .join(UserModel, on=(Interest.user == UserModel.id))
-                       .switch(Interest)
-                       .join(Subject, on=(Interest.subject == Subject.id))
-                       .where(predicate)
-                       )
-    user_interests = [record.subject.name for record in query_interests]'''
-
-    user_interests = get_all_interests_for_user(user.t_id)
-
-    if subject_name not in user_interests:
-        Interest.create(user=user.id, subject=subject)
+def get_problem_by_id(q_id) -> typing.Optional[Problem]:
+    return Problem.get_or_none(id=q_id)
 
 
 def assign_topic(problem: Problem, subject_name: str):
@@ -89,19 +75,6 @@ def assign_topic(problem: Problem, subject_name: str):
 
     if subject_name not in problem_topics:
         Interest.create(problem=problem, subject=subject)
-
-
-def get_all_interests_for_user(user_id: int):
-    predicate = (UserModel.t_id == user_id)
-    query_interests = ((Interest
-                        .select(Interest, UserModel, Subject)
-                        .join(UserModel, on=(Interest.user == UserModel.id))
-                        .switch(Interest)
-                        .join(Subject, on=(Interest.subject == Subject.id))
-                        .where(predicate)
-                        ))
-
-    return [record.subject.name for record in query_interests]
 
 
 def get_all_topics_for_problem(problem_id: int):

@@ -3,13 +3,16 @@ from aiogram.dispatcher import FSMContext
 
 from bot import constants
 from bot.config import dp, ADMINS_IDS
+
 from bot.db.services.queston_service import get_all_sciences, get_all_subjects
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
-    SettingsChangeStates
+    SettingsChangeStates, QuestionDetailStates
+
 import bot.keyboards.replay as kb
 from bot.db.services import account_service, queston_service
 from bot.handlers.commands import send_welcome, handle_admin
 from bot.constants import *
+from bot.utils import remove_non_service_data
 
 '''
     Getting current state 'name':
@@ -17,30 +20,20 @@ from bot.constants import *
         print(cs.split(':')[1])
 '''
 
-'''
-# Attempt to make a generic handler...
 
-@dp.message_handler(state=RegistrationProcessStates.all_states)
-async def registration_process(message: types.Message, state: FSMContext):
-    current_state = await state.get_state()
-    current_state = current_state.strip(':')[1]
-    user_data = await state.get_data()
-    user_data[current_state] = message.text
-    if current_state == 'degree_level':
-        telegram_data = message.from_user
-        account_service.add_new_user(t_id=telegram_data.id,
-                                     t_username=telegram_data.username,
-                                     name=user_data['name'],
-                                     email=user_data['email'],
-                                     department=user_data['department'],
-                                     degree_level=user_data['degree_level'],
-                                     )
-        await message.answer("Регистрация прошла успешно! Добро пожаловать!", reply_markup=kb.ReplyKeyboardRemove())
-        await state.finish()
-        await send_welcome(message)
-
-    else:
-'''
+@dp.message_handler(state=QuestionDetailStates.waiting_for_response)
+async def handle_response_body(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    problem_id = data["problem_id"]
+    response_body = message.text
+    user_t_id = message.from_user.id
+    queston_service.add_new_response(problem_id=problem_id,
+                                     body=response_body,
+                                     user_t_id=user_t_id,
+                                     is_anonymous=False)
+    await state.set_data(remove_non_service_data(data))
+    # ???
+    await send_welcome(message)
 
 
 @dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_subject)
@@ -69,7 +62,7 @@ async def handle_admin_add_science(message: types.Message, state: FSMContext):
         except queston_service.DoesNotExist:
             await message.answer("Ошибка! Что-то пошло не так...", reply_markup=kb.ReplyKeyboardRemove())
 
-        await state.reset_data()
+        await state.set_data(remove_non_service_data(data))
         await state.set_state(AdminPanelStates.waiting_for_command)
         await handle_admin(message, state)
 
@@ -77,7 +70,7 @@ async def handle_admin_add_science(message: types.Message, state: FSMContext):
         # save science in db
         queston_service.add_new_science(name=science)
         await message.answer("Наука \"{}\" добавлена.".format(science), reply_markup=kb.ReplyKeyboardRemove())
-        await state.reset_data()
+        await state.set_data(remove_non_service_data(data))
         await state.set_state(AdminPanelStates.waiting_for_command)
         await handle_admin(message, state)
 
@@ -89,7 +82,7 @@ async def add_interests_subject(message: types.Message, state: FSMContext):
     subject_name = message.text
     if queston_service.is_valid(queston_service.Subject, subject_name):
         user_obj = account_service.get_user(t_id=message.from_user.id)
-        queston_service.assign_interest(user_obj, subject_name)
+        account_service.assign_interest(user_obj, subject_name)
         await message.answer(constants.SETTINGS_ADD_FINISH_MESSAGE.format(interest=subject_name) +
                              "\nДля выхода напишите /exit.",
                              reply_markup=kb.get_science_list_km())
@@ -105,7 +98,7 @@ async def add_interests_science(message: types.Message, state: FSMContext):
     if queston_service.is_valid(queston_service.Science, science_name):
         await state.update_data(science_name=science_name)
         await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name,
-                                                                            exclude_list=queston_service
+                                                                            exclude_list=account_service
                                                                             .get_all_interests_for_user(
                                                                                 message.from_user.id)))
         await InterestsInputStates.waiting_for_subject.set()
@@ -234,7 +227,7 @@ async def new_question_body(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=InterestsInputStates.waiting_for_science)
 async def new_question_science(message: types.Message, state: FSMContext):
-    sciences = get_all_sciences()
+    sciences = queston_service.get_all_sciences()
     current_science = message.text.strip()
 
     if current_science not in sciences:
@@ -260,7 +253,7 @@ async def new_question_subject(message: types.Message, state: FSMContext):
     problem_data = await state.get_data()
     science = problem_data.get('current_science')
 
-    subjects = get_all_subjects(science)
+    subjects = queston_service.get_all_subjects(science)
     current_subject = message.text.strip()
 
     if current_subject not in subjects:
@@ -328,7 +321,8 @@ async def handle_new_anonymous_question_answer(message: types.Message, state: FS
         problem_id = 0  # id from db
 
         await message.answer(process_finished_message.format(id=problem_id))
-        await state.reset_state()
+        await state.set_data(remove_non_service_data(problem_data))
+        await state.reset_state(with_data=False)
 
     else:
         await message.answer(NEW_QUESTION_SELECT_YES_OR_NO, reply_markup=kb.get_yes_no_km())
