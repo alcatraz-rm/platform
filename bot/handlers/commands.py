@@ -116,21 +116,17 @@ async def handle_register(message: types.Message):
         await RegistrationProcessStates.waiting_for_name.set()
 
 @dp.message_handler(commands=["me"], state="*")
-async def handle_register(message: types.Message):
-    user = account_service.is_user_exist(t_id=message.from_user.id)
+async def handle_me(message: types.Message):
+    user = account_service.get_user(t_id=message.from_user.id)
     if user is None:
-        await message.answer(constants.ME_MESSAGE) "кнопка регистр"
+        await message.answer(constants.ME_MESSAGE + "/register")
     else:
         await message.answer(constants.ME_MET_MESSAGE)
 
 
 @dp.message_handler(commands=["about"], state="*")
 async def send_about(message: types.Message):
-    """
-    This handler will be called when user sends `/about` command
-    """
-
-    await message.answer(constants.ABOUT_MESSAGE)
+    await message.answer(constants.ABOUT_MESSAGE + "/start")
 
 
 @dp.message_handler(commands=["help"], state="*")
