@@ -115,6 +115,14 @@ async def handle_register(message: types.Message):
                              reply_markup=kb.ReplyKeyboardRemove())
         await RegistrationProcessStates.waiting_for_name.set()
 
+@dp.message_handler(commands=["me"], state="*")
+async def handle_register(message: types.Message):
+    user = account_service.is_user_exist(t_id=message.from_user.id)
+    if user is None:
+        await message.answer(constants.ME_MESSAGE) "кнопка регистр"
+    else:
+        await message.answer(constants.ME_MET_MESSAGE)
+
 
 @dp.message_handler(commands=["about"], state="*")
 async def send_about(message: types.Message):
