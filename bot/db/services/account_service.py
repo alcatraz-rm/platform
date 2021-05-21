@@ -1,5 +1,6 @@
 from peewee import DoesNotExist
 
+from bot.constants import DEPARTMENT_ALIASES, DEGREES_ALIASES
 from bot.db.models import UserModel, Interest, Subject
 
 from typing import Optional
@@ -17,8 +18,8 @@ def add_new_user(t_id, t_username, name, email, department, degree_level):
         t_username=t_username,
         name=name,
         email=email,
-        department=department,
-        degree_level=degree_level,
+        department=DEPARTMENT_ALIASES[department],
+        degree_level=DEGREES_ALIASES[degree_level],
     )
 
 
@@ -32,8 +33,11 @@ def is_user_exist(t_id) -> bool:
 
 
 def get_user(t_id: int) -> Optional[UserModel]:
+    user = UserModel.get_or_none(t_id=t_id)
+    user.department = {value: key for key, value in DEPARTMENT_ALIASES.items()}.get(user.department)
+    user.degree_level = {value: key for key, value in DEGREES_ALIASES.items()}.get(user.degree_level)
 
-    return UserModel.get_or_none(t_id=t_id)
+    return user
 
 
 def assign_interest(user: UserModel, subject_name: str):
@@ -87,8 +91,8 @@ def alter_user_info(user: UserModel, name: str = None, email: str = None,
     if email is not None:
         user.email = email
     if department is not None:
-        user.department = department
+        user.department = DEPARTMENT_ALIASES[department]
     if degree_level is not None:
-        user.degree_level = degree_level
+        user.degree_level = DEGREES_ALIASES[degree_level]
 
     user.save()

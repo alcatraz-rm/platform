@@ -155,6 +155,7 @@ NEW_EXIT_QUESTION_MESSAGE = """Создание вопроса отменено"
 NEW_EXIT_DISCUSSION_MESSAGE = """Создание обсуждения отменено"""
 
 # Question detail
+
 QUESTION_DETAIL_MESSAGE = """*#{id} {title}*\n\n*Автор:* {author_name}\n\n*Вопрос:* {body}\n\n*Темы:* {topics}\n
 Для перехода к ленте вопросов - /feed\nЕсли возникли проблемы - /help"""
 QUESTION_DETAIL_LIKED_MESSAGE = """_Ты отслеживаеШЬ этот вопрос._"""
@@ -169,3 +170,9 @@ QUESTION_DETAIL_AUTHOR_INFO = """*Информация об авторе:*
 QUESTION_DETAIL_REPORT_INIT = "Опиши проблему с этим постом."
 QUESTION_DETAIL_REPORT_SUBMITTED = """Спасибо за жалобу. Мы рассмотрим ее в кратчайшие сроки и прием взвешанное решение.
 \nДля перехода к ленте вопросов - /feed\nЕсли возникли проблемы - /help"""
+
+# departments aliases, TODO: add full list
+DEPARTMENT_ALIASES = {'Механико-математический факультет': 'mmf'}
+
+# degrees aliases, TODO: add full list
+DEGREES_ALIASES = {'Бакалавриат': 'bachelor'}
