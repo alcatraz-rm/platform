@@ -104,7 +104,7 @@ async def handle_new(message: types.Message, state: FSMContext):
             await NewQuestionStates.waiting_for_anonymous_or_not_answer.set()
 
 
-@dp.message_handler(lambda message: message.text.startswith("/detail"))
+@dp.message_handler(lambda message: message.text.startswith("/detail"), state="*")
 async def handle_detail(message: types.Message, state: FSMContext):
     q_id = int(message.text.replace("/detail", ''))
     problem_obj = queston_service.get_problem_by_id(q_id)

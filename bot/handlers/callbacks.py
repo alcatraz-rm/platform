@@ -50,9 +50,14 @@ async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_d
 
 @dp.callback_query_handler(question_detail_cb.filter(action=["author_info"]),
                            state=QuestionDetailStates.waiting_for_choose_option)
-async def send_report(call: types.CallbackQuery, callback_data: dict):
+async def send_author_info(call: types.CallbackQuery, callback_data: dict):
     author = queston_service.get_problem_by_id(callback_data["problem_id"]).user
-    await call.message.answer("Автора вопроса: " + author.name, reply_markup=kb.ReplyKeyboardRemove())
+    interests_str = generate_topic_str(account_service.get_all_interests_for_user(author.t_id))
+    answer = constants.QUESTION_DETAIL_AUTHOR_INFO.format(name=author.name,
+                                                          interests=interests_str,
+                                                          department=author.department,
+                                                          degree_level=author.degree_level)
+    await call.message.answer(answer, reply_markup=kb.ReplyKeyboardRemove(), parse_mode=types.ParseMode.MARKDOWN)
     await call.answer()
 
 
@@ -70,7 +75,6 @@ async def handle_like(call: types.CallbackQuery, callback_data: dict):
     problem_id = callback_data["problem_id"]
 
     problem_obj = queston_service.get_problem_by_id(problem_id)
-
 
     topics_str = generate_topic_str(queston_service.get_all_topics_for_problem(problem_id))
     author_name = problem_obj.user.name if not problem_obj.is_anonymous else "Anonymous"

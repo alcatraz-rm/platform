@@ -117,12 +117,8 @@ def get_list_of_users_who_liked(problem_id: int) -> list:
 
 def is_problem_liked_by_user(problem_id: int, user_t_id: int) -> bool:
     liked_by_users = get_list_of_users_who_liked(problem_id)
-    print(user_t_id)
-    print(liked_by_users)
     if user_t_id in liked_by_users:
-        print("in list")
         return True
-    print("not in list")
     return False
 
 

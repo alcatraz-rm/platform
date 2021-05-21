@@ -155,5 +155,13 @@ NEW_EXIT_QUESTION_MESSAGE = """Создание вопроса отменено"
 NEW_EXIT_DISCUSSION_MESSAGE = """Создание обсуждения отменено"""
 
 # Question detail
-QUESTION_DETAIL_MESSAGE = """*#{id} {title}*\n\n*Автор:* {author_name}\n\n*Вопрос:* {body}\n\n*Темы:* {topics}"""
+QUESTION_DETAIL_MESSAGE = """*#{id} {title}*\n\n*Автор:* {author_name}\n\n*Вопрос:* {body}\n\n*Темы:* {topics}\n
+Для перехода к ленте вопросов - /feed\nЕсли возникли проблемы - /help"""
 QUESTION_DETAIL_LIKED_MESSAGE = """_Вы отслеживаете этот вопрос._"""
+QUESTION_DETAIL_AUTHOR_INFO = """*Информация об авторе:*
+*Имя:* {name}
+*Интересы:* {interests}
+*Факультет:* {department}
+*Степень обучения:* {degree_level}
+"""
+
