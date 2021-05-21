@@ -80,6 +80,12 @@ class Topic(BaseModel):
     subject = ForeignKeyField(Subject)
 
 
+class ProblemLike(BaseModel):
+    problem = ForeignKeyField(Problem)
+
+    liked_by = ForeignKeyField(UserModel)
+
+
 class ProblemReport(BaseModel):
     report_problem = ForeignKeyField(Problem)
 
