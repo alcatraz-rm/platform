@@ -16,10 +16,10 @@ def remove_non_service_data(data: dict):
     return service_data
 
 
-def generate_topic_str(topics: dict) -> str:
+def generate_topic_str(topics: dict, sep="::") -> str:
     topics_str = ""
     for t in topics.keys():
-        tag = topics[t] + "::" + t + "; "
+        tag = topics[t] + sep + t + "; "
         topics_str += tag
 
     return topics_str

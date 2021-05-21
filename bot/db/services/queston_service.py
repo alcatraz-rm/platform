@@ -1,6 +1,6 @@
 from peewee import DoesNotExist
 from datetime import datetime as dt
-from bot.db.models import Subject, Science, Problem, Response, Topic, Interest, UserModel, ProblemLike
+from bot.db.models import Subject, Science, Problem, Response, Topic, Interest, UserModel, ProblemLike, ProblemReport
 import typing
 
 
@@ -117,12 +117,8 @@ def get_list_of_users_who_liked(problem_id: int) -> list:
 
 def is_problem_liked_by_user(problem_id: int, user_t_id: int) -> bool:
     liked_by_users = get_list_of_users_who_liked(problem_id)
-    print(user_t_id)
-    print(liked_by_users)
     if user_t_id in liked_by_users:
-        print("in list")
         return True
-    print("not in list")
     return False
 
 
@@ -145,3 +141,14 @@ def dislike_problem(problem_id: int, user_t_id: int):
         ProblemLike.delete_by_id(like.id)
     else:
         raise DoesNotExist("Problem with given id doesn't exist.")
+
+
+def report_problem(problem_id: int, report_body, report_author_id: int):
+    problem = Problem.get_or_none(id=problem_id)
+
+    if problem is not None:
+        author_obj = UserModel.get_or_none(t_id=report_author_id)
+        ProblemReport.create(report_problem=problem,
+                             author=author_obj,
+                             report_message=report_body,
+                             )
