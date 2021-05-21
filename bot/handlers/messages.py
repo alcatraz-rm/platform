@@ -4,7 +4,7 @@ from aiogram.dispatcher import FSMContext
 from bot import constants
 from bot.config import dp, ADMINS_IDS
 
-from bot.db.services.queston_service import get_all_sciences, get_all_subjects
+from bot.db.services.queston_service import get_all_sciences, get_all_subjects, add_new_problem, assign_topic
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
     SettingsChangeStates, QuestionDetailStates
 
@@ -263,7 +263,7 @@ async def new_question_subject(message: types.Message, state: FSMContext):
     type_ = problem_data.get('type')
 
     if 'topics' in problem_data:
-        await state.update_data(topics=problem_data.get('topics') + (science, current_subject))
+        await state.update_data(topics=problem_data.get('topics') + [(science, current_subject)])
     else:
         await state.set_data({'topics': [(science, current_subject)]})
 
@@ -271,24 +271,32 @@ async def new_question_subject(message: types.Message, state: FSMContext):
 
     new_topic_message = ''
     topics_limit = 0
-    process_finished_message = ''
     if type_ == 'question':
         new_topic_message = NEW_QUESTION_THEME_SAVED_MESSAGE
-        process_finished_message = NEW_QUESTION_THEME_FINISH_MESSAGE
         topics_limit = 3
     elif type_ == 'discussion':
         new_topic_message = NEW_DISCUSSION_THEME_SAVED_MESSAGE
-        process_finished_message = NEW_DISCUSSION_THEME_FINISH_MESSAGE
         topics_limit = 5
 
     if len(problem_data.get('topics') + 1) == topics_limit:
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
+
+            problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id)
+
+            for topic in problem_data['topics']:
+                assign_topic(problem, topic[1])
+
+            await message.answer(NEW_DISCUSSION_END_MESSAGE.format(id=problem.get_id()))
+            await state.set_data(remove_non_service_data(problem_data))
+            await state.reset_state(with_data=False)
+
         elif type_ == 'question':
             await message.answer(NEW_QUESTION_THEME_FINISH_MESSAGE)
             await message.answer(NEW_QUESTION_ANON_MESSAGE, reply_markup=kb.get_yes_no_km())
 
             await NewQuestionStates.waiting_for_anonymous_or_not_answer.set()
+
         return
 
     await message.answer(new_topic_message, reply_markup=kb.get_add_finish_exit_km())
@@ -299,33 +307,25 @@ async def new_question_subject(message: types.Message, state: FSMContext):
 async def handle_new_anonymous_question_answer(message: types.Message, state: FSMContext):
     answer = message.text.strip()
     problem_data = await state.get_data()
-    type_ = problem_data.get('type')
-
-    if type_ == 'question':
-        process_finished_message = NEW_QUESTION_END_MESSAGE
-    else:
-        process_finished_message = NEW_DISCUSSION_END_MESSAGE
 
     if answer == 'Да':
-        await state.update_data(anonymous_question=True)
-
-        # TODO: problem saving logic
-        problem_id = 0  # id from db
-
-        await message.answer(process_finished_message.format(id=problem_id))
-
+        anonymous_question = True
     elif answer == 'Нет':
-        await state.update_data(anonymous_question=False)
-
-        # TODO: problem saving logic
-        problem_id = 0  # id from db
-
-        await message.answer(process_finished_message.format(id=problem_id))
-        await state.set_data(remove_non_service_data(problem_data))
-        await state.reset_state(with_data=False)
-
+        anonymous_question = False
     else:
         await message.answer(NEW_QUESTION_SELECT_YES_OR_NO, reply_markup=kb.get_yes_no_km())
+        return
+
+    await state.update_data(anonymous_question=anonymous_question)
+
+    problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id)
+
+    for topic in problem_data['topics']:
+        assign_topic(problem, topic[1])
+
+    await message.answer(NEW_QUESTION_END_MESSAGE.format(id=problem.get_id()))
+    await state.set_data(remove_non_service_data(problem_data))
+    await state.reset_state(with_data=False)
 
 
 @dp.message_handler(state="*")

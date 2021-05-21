@@ -159,7 +159,6 @@ async def send_about(message: types.Message):
     await message.answer(constants.ABOUT_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
 
 
-
 @dp.message_handler(commands=["help"], state="*")
 async def send_help(message: types.Message):
     """
