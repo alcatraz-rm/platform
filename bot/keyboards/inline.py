@@ -44,9 +44,10 @@ def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: 
     buttons = [
         types.InlineKeyboardButton(text=emoji.emojize("Отписаться:cross_mark:", use_aliases=True) if is_liked else
                                    emoji.emojize("Отслеживать:eyes:", use_aliases=True), callback_data=like_callback),
-        types.InlineKeyboardButton(text=emoji.emojize("Автор:clipboard:"), callback_data=author_callback),
+        types.InlineKeyboardButton(text=emoji.emojize("Автор:copyright:"), callback_data=author_callback),
         types.InlineKeyboardButton(text=emoji.emojize("Пожаловаться:warning:"), callback_data=report_callback),
-        types.InlineKeyboardButton(text="Обсудить или ответить", callback_data=resp_or_disc_callback),
+        types.InlineKeyboardButton(text=emoji.emojize("Обсудить или ответить:speech balloon:"),
+                                   callback_data=resp_or_disc_callback),
     ]
 
     keyboard = types.InlineKeyboardMarkup()

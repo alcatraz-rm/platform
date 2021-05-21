@@ -157,11 +157,13 @@ NEW_EXIT_DISCUSSION_MESSAGE = """Создание обсуждения отме�
 # Question detail
 QUESTION_DETAIL_MESSAGE = """*#{id} {title}*\n\n*Автор:* {author_name}\n\n*Вопрос:* {body}\n\n*Темы:* {topics}\n
 Для перехода к ленте вопросов - /feed\nЕсли возникли проблемы - /help"""
-QUESTION_DETAIL_LIKED_MESSAGE = """_Вы отслеживаете этот вопрос._"""
+QUESTION_DETAIL_LIKED_MESSAGE = """_Ты отслеживаеШЬ этот вопрос._"""
+QUESTION_DETAIL_LIKED_ALERT = "Ты поставили лайк. Теперь ты отслеживаешь этот вопрос."
+QUESTION_DETAIL_DISLIKED_ALERT = "Ты убрал лайк. Ты больше не отслеживаешь этот вопрос."
 QUESTION_DETAIL_AUTHOR_INFO = """*Информация об авторе:*
-*Имя:* {name}
-*Интересы:* {interests}
-*Факультет:* {department}
-*Степень обучения:* {degree_level}
+:white_small_square:*Имя:* {name}
+:white_small_square:*Интересы:* {interests}
+:white_small_square:*Факультет:* {department}
+:white_small_square:*Степень обучения:* {degree_level}
 """
 

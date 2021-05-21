@@ -11,6 +11,7 @@ from aiogram.utils.callback_data import CallbackData
 import bot.keyboards.inline as inline_kb
 import bot.keyboards.replay as kb
 from bot.utils import remove_non_service_data, generate_topic_str
+import emoji
 
 # user_id is telegram_id
 question_detail_cb = CallbackData("problem", "problem_id", "user_id", "action")
@@ -57,7 +58,7 @@ async def send_author_info(call: types.CallbackQuery, callback_data: dict):
                                                           interests=interests_str,
                                                           department=author.department,
                                                           degree_level=author.degree_level)
-    await call.message.answer(answer, reply_markup=kb.ReplyKeyboardRemove(), parse_mode=types.ParseMode.MARKDOWN)
+    await call.message.answer(emoji.emojize(answer), reply_markup=kb.ReplyKeyboardRemove(), parse_mode=types.ParseMode.MARKDOWN)
     await call.answer()
 
 
@@ -88,7 +89,7 @@ async def handle_like(call: types.CallbackQuery, callback_data: dict):
         reply_markup = inline_kb.get_question_detail_inline_kb(problem_obj, call.from_user.id, is_liked=False)
         queston_service.dislike_problem(problem_id=problem_id, user_t_id=user_t_id)
         await call.message.edit_text(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
-        await call.answer("Ты убрал лайк. Ты больше не отслеживаешь этот вопрос.", show_alert=True)
+        await call.answer(constants.QUESTION_DETAIL_DISLIKED_ALERT, show_alert=True)
     else:
         # like
         queston_service.like_problem(problem_id=problem_id, user_t_id=user_t_id)
@@ -96,17 +97,5 @@ async def handle_like(call: types.CallbackQuery, callback_data: dict):
         answer += "\n" + constants.QUESTION_DETAIL_LIKED_MESSAGE
 
         await call.message.edit_text(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
-        await call.answer("Ты поставили лайк. Теперь ты отслеживаешь этот вопрос.", show_alert=True)
-
-
-@dp.callback_query_handler(text="click")
-async def send_random_value(call: types.CallbackQuery):
-    """
-        DEMO handler
-    """
-    # Send a message if needed
-    await call.message.answer("Click")
-    # Finish the callback
-    await call.answer(show_alert=False)
-
+        await call.answer(constants.QUESTION_DETAIL_LIKED_ALERT, show_alert=True)
 
