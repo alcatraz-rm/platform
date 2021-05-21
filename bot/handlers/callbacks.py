@@ -10,21 +10,10 @@ from bot.utils import remove_non_service_data
 from aiogram.utils.callback_data import CallbackData
 import bot.keyboards.inline as inline_kb
 import bot.keyboards.replay as kb
+from bot.utils import remove_non_service_data, generate_topic_str
 
-
+# user_id is telegram_id
 question_detail_cb = CallbackData("problem", "problem_id", "user_id", "action")
-
-
-@dp.callback_query_handler(question_detail_cb.filter(action="detail"))
-async def handle_detail(call: types.CallbackQuery, state: FSMContext, callback_data: dict):
-    q_id = callback_data.get("problem_id")
-    problem_obj = queston_service.get_problem_by_id(q_id)
-    # TODO: add tags to message (via template)
-    reply_markup = inline_kb.get_question_detail_inline_kb(problem_obj, call.from_user.id)
-    await call.message.answer(problem_obj.body,
-                              reply_markup=reply_markup)
-    await QuestionDetailStates.waiting_for_choose_option.set()
-    await state.update_data(q_id=q_id)
 
 
 @dp.callback_query_handler(question_detail_cb.filter(action="discussion"))
@@ -59,23 +48,51 @@ async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_d
     await QuestionDetailStates.response_or_discussion.set()
 
 
-@dp.callback_query_handler(question_detail_cb.filter(action=["author_info"]))
+@dp.callback_query_handler(question_detail_cb.filter(action=["author_info"]),
+                           state=QuestionDetailStates.waiting_for_choose_option)
 async def send_report(call: types.CallbackQuery, callback_data: dict):
     author = queston_service.get_problem_by_id(callback_data["problem_id"]).user
     await call.message.answer("Автора вопроса: " + author.name, reply_markup=kb.ReplyKeyboardRemove())
     await call.answer()
 
 
-@dp.callback_query_handler(question_detail_cb.filter(action=["report"]))
+@dp.callback_query_handler(question_detail_cb.filter(action=["report"]),
+                           state=QuestionDetailStates.waiting_for_choose_option)
 async def send_report(call: types.CallbackQuery, callback_data: dict):
     await call.message.answer("Функция еще недоступна :(.", reply_markup=kb.ReplyKeyboardRemove())
     await call.answer()
 
 
-@dp.callback_query_handler(question_detail_cb.filter(action=["like"]))
+@dp.callback_query_handler(question_detail_cb.filter(action=["like"]),
+                           state=QuestionDetailStates.waiting_for_choose_option)
 async def handle_like(call: types.CallbackQuery, callback_data: dict):
-    await call.message.answer("Функция еще недоступна :(.", reply_markup=kb.ReplyKeyboardRemove())
-    await call.answer()
+    user_t_id = int(callback_data["user_id"])
+    problem_id = callback_data["problem_id"]
+
+    problem_obj = queston_service.get_problem_by_id(problem_id)
+
+
+    topics_str = generate_topic_str(queston_service.get_all_topics_for_problem(problem_id))
+    author_name = problem_obj.user.name if not problem_obj.is_anonymous else "Anonymous"
+    answer = constants.QUESTION_DETAIL_MESSAGE.format(id=problem_obj.id,
+                                                      title=problem_obj.title,
+                                                      author_name=author_name,
+                                                      body=problem_obj.body,
+                                                      topics=topics_str)
+    if queston_service.is_problem_liked_by_user(problem_id=problem_id, user_t_id=user_t_id):
+        # dislike
+        reply_markup = inline_kb.get_question_detail_inline_kb(problem_obj, call.from_user.id, is_liked=False)
+        queston_service.dislike_problem(problem_id=problem_id, user_t_id=user_t_id)
+        await call.message.edit_text(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
+        await call.answer("Ты убрал лайк. Ты больше не отслеживаешь этот вопрос.", show_alert=True)
+    else:
+        # like
+        queston_service.like_problem(problem_id=problem_id, user_t_id=user_t_id)
+        reply_markup = inline_kb.get_question_detail_inline_kb(problem_obj, call.from_user.id, is_liked=True)
+        answer += "\n" + constants.QUESTION_DETAIL_LIKED_MESSAGE
+
+        await call.message.edit_text(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
+        await call.answer("Ты поставили лайк. Теперь ты отслеживаешь этот вопрос.", show_alert=True)
 
 
 @dp.callback_query_handler(text="click")

@@ -1,6 +1,6 @@
 from peewee import DoesNotExist
 from datetime import datetime as dt
-from bot.db.models import Subject, Science, Problem, Response, Topic, Interest, UserModel
+from bot.db.models import Subject, Science, Problem, Response, Topic, Interest, UserModel, ProblemLike
 import typing
 
 
@@ -77,7 +77,7 @@ def assign_topic(problem: Problem, subject_name: str):
         Interest.create(problem=problem, subject=subject)
 
 
-def get_all_topics_for_problem(problem_id: int):
+def get_all_topics_for_problem(problem_id: int) -> dict:
     predicate = (Problem.id == problem_id)
 
     query_topics = (Topic
@@ -88,10 +88,60 @@ def get_all_topics_for_problem(problem_id: int):
                     .where(predicate)
                     )
 
-    return [record.subject.name for record in query_topics]
+    topics = {}
+    for record in query_topics:
+        topics[record.subject.name] = record.subject.science.name
+
+    return topics
 
 
 def is_valid(Clazz: Science.__class__, name: str) -> bool:
     if Clazz.get_or_none(name=name) is None:
         return False
     return True
+
+
+def get_list_of_users_who_liked(problem_id: int) -> list:
+    predicate = (Problem.id == problem_id)
+    query = (ProblemLike
+             .select(ProblemLike, UserModel, Problem)
+             .join(Problem, on=(ProblemLike.problem == Problem.id))
+             .switch(UserModel)
+             .join(UserModel, on=(ProblemLike.liked_by == UserModel.id))
+             .where(predicate)
+             )
+    liked_by_users = [record.liked_by.t_id for record in query]
+
+    return liked_by_users
+
+
+def is_problem_liked_by_user(problem_id: int, user_t_id: int) -> bool:
+    liked_by_users = get_list_of_users_who_liked(problem_id)
+    print(user_t_id)
+    print(liked_by_users)
+    if user_t_id in liked_by_users:
+        print("in list")
+        return True
+    print("not in list")
+    return False
+
+
+def like_problem(problem_id: int, user_t_id: int):
+    problem = Problem.get_or_none(id=problem_id)
+
+    if problem is not None:
+        user = UserModel.get_or_none(t_id=user_t_id)
+        ProblemLike.create(problem=problem, liked_by=user)
+    else:
+        raise DoesNotExist("Problem with given id doesn't exist.")
+
+
+def dislike_problem(problem_id: int, user_t_id: int):
+    problem = Problem.get_or_none(id=problem_id)
+
+    if problem is not None:
+        user = UserModel.get_or_none(t_id=user_t_id)
+        like = ProblemLike.get_or_none(problem=problem, liked_by=user)
+        ProblemLike.delete_by_id(like.id)
+    else:
+        raise DoesNotExist("Problem with given id doesn't exist.")

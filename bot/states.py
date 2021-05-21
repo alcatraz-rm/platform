@@ -21,6 +21,7 @@ class InterestsInputStates(StatesGroup):
     waiting_for_science = State('science')
     waiting_for_subject = State('subject')
 
+
 class SettingsChangeStates(StatesGroup):
     waiting_for_option = State('option')
     waiting_for_name = State('name')
@@ -28,8 +29,9 @@ class SettingsChangeStates(StatesGroup):
     waiting_for_degree_level = State('degree_level')
     waiting_for_new_science = State('new_science')
     waiting_for_new_subject = State('new_subject')
-    #We should think about names
+    # We should think about names
     waiting_for_del_interest = State('del_interest')
+
 
 class AdminPanelStates(StatesGroup):
     waiting_for_command = State()

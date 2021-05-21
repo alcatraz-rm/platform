@@ -3,6 +3,7 @@ from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButt
 from bot.constants import DEPARTMENT_OPTIONS, DEGREE_LEVEL_OPTIONS
 from bot.db.services.queston_service import *
 from bot.handlers.callbacks import question_detail_cb
+import emoji
 
 
 def get_generic_inline_kb(keyboard_data: dict, row_widths: int = 1):
@@ -34,14 +35,15 @@ def get_detail_button_inline_kb(problem_id: int, user_id: int):
     return keyboard
 
 
-def get_question_detail_inline_kb(problem_obj: Problem, user_id: int):
+def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: bool = False):
     like_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="like")
     author_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="author_info")
     resp_or_disc_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="resp_or_disc")
     report_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="report")
 
     buttons = [
-        types.InlineKeyboardButton(text="Лайк", callback_data=like_callback),
+        types.InlineKeyboardButton(text=emoji.emojize("Dislike:thumbsdown:", use_aliases=True) if is_liked else
+                                   emoji.emojize("Like:thumbsup:", use_aliases=True), callback_data=like_callback),
         types.InlineKeyboardButton(text="Автор", callback_data=author_callback),
         types.InlineKeyboardButton(text="Пожаловаться", callback_data=report_callback),
         types.InlineKeyboardButton(text="Обсудить или ответить", callback_data=resp_or_disc_callback),
