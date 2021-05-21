@@ -1,6 +1,7 @@
 from peewee import *
 from .base import BaseModel
 from bot import constants
+from datetime import datetime
 
 
 class Science(BaseModel):
@@ -46,7 +47,7 @@ class Problem(BaseModel):
 
     user = ForeignKeyField(UserModel)
 
-    created_at = DateTimeField()
+    created_at = DateTimeField(default=datetime.now)
 
     is_closed = BooleanField(default=False)
 
@@ -60,7 +61,7 @@ class Response(BaseModel):
 
     author = ForeignKeyField(UserModel)
 
-    created_at = DateTimeField()
+    created_at = DateTimeField(default=datetime.now)
 
     is_anonymous = BooleanField(default=False)
 
@@ -77,3 +78,27 @@ class Topic(BaseModel):
     problem = ForeignKeyField(Problem)
 
     subject = ForeignKeyField(Subject)
+
+
+class ProblemReport(BaseModel):
+    report_problem = ForeignKeyField(Problem)
+
+    author = ForeignKeyField(UserModel)
+
+    report_message = TextField()
+
+    time_stamp = DateTimeField(default=datetime.now)
+
+    is_closed = BooleanField(default=False)
+
+
+class UserReport(BaseModel):
+    report_user = ForeignKeyField(UserModel)
+
+    author = ForeignKeyField(UserModel)
+
+    report_message = TextField()
+
+    time_stamp = DateTimeField(default=datetime.now)
+
+    is_closed = BooleanField(default=False)

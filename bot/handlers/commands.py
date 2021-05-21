@@ -101,6 +101,18 @@ async def handle_new(message: types.Message, state: FSMContext):
             await NewQuestionStates.waiting_for_anonymous_or_not_answer.set()
 
 
+@dp.message_handler(lambda message: message.text.startswith("/detail"))
+async def handle_detail(message: types.Message, state: FSMContext):
+    q_id = int(message.text.replace("/detail", ''))
+    problem_obj = queston_service.get_problem_by_id(q_id)
+    # TODO: add tags to message (via template)
+    reply_markup = inline_kb.get_question_detail_inline_kb(problem_obj, message.from_user.id)
+    await message.answer(problem_obj.body,
+                         reply_markup=reply_markup)
+    await QuestionDetailStates.waiting_for_choose_option.set()
+    await state.update_data(q_id=q_id)
+
+
 @dp.message_handler(commands=["register"], state="*")
 async def handle_register(message: types.Message):
     """
