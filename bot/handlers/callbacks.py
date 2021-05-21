@@ -11,6 +11,7 @@ from aiogram.utils.callback_data import CallbackData
 import bot.keyboards.inline as inline_kb
 import bot.keyboards.replay as kb
 from bot.utils import remove_non_service_data, generate_topic_str
+import emoji
 
 # user_id is telegram_id
 question_detail_cb = CallbackData("problem", "problem_id", "user_id", "action")
@@ -34,7 +35,7 @@ async def send_response_form(call: types.CallbackQuery, callback_data: dict, sta
 
 @dp.callback_query_handler(question_detail_cb.filter(action=["resp_or_disc"]),
                            state=QuestionDetailStates.waiting_for_choose_option)
-async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_data: dict):
+async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     """
         Asks if user want to make a response for question or go to a discussion group-chat.
         Returns a message with two inline buttons.
@@ -50,17 +51,29 @@ async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_d
 
 @dp.callback_query_handler(question_detail_cb.filter(action=["author_info"]),
                            state=QuestionDetailStates.waiting_for_choose_option)
-async def send_report(call: types.CallbackQuery, callback_data: dict):
+async def send_author_info(call: types.CallbackQuery, callback_data: dict):
     author = queston_service.get_problem_by_id(callback_data["problem_id"]).user
-    await call.message.answer("Автора вопроса: " + author.name, reply_markup=kb.ReplyKeyboardRemove())
+
+    interests_str = generate_topic_str(account_service.get_all_interests_for_user(author.t_id))
+
+    answer = constants.QUESTION_DETAIL_AUTHOR_INFO.format(name=author.name,
+                                                          interests=interests_str,
+                                                          department=author.department,
+                                                          degree_level=author.degree_level)
+
+    await call.message.answer(emoji.emojize(answer),
+                              reply_markup=kb.ReplyKeyboardRemove(),
+                              parse_mode=types.ParseMode.MARKDOWN)
     await call.answer()
 
 
 @dp.callback_query_handler(question_detail_cb.filter(action=["report"]),
                            state=QuestionDetailStates.waiting_for_choose_option)
-async def send_report(call: types.CallbackQuery, callback_data: dict):
-    await call.message.answer("Функция еще недоступна :(.", reply_markup=kb.ReplyKeyboardRemove())
+async def send_report(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    await call.message.answer(constants.QUESTION_DETAIL_REPORT_INIT, reply_markup=kb.ReplyKeyboardRemove())
     await call.answer()
+    await QuestionDetailStates.waiting_for_report.set()
+    await state.update_data(problem_id=callback_data["problem_id"])
 
 
 @dp.callback_query_handler(question_detail_cb.filter(action=["like"]),
@@ -70,7 +83,6 @@ async def handle_like(call: types.CallbackQuery, callback_data: dict):
     problem_id = callback_data["problem_id"]
 
     problem_obj = queston_service.get_problem_by_id(problem_id)
-
 
     topics_str = generate_topic_str(queston_service.get_all_topics_for_problem(problem_id))
     author_name = problem_obj.user.name if not problem_obj.is_anonymous else "Anonymous"
@@ -84,7 +96,7 @@ async def handle_like(call: types.CallbackQuery, callback_data: dict):
         reply_markup = inline_kb.get_question_detail_inline_kb(problem_obj, call.from_user.id, is_liked=False)
         queston_service.dislike_problem(problem_id=problem_id, user_t_id=user_t_id)
         await call.message.edit_text(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
-        await call.answer("Ты убрал лайк. Ты больше не отслеживаешь этот вопрос.", show_alert=True)
+        await call.answer(constants.QUESTION_DETAIL_DISLIKED_ALERT, show_alert=True)
     else:
         # like
         queston_service.like_problem(problem_id=problem_id, user_t_id=user_t_id)
@@ -92,17 +104,5 @@ async def handle_like(call: types.CallbackQuery, callback_data: dict):
         answer += "\n" + constants.QUESTION_DETAIL_LIKED_MESSAGE
 
         await call.message.edit_text(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
-        await call.answer("Ты поставили лайк. Теперь ты отслеживаешь этот вопрос.", show_alert=True)
-
-
-@dp.callback_query_handler(text="click")
-async def send_random_value(call: types.CallbackQuery):
-    """
-        DEMO handler
-    """
-    # Send a message if needed
-    await call.message.answer("Click")
-    # Finish the callback
-    await call.answer(show_alert=False)
-
+        await call.answer(constants.QUESTION_DETAIL_LIKED_ALERT, show_alert=True)
 

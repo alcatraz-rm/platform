@@ -328,7 +328,21 @@ async def handle_new_anonymous_question_answer(message: types.Message, state: FS
     await state.reset_state(with_data=False)
 
 
+# Question detail
+@dp.message_handler(state=QuestionDetailStates.waiting_for_report)
+async def handle_report_message(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    author = message.from_user.id
+    problem_id = data.get("problem_id")
+    report_body = message.text
+    queston_service.report_problem(problem_id=problem_id, report_body=report_body, report_author_id=author)
+    # TODO: ADD KB_MARKUP
+    await state.set_data(remove_non_service_data(data))
+    await message.answer(constants.QUESTION_DETAIL_REPORT_SUBMITTED, reply_markup=kb.ReplyKeyboardRemove())
+    await state.reset_state(with_data=False)
+
+
 @dp.message_handler(state="*")
 async def handle_any_other_message(message: types.Message, state: FSMContext):
-    await message.answer("Ошибка! Невозможно выполнить эту команду сейчас!")
+    await message.answer("Ошибка! Невозможно выполнить эту команду сейчас!", reply_markup=kb.ReplyKeyboardRemove())
     await send_welcome(message)

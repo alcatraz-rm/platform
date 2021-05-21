@@ -104,7 +104,7 @@ async def handle_new(message: types.Message, state: FSMContext):
             await NewQuestionStates.waiting_for_anonymous_or_not_answer.set()
 
 
-@dp.message_handler(lambda message: message.text.startswith("/detail"))
+@dp.message_handler(lambda message: message.text.startswith("/detail"), state="*")
 async def handle_detail(message: types.Message, state: FSMContext):
     q_id = int(message.text.replace("/detail", ''))
     problem_obj = queston_service.get_problem_by_id(q_id)
@@ -121,7 +121,6 @@ async def handle_detail(message: types.Message, state: FSMContext):
         answer += "\n" + constants.QUESTION_DETAIL_LIKED_MESSAGE
     await message.answer(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
     await QuestionDetailStates.waiting_for_choose_option.set()
-    await state.update_data(q_id=q_id)
 
 
 @dp.message_handler(commands=["register"], state="*")
