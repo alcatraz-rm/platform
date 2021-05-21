@@ -3,7 +3,11 @@ from aiogram.dispatcher import FSMContext
 
 from bot import constants
 from bot.config import dp, ADMINS_IDS
-from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, QuestionDetailStates
+
+from bot.db.services.queston_service import get_all_sciences, get_all_subjects
+from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
+    SettingsChangeStates, QuestionDetailStates
+
 import bot.keyboards.replay as kb
 from bot.db.services import account_service, queston_service
 from bot.handlers.commands import send_welcome, handle_admin
@@ -144,6 +148,23 @@ async def registration_name(message: types.Message, state: FSMContext):
     await message.answer("Твой адрес эл. почты (только для лохов из НГУ)." + constants.REGISTRATION_EXIT_SENTENCES,
                          reply_markup=kb.ReplyKeyboardRemove())
     await RegistrationProcessStates.next()
+
+
+# @dp.message_handler(state=SettingsChangeStates.waiting_for_option)
+# async def handle_settings_option(message: types.Message):
+#     if message.text == 'Name':
+#         await message.answer(SETTINGS_NAME_MESSAGE)
+#         await SettingsChangeStates.waiting_for_name.set()
+#     elif message.text == 'Department':
+#         await message.answer(SETTINGS_FACULTY_MESSAGE)
+#         await SettingsChangeStates.waiting_for_department.set()
+#     elif message.text == 'Degree':
+#         await message.answer(SETTINGS_DEGREE_MESSAGE)
+#         await SettingsChangeStates.waiting_for_degree_level.set()
+#     elif message.text == 'Add interest':
+#         await message.answer(SETTINGS_NAME_MESSAGE)
+#         await SettingsChangeStates.waiting_for_name.set()
+#     elif message.text == 'Delete interest':
 
 
 # /new process

@@ -3,7 +3,10 @@ from aiogram.dispatcher import FSMContext
 
 from bot import constants
 from bot.config import dp, ADMINS_IDS
-from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, QuestionDetailStates
+
+from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
+    SettingsChangeStates, QuestionDetailStates
+
 import bot.keyboards.replay as kb
 import bot.keyboards.inline as inline_kb
 from bot.db.services import account_service, queston_service
@@ -129,6 +132,14 @@ async def handle_register(message: types.Message):
                              reply_markup=kb.ReplyKeyboardRemove())
         await RegistrationProcessStates.waiting_for_name.set()
 
+@dp.message_handler(commands=["me"], state="*")
+async def handle_me(message: types.Message):
+    user = account_service.get_user(t_id=message.from_user.id)
+    if user is None:
+        await message.answer(constants.ME_MESSAGE + "/register")
+    else:
+        await message.answer(constants.ME_MET_MESSAGE)
+
 
 @dp.message_handler(commands=["about"], state="*")
 async def send_about(message: types.Message):
@@ -137,6 +148,7 @@ async def send_about(message: types.Message):
     """
 
     await message.answer(constants.ABOUT_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
+
 
 
 @dp.message_handler(commands=["help"], state="*")
@@ -162,3 +174,12 @@ async def send_welcome(message: types.Message):
         await message.answer(constants.ABOUT_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
         await handle_register(message)
 
+
+@dp.message_handler(commands=["settings"], state="*")
+async def handle_settings(message: types.Message):
+    user = account_service.is_user_exist(t_id=message.from_user.id)
+    if user is None:
+        await message.answer(constants.SETTINGS_UNREGISTERED_MESSAGE)
+    else:
+        await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
+        await SettingsChangeStates.waiting_for_option.set()

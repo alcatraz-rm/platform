@@ -86,3 +86,15 @@ def get_subject_list_km(science: str, exclude_list: typing.Optional[dict] = None
     keyboard.add('/exit')
 
     return keyboard
+
+
+def get_settings_option_km():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.add('Name')
+    keyboard.add('Department')
+    keyboard.add('Degree')
+    keyboard.add('Add interest')
+    keyboard.add('Delete interest')
+    keyboard.add('/exit')
+
+    return keyboard
