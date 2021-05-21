@@ -166,4 +166,6 @@ QUESTION_DETAIL_AUTHOR_INFO = """*Информация об авторе:*
 :white_small_square:*Факультет:* {department}
 :white_small_square:*Степень обучения:* {degree_level}
 """
-
+QUESTION_DETAIL_REPORT_INIT = "Опиши проблему с этим постом."
+QUESTION_DETAIL_REPORT_SUBMITTED = """Спасибо за жалобу. Мы рассмотрим ее в кратчайшие сроки и прием взвешанное решение.
+\nДля перехода к ленте вопросов - /feed\nЕсли возникли проблемы - /help"""

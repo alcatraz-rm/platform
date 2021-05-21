@@ -121,7 +121,6 @@ async def handle_detail(message: types.Message, state: FSMContext):
         answer += "\n" + constants.QUESTION_DETAIL_LIKED_MESSAGE
     await message.answer(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
     await QuestionDetailStates.waiting_for_choose_option.set()
-    await state.update_data(q_id=q_id)
 
 
 @dp.message_handler(commands=["register"], state="*")

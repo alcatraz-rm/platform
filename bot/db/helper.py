@@ -5,7 +5,9 @@ from .models import *
 def create_tables():
     try:
         db.connect()
-        db.create_tables([UserModel, Science, Subject, Problem, Response, Interest, Topic, ProblemLike])
+        db.create_tables([UserModel, Science, Subject, Problem,
+                          Response, Interest, Topic, ProblemLike,
+                          ProblemReport, UserReport, ])
     except InternalError as px:
         print(str(px))
 
