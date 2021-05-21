@@ -12,7 +12,7 @@ import bot.keyboards.inline as inline_kb
 import bot.keyboards.replay as kb
 
 
-question_detail_cb = CallbackData("problem_id", "user_id", "action")
+question_detail_cb = CallbackData("problem", "problem_id", "user_id", "action")
 
 
 @dp.callback_query_handler(question_detail_cb.filter(action="detail"))
@@ -57,6 +57,13 @@ async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_d
                               reply_markup=inline_kb.get_resp_or_disc_inline_kb(problem_obj, user_id))
     await call.answer()
     await QuestionDetailStates.response_or_discussion.set()
+
+
+@dp.callback_query_handler(question_detail_cb.filter(action=["author_info"]))
+async def send_report(call: types.CallbackQuery, callback_data: dict):
+    author = queston_service.get_problem_by_id(callback_data["problem_id"]).user
+    await call.message.answer("Автора вопроса: " + author.name, reply_markup=kb.ReplyKeyboardRemove())
+    await call.answer()
 
 
 @dp.callback_query_handler(question_detail_cb.filter(action=["report"]))

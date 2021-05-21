@@ -14,7 +14,8 @@ def get_generic_inline_kb(keyboard_data: dict, row_widths: int = 1):
         buttons.append(types.InlineKeyboardButton(text=button_text,
                                                   callback_data=keyboard_data[button_text]))
 
-    keyboard = types.InlineKeyboardMarkup(*buttons, row_width=row_widths)
+    keyboard = types.InlineKeyboardMarkup(row_width=row_widths)
+    keyboard.add(*buttons)
 
     return keyboard
 
@@ -27,7 +28,8 @@ def get_detail_button_inline_kb(problem_id: int, user_id: int):
     """
     detail_callback = question_detail_cb.new(problem_id=problem_id, user_id=user_id, action="detail")
     detail_button = types.InlineKeyboardButton(text="Подробнее", callback_data=detail_callback)
-    keyboard = types.InlineKeyboardMarkup(detail_button)
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(detail_button)
 
     return keyboard
 
@@ -41,11 +43,12 @@ def get_question_detail_inline_kb(problem_obj: Problem, user_id: int):
     buttons = [
         types.InlineKeyboardButton(text="Лайк", callback_data=like_callback),
         types.InlineKeyboardButton(text="Автор", callback_data=author_callback),
-        types.InlineKeyboardButton(text="Обсудить или ответить", callback_data=resp_or_disc_callback),
         types.InlineKeyboardButton(text="Пожаловаться", callback_data=report_callback),
+        types.InlineKeyboardButton(text="Обсудить или ответить", callback_data=resp_or_disc_callback),
     ]
 
-    keyboard = types.InlineKeyboardMarkup(*buttons)
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.add(*buttons)
 
     return keyboard
 
@@ -59,7 +62,8 @@ def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int):
         types.InlineKeyboardButton(text="Перейти к обсуждению", callback_data=discussion_callback),
     ]
 
-    keyboard = types.InlineKeyboardMarkup(*buttons, row_width=2)
+    keyboard = types.InlineKeyboardMarkup(row_width=2)
+    keyboard.add(*buttons)
 
     return keyboard
 
