@@ -41,11 +41,30 @@ def assign_interest(user: UserModel, subject_name: str):
 
     user_interests = get_all_interests_for_user(user.t_id)
 
-    if subject_name not in user_interests:
+    if subject_name not in user_interests.keys():
         Interest.create(user=user.id, subject=subject)
 
 
-def get_all_interests_for_user(user_id: int):
+def remove_interest(user: UserModel, subject_name: str):
+    """
+        Removes interest for user. If subject with given name wasn't found DoesNotExist exception is being thrown.
+    """
+    subject = Subject.get_or_none(name=subject_name)
+    if subject is not None:
+        interest = Interest.get_or_none(user=user, subject=subject)
+
+        if interest is not None:
+            Interest.delete_by_id(interest.id)
+        else:
+            raise DoesNotExist("User {} doesn't have given interest \"{}\".".format(user.t_username, subject.name))
+    else:
+        raise DoesNotExist("Subject \"{}\" doesn't exist.".format(subject_name))
+
+
+def get_all_interests_for_user(user_id: int) -> dict:
+    """
+        Returns a dict of pairs {subject_name, science_name (linked to the subject)}.
+    """
     predicate = (UserModel.t_id == user_id)
     query_interests = ((Interest
                         .select(Interest, UserModel, Subject)
@@ -54,5 +73,22 @@ def get_all_interests_for_user(user_id: int):
                         .join(Subject, on=(Interest.subject == Subject.id))
                         .where(predicate)
                         ))
+    subjects = {}
+    for record in query_interests:
+        subjects[record.subject.name] = record.subject.science.name
 
-    return [record.subject.name for record in query_interests]
+    return subjects
+
+
+def alter_user_info(user: UserModel, name: str = None, email: str = None,
+                    department: str = None, degree_level: str = None):
+    if name is not None:
+        user.name = name
+    if email is not None:
+        user.email = email
+    if department is not None:
+        user.department = department
+    if degree_level is not None:
+        user.degree_level = degree_level
+
+    user.save()
