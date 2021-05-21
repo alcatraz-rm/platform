@@ -108,10 +108,21 @@ async def handle_new(message: types.Message, state: FSMContext):
 async def handle_detail(message: types.Message, state: FSMContext):
     q_id = int(message.text.replace("/detail", ''))
     problem_obj = queston_service.get_problem_by_id(q_id)
-    # TODO: add tags to message (via template)
+
     reply_markup = inline_kb.get_question_detail_inline_kb(problem_obj, message.from_user.id)
-    await message.answer(problem_obj.body,
-                         reply_markup=reply_markup)
+    topics = queston_service.get_all_topics_for_problem(q_id)
+    topics_str = ""
+    for t in topics.keys():
+        tag = topics[t] + "::" + t + "; "
+        topics_str += tag
+    author_name = problem_obj.user.name if not problem_obj.is_anonymous else "Anonymous"
+    answer = constants.QUESTION_DETAIL_MESSAGE.format(id=problem_obj.id,
+                                                      title=problem_obj.title,
+                                                      author_name=author_name,
+                                                      body=problem_obj.body,
+                                                      topics=topics_str)
+
+    await message.answer(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
     await QuestionDetailStates.waiting_for_choose_option.set()
     await state.update_data(q_id=q_id)
 
@@ -131,6 +142,7 @@ async def handle_register(message: types.Message):
                              constants.REGISTRATION_EXIT_SENTENCES,
                              reply_markup=kb.ReplyKeyboardRemove())
         await RegistrationProcessStates.waiting_for_name.set()
+
 
 @dp.message_handler(commands=["me"], state="*")
 async def handle_me(message: types.Message):
