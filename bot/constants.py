@@ -157,3 +157,10 @@ NEW_EXIT_DISCUSSION_MESSAGE = """Создание обсуждения отме�
 # Question detail
 QUESTION_DETAIL_MESSAGE = """*#{id} {title}*\n\n*Автор:* {author_name}\n\n*Вопрос:* {body}\n\n*Темы:* {topics}"""
 QUESTION_DETAIL_LIKED_MESSAGE = """_Вы отслеживаете этот вопрос._"""
+
+
+# departments aliases, TODO: add full list
+DEPARTMENT_ALIASES = {'Механико-математический факультет': 'mmf'}
+
+# degrees aliases, TODO: add full list
+DEGREES_ALIASES = {'Бакалавриат': 'bachelor'}
