@@ -149,22 +149,103 @@ async def registration_name(message: types.Message, state: FSMContext):
                          reply_markup=kb.ReplyKeyboardRemove())
     await RegistrationProcessStates.next()
 
+# /settings process:
 
-# @dp.message_handler(state=SettingsChangeStates.waiting_for_option)
-# async def handle_settings_option(message: types.Message):
-#     if message.text == 'Name':
-#         await message.answer(SETTINGS_NAME_MESSAGE)
-#         await SettingsChangeStates.waiting_for_name.set()
-#     elif message.text == 'Department':
-#         await message.answer(SETTINGS_FACULTY_MESSAGE)
-#         await SettingsChangeStates.waiting_for_department.set()
-#     elif message.text == 'Degree':
-#         await message.answer(SETTINGS_DEGREE_MESSAGE)
-#         await SettingsChangeStates.waiting_for_degree_level.set()
-#     elif message.text == 'Add interest':
-#         await message.answer(SETTINGS_NAME_MESSAGE)
-#         await SettingsChangeStates.waiting_for_name.set()
-#     elif message.text == 'Delete interest':
+@dp.message_handler(state=SettingsChangeStates.waiting_for_name)
+async def handle_settings_option(message:types.Message):
+    user = account_service.get_user(message.from_user.id)
+    account_service.alter_user_info(user, name=message.text)
+    message.answer(SETTINGS_NAME_CHANGED_MESSAGE.format(name=message.text))
+    await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
+    SettingsChangeStates.waiting_for_option.set()
+
+
+@dp.message_handler(state=SettingsChangeStates.waiting_for_department)
+async def handle_settings_option(message:types.Message):
+    user = account_service.get_user(message.from_user.id)
+    account_service.alter_user_info(user, department=message.text)
+    message.answer(SETTINGS_FACULTY_CHANGED_MESSAGE.format(faculty=message.text))
+    await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
+    SettingsChangeStates.waiting_for_option.set()
+
+
+@dp.message_handler(state=SettingsChangeStates.waiting_for_degree_level)
+async def handle_settings_option(message:types.Message):
+    user = account_service.get_user(message.from_user.id)
+    account_service.alter_user_info(user, degree_level=message.text)
+    message.answer(SETTINGS_DEGREE_CHANGED_MESSAGE.format(degree=message.text))
+    await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
+    SettingsChangeStates.waiting_for_option.set()
+
+
+@dp.message_handler(state=SettingsChangeStates.waiting_for_new_subject)
+async def add_interests_subject(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    science_name = data['science_name']
+    subject_name = message.text
+    if queston_service.is_valid(queston_service.Subject, subject_name):
+        user_obj = account_service.get_user(t_id=message.from_user.id)
+        account_service.assign_interest(user_obj, subject_name)
+        await message.answer(constants.SETTINGS_ADD_FINISH_MESSAGE.format(interest=subject_name) +
+                             "\nДля выхода напишите /exit.",
+                             reply_markup=kb.get_science_list_km())
+        await SettingsChangeStates.waiting_for_new_science.set()
+    else:
+        await message.answer("Ошибка! Такого предмета нет. Выбири из списка.",
+                             reply_markup=kb.get_subject_list_km(science=science_name))
+
+
+@dp.message_handler(state=SettingsChangeStates.waiting_for_new_science)
+async def add_interests_science(message: types.Message, state: FSMContext):
+    science_name = message.text
+    if queston_service.is_valid(queston_service.Science, science_name):
+        await state.update_data(science_name=science_name)
+        await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name,
+                                                                            exclude_list=account_service
+                                                                            .get_all_interests_for_user(
+                                                                                message.from_user.id)))
+        await SettingsChangeStates.waiting_for_new_subject.set()
+    else:
+        await message.answer("Ошибка! Такой науки нет. Выбири из списка.",
+                             reply_markup=kb.get_science_list_km())
+
+
+@dp.message_handler(state=SettingsChangeStates.waiting_for_del_interest)
+async def handle_deleting_interest(message: types.Message):
+    user_id = message.from_user.id
+    user = account_service.get_user(user_id)
+    user_interests = account_service.get_all_interests_for_user(user_id)
+    science_subject = message.text.split(sep='/')
+    if user_interests[science_subject[0]] == science_subject[1]:
+        account_service.remove_interest(user, science_subject[1])
+        await message.answer(SETTINGS_DELETE_FINISH_MESSAGE.format(interest=message.text))
+        await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
+        SettingsChangeStates.waiting_for_option.set()
+    else:
+        await message.answer("Такого интереса у вас нет!")
+        await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
+        SettingsChangeStates.waiting_for_option.set()
+
+
+@dp.message_handler(state=SettingsChangeStates.waiting_for_option)
+async def handle_settings_option(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    if message.text == 'Name':
+        await message.answer(SETTINGS_NAME_MESSAGE)
+        await SettingsChangeStates.waiting_for_name.set()
+    elif message.text == 'Department':
+        await message.answer(SETTINGS_FACULTY_MESSAGE)
+        await SettingsChangeStates.waiting_for_department.set()
+    elif message.text == 'Degree':
+        await message.answer(SETTINGS_DEGREE_MESSAGE)
+        await SettingsChangeStates.waiting_for_degree_level.set()
+    elif message.text == 'Add interest':
+        await message.answer(SETTINGS_NAME_MESSAGE)
+        await state.set_data({})
+        await SettingsChangeStates.waiting_for_name.set()
+    elif message.text == 'Delete interest':
+        await message.answer(SETTINGS_DELETE_MESSAGE, reply_markup=kb.get_interests_km(user_id))
+        await SettingsChangeStates.waiting_for_del_interest.set()
 
 
 # /new process
