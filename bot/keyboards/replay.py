@@ -113,3 +113,9 @@ def get_interests_km(user_id: int):
 
     return keyboard
 
+
+def get_generic_km(buttons: list):
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.add(*buttons)
+
+    return keyboard
