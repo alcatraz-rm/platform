@@ -4,12 +4,15 @@ from bot.constants import DEPARTMENT_ALIASES, DEGREES_ALIASES
 from bot.db.models import UserModel, Interest, Subject
 
 from typing import Optional
+from email_validator import validate_email, EmailNotValidError
 
-# TODO
-'''
-    def email_validation(self, email: str):
-    pass
-'''
+
+def email_is_valid(email: str):
+    try:
+        validate_email(email)
+        return '@g.nsu.ru' in email
+    except EmailNotValidError:
+        return False
 
 
 def add_new_user(t_id, t_username, name, email, department, degree_level):
