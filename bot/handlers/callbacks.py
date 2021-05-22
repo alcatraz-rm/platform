@@ -31,6 +31,7 @@ async def send_response_form(call: types.CallbackQuery, callback_data: dict, sta
     await call.message.answer("Напиши свой ответ в следующем сообщении.", reply_markup=kb.ReplyKeyboardRemove())
     await QuestionDetailStates.waiting_for_response.set()
     await state.update_data(problem_id=problem_id)
+    await call.answer()
 
 
 @dp.callback_query_handler(question_detail_cb.filter(action=["resp_or_disc"]),
