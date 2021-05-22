@@ -8,11 +8,15 @@ from email_validator import validate_email, EmailNotValidError
 
 
 def email_is_valid(email: str):
+    if '@g.nsu.ru' not in email:
+        return False
+
     try:
         validate_email(email)
-        return '@g.nsu.ru' in email
     except EmailNotValidError:
         return False
+
+    return True
 
 
 def add_new_user(t_id, t_username, name, email, department, degree_level):

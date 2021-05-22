@@ -6,6 +6,7 @@ from bot import constants
 from bot.config import dp, ADMINS_IDS
 from bot.constants import *
 from bot.db.services import account_service, queston_service
+from bot.db.services.account_service import email_is_valid
 from bot.db.services.queston_service import add_new_problem, assign_topic
 from bot.handlers.commands import send_welcome, handle_admin, handle_detail
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
@@ -63,7 +64,6 @@ async def registration_complete(message: types.Message, state: FSMContext):
     telegram_data = message.from_user
     user_data = await state.get_data()
     user_data['degree_level'] = message.text
-    # TODO: FIX how department and degree_level are being saved.
     account_service.add_new_user(t_id=telegram_data.id,
                                  t_username=telegram_data.username,
                                  name=user_data['name'],
@@ -86,6 +86,10 @@ async def registration_department(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_email)
 async def registration_email(message: types.Message, state: FSMContext):
+    if not email_is_valid(message.text):
+        await message.answer("Используй корректный адрес электронной почты НГУ")
+        return
+
     await state.update_data(email=message.text)
 
     await message.answer("С какого ты факультета?" + constants.REGISTRATION_EXIT_SENTENCES,
@@ -317,7 +321,7 @@ async def new_question_subject(message: types.Message, state: FSMContext):
         new_topic_message = NEW_DISCUSSION_THEME_SAVED_MESSAGE
         topics_limit = 5
 
-    if len(problem_data.get('topics')) + 1 == topics_limit:
+    if len(problem_data.get('topics')) == topics_limit:
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
 
@@ -357,7 +361,8 @@ async def handle_new_anonymous_question_answer(message: types.Message, state: FS
 
     await state.update_data(anonymous_question=anonymous_question)
 
-    problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id)
+    problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id,
+                              is_anonymous=anonymous_question)
 
     for topic in problem_data['topics']:
         assign_topic(problem, topic[1])

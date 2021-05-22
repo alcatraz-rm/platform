@@ -32,12 +32,13 @@ def get_all_subjects(science_name: str):
     return subjects
 
 
-def add_new_problem(title: str, body: str, user_t_id: int) -> Problem:
+def add_new_problem(title: str, body: str, user_t_id: int, is_anonymous: bool = False) -> Problem:
     user = UserModel.get_or_none(t_id=user_t_id)
 
     new_problem = Problem.create(title=title,
                                  body=body,
                                  user=user,
+                                 is_anonymous=is_anonymous,
                                  created_at=dt.now(),
                                  )
 
@@ -75,6 +76,10 @@ def assign_topic(problem: Problem, subject_name: str):
 
     if subject_name not in problem_topics:
         Topic.create(problem=problem, subject=subject)
+
+
+def get_all_open_questions() -> list:
+    return list(Problem.select().where(Problem.is_closed == False))
 
 
 def get_all_topics_for_problem(problem_id: int) -> dict:
