@@ -106,3 +106,8 @@ async def handle_like(call: types.CallbackQuery, callback_data: dict):
         await call.message.edit_text(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
         await call.answer(constants.QUESTION_DETAIL_LIKED_ALERT, show_alert=True)
 
+
+@dp.callback_query_handler(question_detail_cb.filter(), state="*")
+async def handle_anything_else(call: types.CallbackQuery, callback_data: dict):
+    await call.message.answer(constants.QUESTION_DETAIL_CALLBACK_ERROR_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
+    await call.answer(constants.QUESTION_DETAIL_CALLBACK_ERROR_ALERT, show_alert=True)

@@ -45,6 +45,7 @@ class AdminPanelStates(StatesGroup):
 
 class QuestionDetailStates(StatesGroup):
     waiting_for_choose_option = State()
+    waiting_for_problem_id = State()
     waiting_for_report = State()
     response_or_discussion = State()
     waiting_for_response = State()

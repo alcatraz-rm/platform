@@ -97,6 +97,10 @@ def get_all_topics_for_problem(problem_id: int) -> dict:
 
 
 def is_valid(Clazz: Science.__class__, name: str) -> bool:
+    """
+        Validates Science by name. If science with given name presents in db True is being returned.
+
+    """
     if Clazz.get_or_none(name=name) is None:
         return False
     return True

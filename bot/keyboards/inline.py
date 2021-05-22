@@ -42,11 +42,11 @@ def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: 
     report_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="report")
 
     buttons = [
-        types.InlineKeyboardButton(text=emoji.emojize("Отписаться:cross_mark:", use_aliases=True) if is_liked else
-                                   emoji.emojize("Отслеживать:eyes:", use_aliases=True), callback_data=like_callback),
-        types.InlineKeyboardButton(text=emoji.emojize("Автор:copyright:"), callback_data=author_callback),
-        types.InlineKeyboardButton(text=emoji.emojize("Пожаловаться:warning:"), callback_data=report_callback),
-        types.InlineKeyboardButton(text=emoji.emojize("Обсудить или ответить:speech balloon:"),
+        types.InlineKeyboardButton(text=emoji.emojize("Отписаться :cross_mark:" if is_liked else "Отслеживать :eyes:",
+                                                      use_aliases=True), callback_data=like_callback),
+        types.InlineKeyboardButton(text=emoji.emojize("Автор :copyright:"), callback_data=author_callback),
+        types.InlineKeyboardButton(text=emoji.emojize("Пожаловаться :warning:"), callback_data=report_callback),
+        types.InlineKeyboardButton(text=emoji.emojize("Обсудить или ответить :speech_balloon:"),
                                    callback_data=resp_or_disc_callback),
     ]
 
