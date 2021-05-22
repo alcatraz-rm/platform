@@ -14,6 +14,15 @@ from bot.db.services import account_service, queston_service
 from bot.constants import *
 from bot.utils import remove_non_service_data, generate_topic_str
 
+# TODO: add /exit to /new, /settings
+# TODO: logging to file
+# TODO: fix messages
+# TODO: fix register (adding interests)
+# TODO: highlight closed question and delete answer button
+# TODO: implement interactive report using inline buttons
+# TODO: speed up email validation
+# TODO: validate degree and department
+
 
 @dp.message_handler(user_id=ADMINS_IDS,
                     commands=["science", "subject"],
@@ -36,10 +45,29 @@ async def handle_admin_add(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=["exit"], state=InterestsInputStates.all_states)
 async def handle_admin_exit(message: types.Message, state: FSMContext):
-
     await message.answer("Интересы добавлены.", reply_markup=kb.ReplyKeyboardRemove())
     await state.reset_state(with_data=False)
     await send_welcome(message)
+
+
+@dp.message_handler(commands=["exit"], state=NewQuestionStates.all_states)
+async def handle_new_exit(message: types.Message, state: FSMContext):
+    problem_data = await state.get_data()
+
+    if 'type' in problem_data:
+        if problem_data['type'] == 'question':
+            await message.answer(NEW_EXIT_QUESTION_MESSAGE)
+        else:
+            await message.answer(NEW_EXIT_DISCUSSION_MESSAGE)
+
+        await state.reset_state(with_data=False)
+        await state.set_data(remove_non_service_data(problem_data))
+
+        return
+
+    await message.answer("Создание отменено")
+    await state.reset_state(with_data=False)
+    await state.set_data(remove_non_service_data(problem_data))
 
 
 @dp.message_handler(user_id=ADMINS_IDS, commands=["exit"], state=AdminPanelStates.all_states)
