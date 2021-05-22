@@ -22,6 +22,7 @@ from bot.utils import remove_non_service_data, generate_topic_str
 # TODO: implement interactive report using inline buttons
 # TODO: speed up email validation
 # TODO: validate degree and department
+# TODO: Change /exit from Add interest
 # TODO: fix loading department and degree from db in author info
 
 
@@ -86,6 +87,16 @@ async def handle_admin(message: types.Message, state: FSMContext):
     await AdminPanelStates.waiting_for_command.set()
 
 
+@dp.message_handler(commands=["exit"], state=SettingsChangeStates.all_states)
+async def handle_exit(message: types.Message, state: FSMContext):
+    # TODO: remove dat shit!!!
+    # TODO: save changes here
+
+    await message.answer("Йоу, бро с настройками покончено. Мне похуй.", reply_markup=kb.ReplyKeyboardRemove())
+    await state.set_data(remove_non_service_data(await state.get_data()))
+    await state.finish()
+
+
 @dp.message_handler(commands=["exit"], state=RegistrationProcessStates.all_states)
 async def handle_exit(message: types.Message, state: FSMContext):
     await message.answer(constants.REGISTRATION_CANCELED_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
@@ -146,19 +157,23 @@ async def handle_detail_without_id(message: types.Message, state: FSMContext):
 async def handle_detail(message: types.Message, state: FSMContext):
     q_id = int(message.text.replace("/detail", ''))
     problem_obj = queston_service.get_problem_by_id(q_id)
-    is_liked = queston_service.is_problem_liked_by_user(problem_id=q_id, user_t_id=message.from_user.id)
-    reply_markup = inline_kb.get_question_detail_inline_kb(problem_obj, message.from_user.id, is_liked=is_liked)
-    topics_str = generate_topic_str(queston_service.get_all_topics_for_problem(q_id))
-    author_name = problem_obj.user.name if not problem_obj.is_anonymous else "Anonymous"
-    answer = constants.QUESTION_DETAIL_MESSAGE.format(id=problem_obj.id,
-                                                      title=problem_obj.title,
-                                                      author_name=author_name,
-                                                      body=problem_obj.body,
-                                                      topics=topics_str)
-    if is_liked:
-        answer += "\n" + constants.QUESTION_DETAIL_LIKED_MESSAGE
-    await message.answer(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
-    await QuestionDetailStates.waiting_for_choose_option.set()
+    if problem_obj is not None:
+        is_liked = queston_service.is_problem_liked_by_user(problem_id=q_id, user_t_id=message.from_user.id)
+        reply_markup = inline_kb.get_question_detail_inline_kb(problem_obj, message.from_user.id, is_liked=is_liked)
+        topics_str = generate_topic_str(queston_service.get_all_topics_for_problem(q_id))
+        author_name = problem_obj.user.name if not problem_obj.is_anonymous else "Anonymous"
+        answer = constants.QUESTION_DETAIL_MESSAGE.format(id=problem_obj.id,
+                                                          title=problem_obj.title,
+                                                          author_name=author_name,
+                                                          body=problem_obj.body,
+                                                          topics=topics_str)
+        if is_liked:
+            answer += "\n" + constants.QUESTION_DETAIL_LIKED_MESSAGE
+        await message.answer(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
+        await QuestionDetailStates.waiting_for_choose_option.set()
+    else:
+        await message.answer("Нет такого вопроса!")
+        await handle_feed(message)
 
 
 @dp.message_handler(commands=["response"], state="*")

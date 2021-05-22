@@ -37,7 +37,7 @@ class UserModel(BaseModel):
     degree_level = CharField(choices=constants.DEGREE_LEVEL_OPTIONS)
 
     class Meta:
-        db_table = 'Users'
+        db_table = 'User'
 
 
 class Problem(BaseModel):
@@ -53,6 +53,9 @@ class Problem(BaseModel):
 
     is_anonymous = BooleanField(default=False)
 
+    class Meta:
+        db_table = 'Problem'
+
 
 class Response(BaseModel):
     problem = ForeignKeyField(Problem, backref='responses')
@@ -67,11 +70,17 @@ class Response(BaseModel):
 
     is_final = BooleanField(default=False)
 
+    class Meta:
+        db_table = 'Response'
+
 
 class Interest(BaseModel):
     user = ForeignKeyField(UserModel)
 
     subject = ForeignKeyField(Subject)
+
+    class Meta:
+        db_table = 'Interest'
 
 
 class Topic(BaseModel):
@@ -79,11 +88,17 @@ class Topic(BaseModel):
 
     subject = ForeignKeyField(Subject)
 
+    class Meta:
+        db_table = 'Topic'
+
 
 class ProblemLike(BaseModel):
     problem = ForeignKeyField(Problem)
 
     liked_by = ForeignKeyField(UserModel)
+
+    class Meta:
+        db_table = 'Problem_Like'
 
 
 class ProblemReport(BaseModel):
@@ -97,6 +112,9 @@ class ProblemReport(BaseModel):
 
     is_closed = BooleanField(default=False)
 
+    class Meta:
+        db_table = 'Problem_Report'
+
 
 class UserReport(BaseModel):
     report_user = ForeignKeyField(UserModel)
@@ -108,3 +126,6 @@ class UserReport(BaseModel):
     time_stamp = DateTimeField(default=datetime.now)
 
     is_closed = BooleanField(default=False)
+
+    class Meta:
+        db_table = 'User_Report'

@@ -390,10 +390,9 @@ async def handle_report_message(message: types.Message, state: FSMContext):
 @dp.message_handler(state=QuestionDetailStates.waiting_for_problem_id)
 async def handle_detail_without_id(message: types.Message, state: FSMContext):
     problem_id = message.text
-    problem_obj = queston_service.get_problem_by_id(problem_id)
-    if problem_obj is not None:
-        message.text = "/detail" + problem_id
-        await handle_detail(message, state)
+
+    message.text = "/detail" + problem_id
+    await handle_detail(message, state)
 
 
 @dp.message_handler(state=QuestionDetailStates.waiting_for_response)
