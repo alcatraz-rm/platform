@@ -19,7 +19,6 @@ from bot.utils import remove_non_service_data
 '''
 
 
-
 @dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_subject)
 async def handle_admin_add_subject(message: types.Message, state: FSMContext):
     subject = message.text
@@ -350,7 +349,7 @@ async def new_question_subject(message: types.Message, state: FSMContext):
         new_topic_message = NEW_DISCUSSION_THEME_SAVED_MESSAGE
         topics_limit = 5
 
-    if len(problem_data.get('topics')) + 1 == topics_limit:
+    if len(problem_data.get('topics')) == topics_limit:
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
 
@@ -390,7 +389,8 @@ async def handle_new_anonymous_question_answer(message: types.Message, state: FS
 
     await state.update_data(anonymous_question=anonymous_question)
 
-    problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id)
+    problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id,
+                              is_anonymous=anonymous_question)
 
     for topic in problem_data['topics']:
         assign_topic(problem, topic[1])
