@@ -272,7 +272,8 @@ async def new_question_science(message: types.Message, state: FSMContext):
     current_science = message.text.strip()
 
     if current_science not in sciences:
-        await message.answer('Такой науки нет! Выбери из списка', reply_markup=kb.get_subject_list_km(current_science))
+        await message.answer('Такой науки нет! Выбери из списка', reply_markup=kb.get_science_list_km())
+        return
 
     problem_data = await state.get_data()
     type_ = problem_data.get('type')
@@ -300,6 +301,7 @@ async def new_question_subject(message: types.Message, state: FSMContext):
 
     if current_subject not in subjects:
         await message.answer('Такого предмета нет! Выбери из списка', reply_markup=kb.get_subject_list_km(science))
+        return
 
     problem_data = await state.get_data()
     type_ = problem_data.get('type')
