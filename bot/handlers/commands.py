@@ -23,6 +23,7 @@ from bot.utils import remove_non_service_data, generate_topic_str
 # TODO: speed up email validation
 # TODO: validate degree and department
 # TODO: Change /exit from Add interest
+# TODO: fix loading department and degree from db in author info
 
 
 @dp.message_handler(user_id=ADMINS_IDS,

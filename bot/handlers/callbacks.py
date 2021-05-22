@@ -59,8 +59,8 @@ async def send_author_info(call: types.CallbackQuery, callback_data: dict):
 
     answer = constants.QUESTION_DETAIL_AUTHOR_INFO.format(name=author.name,
                                                           interests=interests_str,
-                                                          department=author.department,
-                                                          degree_level=author.degree_level)
+                                                          department=DEPARTMENT_ALIASES[author.department],
+                                                          degree_level=DEGREES_ALIASES[author.degree_level])
 
     await call.message.answer(emoji.emojize(answer),
                               reply_markup=kb.ReplyKeyboardRemove(),
