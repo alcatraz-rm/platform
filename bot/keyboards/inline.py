@@ -21,18 +21,16 @@ def get_generic_inline_kb(keyboard_data: dict, row_widths: int = 1):
     return keyboard
 
 
-def get_detail_button_inline_kb(problem_id: int, user_id: int):
-    """
-        Reply markup for message with the question.
-        :param problem_id: - problem's id in db
-        :param user_id: - user's id in db
-    """
+"""
+def get_response_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: bool = False):
+    
     detail_callback = question_detail_cb.new(problem_id=problem_id, user_id=user_id, action="detail")
     detail_button = types.InlineKeyboardButton(text="Подробнее", callback_data=detail_callback)
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(detail_button)
 
     return keyboard
+"""
 
 
 def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: bool = False):
@@ -46,23 +44,8 @@ def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: 
                                                       use_aliases=True), callback_data=like_callback),
         types.InlineKeyboardButton(text=emoji.emojize("Автор :copyright:"), callback_data=author_callback),
         types.InlineKeyboardButton(text=emoji.emojize("Пожаловаться :warning:"), callback_data=report_callback),
-        types.InlineKeyboardButton(text=emoji.emojize("Обсудить или ответить :speech_balloon:"),
+        types.InlineKeyboardButton(text=emoji.emojize("Ответы и обсуждение :speech_balloon:"),
                                    callback_data=resp_or_disc_callback),
-    ]
-
-    keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(*buttons)
-
-    return keyboard
-
-
-def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int):
-    discussion_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="discussion")
-    response_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="response")
-
-    buttons = [
-        types.InlineKeyboardButton(text="Написать ответ", callback_data=response_callback),
-        types.InlineKeyboardButton(text="Перейти к обсуждению", callback_data=discussion_callback),
     ]
 
     keyboard = types.InlineKeyboardMarkup(row_width=2)
@@ -71,9 +54,20 @@ def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int):
     return keyboard
 
 
-def get_inline_kb():
-    keyboard = types.InlineKeyboardMarkup()
+def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int):
+    discussion_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="discussion")
+    response_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="response")
+    others_responses_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id,
+                                                       action="other_responses")
 
-    keyboard.add(types.InlineKeyboardButton(text="Click on me!", callback_data="click"))
+    buttons = [
+        types.InlineKeyboardButton(text="Ответы других пользователей", callback_data=others_responses_callback),
+        types.InlineKeyboardButton(text="Написать свой ответ", callback_data=response_callback),
+        types.InlineKeyboardButton(text="Перейти к обсуждению", callback_data=discussion_callback),
+    ]
+
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    keyboard.add(*buttons)
 
     return keyboard
+

@@ -19,7 +19,7 @@ question_detail_cb = CallbackData("problem", "problem_id", "user_id", "action")
 
 @dp.callback_query_handler(question_detail_cb.filter(action="discussion"))
 async def handle_discussion_action(call: types.CallbackQuery, callback_data: dict):
-    await call.message.answer("Функция еще недоступна :(.", reply_markup=kb.ReplyKeyboardRemove())
+    await call.message.answer("Функция еще недоступна :(", reply_markup=kb.ReplyKeyboardRemove())
     await call.answer()
 
 
