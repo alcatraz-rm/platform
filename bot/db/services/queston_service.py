@@ -60,7 +60,6 @@ def get_problem_by_id(q_id) -> typing.Optional[Problem]:
     return Problem.get_or_none(id=q_id)
 
 
-# TODO: wtf
 def assign_topic(problem: Problem, subject_name: str):
     subject = Subject.get_or_none(name=subject_name)
     predicate = (Problem.id == problem.id)
@@ -75,7 +74,7 @@ def assign_topic(problem: Problem, subject_name: str):
     problem_topics = [record.subject.name for record in query_topics]
 
     if subject_name not in problem_topics:
-        Interest.create(problem=problem, subject=subject)
+        Topic.create(problem=problem, subject=subject)
 
 
 def get_all_topics_for_problem(problem_id: int) -> dict:
