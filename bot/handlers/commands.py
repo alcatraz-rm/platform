@@ -105,6 +105,13 @@ async def handle_new(message: types.Message, state: FSMContext):
             await NewQuestionStates.waiting_for_anonymous_or_not_answer.set()
 
 
+@dp.message_handler(commands="detail", state="*")
+async def handle_detail_without_id(message: types.Message, state: FSMContext):
+    answer = "Укажи номер (id) вопроса, по которому хочешь получить информацию."
+    await message.answer(answer, reply_markup=kb.ReplyKeyboardRemove())
+    await QuestionDetailStates.waiting_for_problem_id.set()
+
+
 @dp.message_handler(lambda message: message.text.startswith("/detail"), state="*")
 async def handle_detail(message: types.Message, state: FSMContext):
     q_id = int(message.text.replace("/detail", ''))
@@ -165,7 +172,8 @@ async def send_help(message: types.Message):
     This handler will be called when user sends `/help` command
     """
 
-    await message.answer(constants.HELP_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
+    await message.answer(constants.HELP_MESSAGE, reply_markup=kb.ReplyKeyboardRemove(),
+                         parse_mode=types.ParseMode.MARKDOWN)
 
 
 @dp.message_handler(commands=['start'], state="*")
@@ -177,7 +185,7 @@ async def send_welcome(message: types.Message):
 
     if user is not None:
         await message.answer(constants.START_MET_MESSAGE.format(name=user.name), reply_markup=kb.ReplyKeyboardRemove())
-        await message.answer(constants.HELP_MESSAGE)
+        await message.answer(constants.HELP_MESSAGE, parse_mode=types.ParseMode.MARKDOWN)
     else:
         await message.answer(constants.ABOUT_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
         await handle_register(message)

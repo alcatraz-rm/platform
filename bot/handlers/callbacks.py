@@ -19,7 +19,7 @@ question_detail_cb = CallbackData("problem", "problem_id", "user_id", "action")
 
 @dp.callback_query_handler(question_detail_cb.filter(action="discussion"))
 async def handle_discussion_action(call: types.CallbackQuery, callback_data: dict):
-    await call.message.answer("Функция еще недоступна :(.", reply_markup=kb.ReplyKeyboardRemove())
+    await call.message.answer("Функция еще недоступна :(", reply_markup=kb.ReplyKeyboardRemove())
     await call.answer()
 
 
@@ -31,6 +31,7 @@ async def send_response_form(call: types.CallbackQuery, callback_data: dict, sta
     await call.message.answer("Напиши свой ответ в следующем сообщении.", reply_markup=kb.ReplyKeyboardRemove())
     await QuestionDetailStates.waiting_for_response.set()
     await state.update_data(problem_id=problem_id)
+    await call.answer()
 
 
 @dp.callback_query_handler(question_detail_cb.filter(action=["resp_or_disc"]),
@@ -106,3 +107,8 @@ async def handle_like(call: types.CallbackQuery, callback_data: dict):
         await call.message.edit_text(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
         await call.answer(constants.QUESTION_DETAIL_LIKED_ALERT, show_alert=True)
 
+
+@dp.callback_query_handler(question_detail_cb.filter(), state="*")
+async def handle_anything_else(call: types.CallbackQuery, callback_data: dict):
+    await call.message.answer(constants.QUESTION_DETAIL_CALLBACK_ERROR_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
+    await call.answer(constants.QUESTION_DETAIL_CALLBACK_ERROR_ALERT, show_alert=True)

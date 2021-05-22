@@ -7,7 +7,7 @@ from bot.config import dp, ADMINS_IDS
 from bot.constants import *
 from bot.db.services import account_service, queston_service
 from bot.db.services.queston_service import add_new_problem, assign_topic
-from bot.handlers.commands import send_welcome, handle_admin
+from bot.handlers.commands import send_welcome, handle_admin, handle_detail
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
     SettingsChangeStates, QuestionDetailStates
 from bot.utils import remove_non_service_data
@@ -18,20 +18,6 @@ from bot.utils import remove_non_service_data
         print(cs.split(':')[1])
 '''
 
-
-@dp.message_handler(state=QuestionDetailStates.waiting_for_response)
-async def handle_response_body(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    problem_id = data["problem_id"]
-    response_body = message.text
-    user_t_id = message.from_user.id
-    queston_service.add_new_response(problem_id=problem_id,
-                                     body=response_body,
-                                     user_t_id=user_t_id,
-                                     is_anonymous=False)
-    await state.set_data(remove_non_service_data(data))
-    # ???
-    await send_welcome(message)
 
 
 @dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_subject)
@@ -425,7 +411,34 @@ async def handle_report_message(message: types.Message, state: FSMContext):
     # TODO: ADD KB_MARKUP
     await state.set_data(remove_non_service_data(data))
     await message.answer(constants.QUESTION_DETAIL_REPORT_SUBMITTED, reply_markup=kb.ReplyKeyboardRemove())
-    await state.reset_state(with_data=False)
+    # await state.reset_state(with_data=False)
+    await QuestionDetailStates.waiting_for_choose_option.set()
+
+
+@dp.message_handler(state=QuestionDetailStates.waiting_for_problem_id)
+async def handle_detail_without_id(message: types.Message, state: FSMContext):
+    problem_id = message.text
+    problem_obj = queston_service.get_problem_by_id(problem_id)
+    if problem_obj is not None:
+        message.text = "/detail" + problem_id
+        await handle_detail(message, state)
+
+
+@dp.message_handler(state=QuestionDetailStates.waiting_for_response)
+async def handle_response_body(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    problem_id = data["problem_id"]
+    response_body = message.text
+    user_t_id = message.from_user.id
+    queston_service.add_new_response(problem_id=problem_id,
+                                     body=response_body,
+                                     user_t_id=user_t_id,
+                                     is_anonymous=False)
+
+    await message.answer(constants.QUESTION_DETAIL_RESPONSE_COMPLETE_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
+    await state.set_data(remove_non_service_data(data))
+    message.text = "/detail" + problem_id
+    await handle_detail(message, state)
 
 
 @dp.message_handler(state="*")
