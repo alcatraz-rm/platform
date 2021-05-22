@@ -58,38 +58,6 @@ async def handle_admin_add_science(message: types.Message, state: FSMContext):
         await handle_admin(message, state)
 
 
-@dp.message_handler(state=InterestsInputStates.waiting_for_subject)
-async def add_interests_subject(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    science_name = data['science_name']
-    subject_name = message.text
-    if queston_service.is_valid(queston_service.Subject, subject_name):
-        user_obj = account_service.get_user(t_id=message.from_user.id)
-        account_service.assign_interest(user_obj, subject_name)
-        await message.answer(constants.SETTINGS_ADD_FINISH_MESSAGE.format(interest=subject_name) +
-                             "\nДля выхода напишите /exit.",
-                             reply_markup=kb.get_science_list_km())
-        await InterestsInputStates.waiting_for_science.set()
-    else:
-        await message.answer("Ошибка! Такого предмета нет. Выбири из списка.",
-                             reply_markup=kb.get_subject_list_km(science=science_name))
-
-
-@dp.message_handler(state=InterestsInputStates.waiting_for_science)
-async def add_interests_science(message: types.Message, state: FSMContext):
-    science_name = message.text
-    if queston_service.is_valid(queston_service.Science, science_name):
-        await state.update_data(science_name=science_name)
-        await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name,
-                                                                            exclude_list=account_service
-                                                                            .get_all_interests_for_user(
-                                                                                message.from_user.id)))
-        await InterestsInputStates.waiting_for_subject.set()
-    else:
-        await message.answer("Ошибка! Такой науки нет. Выбири из списка.",
-                             reply_markup=kb.get_science_list_km())
-
-
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_degree_level)
 async def registration_complete(message: types.Message, state: FSMContext):
     telegram_data = message.from_user

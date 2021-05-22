@@ -161,3 +161,24 @@ def report_problem(problem_id: int, report_body, report_author_id: int):
                              author=author_obj,
                              report_message=report_body,
                              )
+
+
+def get_all_responses_for_problem(problem_id: int):
+    # responses = Response.select().join(Problem).where(Problem.id == problem_id)
+
+    return Response.select().join(Problem).where(Problem.id == problem_id)
+
+
+def get_response_by_id(response_id: int) -> typing.Optional[Response]:
+    return Response.get_or_none(id=response_id)
+
+
+def close_problem_via_response(response_id: int):
+    response_obj = Response.get_or_none(id=response_id)
+    if response_obj is not None:
+        problem_obj = response_obj.problem
+        problem_obj.is_closed = True
+        problem_obj.save()
+        response_obj.is_final = True
+        response_obj.save()
+        # TODO: SEND NOTIFICATION TO RESPONSE_AUTHOR

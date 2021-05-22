@@ -57,12 +57,6 @@ async def handle_admin(message: types.Message, state: FSMContext):
     await AdminPanelStates.waiting_for_command.set()
 
 
-@dp.message_handler(commands=["interests"], state="*")
-async def handle_interest(message: types.Message, state: FSMContext):
-    await message.answer("Выберите интересную вам науку.", reply_markup=kb.get_science_list_km())
-    await InterestsInputStates.waiting_for_science.set()
-
-
 @dp.message_handler(commands=["exit"], state=RegistrationProcessStates.all_states)
 async def handle_exit(message: types.Message, state: FSMContext):
     await message.answer(constants.REGISTRATION_CANCELED_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
@@ -136,6 +130,29 @@ async def handle_detail(message: types.Message, state: FSMContext):
         answer += "\n" + constants.QUESTION_DETAIL_LIKED_MESSAGE
     await message.answer(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
     await QuestionDetailStates.waiting_for_choose_option.set()
+
+
+@dp.message_handler(commands=["response"], state="*")
+async def handle_response_without_id(message: types.Message, state: FSMContext):
+    pass
+
+
+@dp.message_handler(lambda message: message.text.startswith("/response"), state="*")
+async def handle_response(message: types.Message, state: FSMContext):
+    r_id = int(message.text.replace("/response", ''))
+    response_obj = queston_service.get_response_by_id(r_id)
+    formatted_date = response_obj.created_at.strftime("%d %b %Y %H:%M:%S")
+    answer = constants.QUESTION_DETAIL_RESPONSE_MESSAGE.format(r_id=response_obj.id,
+                                                               r_author=response_obj.author.name,
+                                                               date=formatted_date,
+                                                               body=response_obj.body)
+    current_user_id = message.from_user.id
+    problem_author_id = response_obj.problem.user.t_id
+    reply_markup = inline_kb.get_response_detail_inline_kb(response_obj=response_obj,
+                                                           user_id=message.from_user.id,
+                                                           is_author=(current_user_id == problem_author_id))
+
+    await message.answer(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
 
 
 @dp.message_handler(commands=["register"], state="*")
