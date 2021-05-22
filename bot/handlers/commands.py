@@ -22,6 +22,7 @@ from bot.utils import remove_non_service_data, generate_topic_str
 # TODO: implement interactive report using inline buttons
 # TODO: speed up email validation
 # TODO: validate degree and department
+# TODO: fix loading department and degree from db in author info
 
 
 @dp.message_handler(user_id=ADMINS_IDS,
