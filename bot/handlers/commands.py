@@ -185,7 +185,7 @@ async def send_welcome(message: types.Message):
 
     if user is not None:
         await message.answer(constants.START_MET_MESSAGE.format(name=user.name), reply_markup=kb.ReplyKeyboardRemove())
-        await message.answer(constants.HELP_MESSAGE)
+        await message.answer(constants.HELP_MESSAGE, parse_mode=types.ParseMode.MARKDOWN)
     else:
         await message.answer(constants.ABOUT_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
         await handle_register(message)
