@@ -16,6 +16,9 @@ class NewQuestionStates(StatesGroup):
     waiting_for_new_topic_or_quit = State('topic_or_quit')
     waiting_for_anonymous_or_not_answer = State('anonymous')
 
+    waiting_for_science = State('science')
+    waiting_for_subject = State('subject')
+
 
 class InterestsInputStates(StatesGroup):
     waiting_for_science = State('science')

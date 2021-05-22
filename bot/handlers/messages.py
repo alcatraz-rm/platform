@@ -273,7 +273,8 @@ async def new_question_title(message: types.Message, state: FSMContext):
     problem_data = await state.get_data()
 
     type_ = problem_data.get('type')
-    await state.set_data({'title': message})
+    problem_data['title'] = message.text
+    await state.set_data(problem_data)
 
     answer = ''
     if type_ == 'question':
@@ -289,7 +290,9 @@ async def new_question_title(message: types.Message, state: FSMContext):
 async def new_question_body(message: types.Message, state: FSMContext):
     problem_data = await state.get_data()
     type_ = problem_data.get('type')
-    await state.set_data({'body': message.text})
+    problem_data['body'] = message.text
+
+    await state.set_data(problem_data)
 
     select_topics_message = ''
     select_science_message = ''
@@ -303,21 +306,22 @@ async def new_question_body(message: types.Message, state: FSMContext):
     await message.answer(select_topics_message)
     await message.answer(select_science_message, reply_markup=kb.get_science_list_km())
     
-    await InterestsInputStates.waiting_for_science.set()
+    await NewQuestionStates.waiting_for_science.set()
 
 
-@dp.message_handler(state=InterestsInputStates.waiting_for_science)
+@dp.message_handler(state=NewQuestionStates.waiting_for_science)
 async def new_question_science(message: types.Message, state: FSMContext):
     sciences = queston_service.get_all_sciences()
     current_science = message.text.strip()
 
     if current_science not in sciences:
-        pass
+        await message.answer('Такой науки нет! Выбери из списка', reply_markup=kb.get_subject_list_km(current_science))
 
     problem_data = await state.get_data()
     type_ = problem_data.get('type')
-    
-    await state.set_data({'current_science': current_science})
+
+    problem_data['current_science'] = current_science
+    await state.set_data(problem_data)
 
     answer = ''
     if type_ == 'question':
@@ -326,10 +330,10 @@ async def new_question_science(message: types.Message, state: FSMContext):
         answer = NEW_DISCUSSION_DISCIPLINE_MESSAGE
 
     await message.answer(answer, reply_markup=kb.get_subject_list_km(current_science))
-    await InterestsInputStates.waiting_for_subject.set()
+    await NewQuestionStates.waiting_for_subject.set()
 
 
-@dp.message_handler(state=InterestsInputStates.waiting_for_subject)
+@dp.message_handler(state=NewQuestionStates.waiting_for_subject)
 async def new_question_subject(message: types.Message, state: FSMContext):
     problem_data = await state.get_data()
     science = problem_data.get('current_science')
@@ -338,16 +342,17 @@ async def new_question_subject(message: types.Message, state: FSMContext):
     current_subject = message.text.strip()
 
     if current_subject not in subjects:
-        pass
+        await message.answer('Такого предмета нет! Выбери из списка', reply_markup=kb.get_subject_list_km(science))
 
     problem_data = await state.get_data()
     type_ = problem_data.get('type')
 
     if 'topics' in problem_data:
-        await state.update_data(topics=problem_data.get('topics') + [(science, current_subject)])
+        problem_data['topics'] += [(science, current_subject)]
     else:
-        await state.set_data({'topics': [(science, current_subject)]})
+        problem_data['topics'] = [(science, current_subject)]
 
+    await state.set_data(problem_data)
     await state.update_data(current_science=None)
 
     new_topic_message = ''
@@ -359,7 +364,7 @@ async def new_question_subject(message: types.Message, state: FSMContext):
         new_topic_message = NEW_DISCUSSION_THEME_SAVED_MESSAGE
         topics_limit = 5
 
-    if len(problem_data.get('topics') + 1) == topics_limit:
+    if len(problem_data.get('topics')) + 1 == topics_limit:
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
 

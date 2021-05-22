@@ -60,6 +60,7 @@ def get_problem_by_id(q_id) -> typing.Optional[Problem]:
     return Problem.get_or_none(id=q_id)
 
 
+# TODO: wtf
 def assign_topic(problem: Problem, subject_name: str):
     subject = Subject.get_or_none(name=subject_name)
     predicate = (Problem.id == problem.id)

@@ -172,7 +172,7 @@ QUESTION_DETAIL_REPORT_SUBMITTED = """Спасибо за жалобу. Мы р�
 \nДля перехода к ленте вопросов - /feed\nЕсли возникли проблемы - /help"""
 
 # departments aliases, TODO: add full list
-DEPARTMENT_ALIASES = {'Механико-математический факультет': 'mmf'}
+DEPARTMENT_ALIASES = {'Механико Математический Факультет': 'mmf', 'Гуманитарный Институт': 'gi'}
 
 # degrees aliases, TODO: add full list
-DEGREES_ALIASES = {'Бакалавриат': 'bachelor'}
+DEGREES_ALIASES = {'Бакалавр': 'bachelor', 'Магистр': 'master'}

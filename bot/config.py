@@ -18,7 +18,7 @@ DATABASE_HOST = os.getenv('DATABASE_HOST')
 DATABASE_NAME = os.getenv('DATABASE_NAME')
 
 # Cfg related constants
-ADMINS_IDS = [401961508, ]
+ADMINS_IDS = [401961508, 187289003]
 
 # Configure logging
 logging.basicConfig(format=u'%(filename)+13s [ LINE:%(lineno)-4s] %(levelname)-8s [%(asctime)s] %(message)s',

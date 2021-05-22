@@ -1,3 +1,7 @@
+import sys
+
+sys.path.append('..')
+
 from bot.config import dp, executor
 from aiogram import Dispatcher
 from bot.db import helper

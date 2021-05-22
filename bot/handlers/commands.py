@@ -85,7 +85,7 @@ async def handle_new(message: types.Message, state: FSMContext):
     type_ = problem_data.get('type')
     answer = ''
 
-    if command == 'add':
+    if command == '/add':
         if type_ == 'question':
             answer = NEW_QUESTION_DISCIPLINE_MESSAGE
         elif type_ == 'discussion':
@@ -94,7 +94,8 @@ async def handle_new(message: types.Message, state: FSMContext):
         await message.answer(answer, reply_markup=kb.get_science_list_km())
         await InterestsInputStates.waiting_for_science.set()
 
-    elif command == 'finish':
+    elif command == '/finish':
+        print('finish')
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
         elif type_ == 'question':

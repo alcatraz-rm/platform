@@ -37,8 +37,10 @@ def is_user_exist(t_id) -> bool:
 
 def get_user(t_id: int) -> Optional[UserModel]:
     user = UserModel.get_or_none(t_id=t_id)
-    user.department = {value: key for key, value in DEPARTMENT_ALIASES.items()}.get(user.department)
-    user.degree_level = {value: key for key, value in DEGREES_ALIASES.items()}.get(user.degree_level)
+
+    if user:
+        user.department = {value: key for key, value in DEPARTMENT_ALIASES.items()}.get(user.department)
+        user.degree_level = {value: key for key, value in DEGREES_ALIASES.items()}.get(user.degree_level)
 
     return user
 
