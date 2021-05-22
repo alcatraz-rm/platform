@@ -25,6 +25,8 @@ from bot.utils import remove_non_service_data, generate_topic_str
 # TODO: Change /exit from Add interest
 # TODO: fix loading department and degree from db in author info
 # TODO: add user id validating and alerting
+# TODO: handle anonymous question detail
+# TODO: resend keyboard markup if error occurred
 
 
 @dp.message_handler(user_id=ADMINS_IDS,
@@ -225,10 +227,16 @@ async def handle_register(message: types.Message):
 @dp.message_handler(commands=["me"], state="*")
 async def handle_me(message: types.Message):
     user = account_service.get_user(t_id=message.from_user.id)
-    if user is None:
-        await message.answer(constants.ME_MESSAGE + "/register")
+    if user is not None:
+        interest_str = ""
+        answer = constants.ME_MET_MESSAGE.format(name=user.name,
+                                                 email=user.email,
+                                                 interests=interest_str,
+                                                 department=user.department,
+                                                 degree_level=user.degree_level)
+        await message.answer(answer, reply_markup=kb.get_generic_km(['/register']))
     else:
-        await message.answer(constants.ME_MET_MESSAGE)
+        await message.answer(constants.ME_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
 
 
 @dp.message_handler(commands=["feed"], state="*")
