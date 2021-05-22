@@ -15,12 +15,12 @@ import emoji
 
 # user_id is telegram_id
 question_detail_cb = CallbackData("problem", "problem_id", "user_id", "action")
+response_detail_cb = CallbackData("response", "response_id", "user_id", "action")
 
 
 @dp.callback_query_handler(question_detail_cb.filter(action="discussion"))
 async def handle_discussion_action(call: types.CallbackQuery, callback_data: dict):
-    await call.message.answer("Функция еще недоступна :(", reply_markup=kb.ReplyKeyboardRemove())
-    await call.answer()
+    await call.answer("Функция еще недоступна :(", show_alert=True)
 
 
 @dp.callback_query_handler(question_detail_cb.filter(action=["response"]),
@@ -106,6 +106,38 @@ async def handle_like(call: types.CallbackQuery, callback_data: dict):
 
         await call.message.edit_text(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
         await call.answer(constants.QUESTION_DETAIL_LIKED_ALERT, show_alert=True)
+
+
+@dp.callback_query_handler(question_detail_cb.filter(action=["other_responses"]),
+                           state=QuestionDetailStates.response_or_discussion)
+async def handle_other_users_responses(call: types.CallbackQuery, callback_data: dict):
+    problem_id = callback_data["problem_id"]
+    responses = queston_service.get_all_responses_for_problem(problem_id=problem_id)
+    resp_temp = constants.QUESTION_DETAIL_RESPONSE_FEED_TEMPLATE
+    answer = "Ответы от пользователей:\n\n"
+    for res in responses:
+        sb = res.body[:32] if len(res.body) > 32 else res.body
+        formatted_date = res.created_at.strftime("%d %b %Y %H:%M:%S")
+
+        t = resp_temp.format(r_author=res.author.name,
+                             date=formatted_date,
+                             small_body=sb,
+                             p_id=res.id)
+        answer += t
+    await call.message.answer(answer, parse_mode=types.ParseMode.MARKDOWN)
+    await call.answer()
+
+
+@dp.callback_query_handler(response_detail_cb.filter(action="report"), state="*")
+async def handle_report_response(call: types.CallbackQuery, callback_data: dict):
+    await call.answer("Функция еще недоступна :(", show_alert=True)
+
+
+@dp.callback_query_handler(response_detail_cb.filter(action="solve"), state="*")
+async def resolve_problem(call: types.CallbackQuery, callback_data: dict):
+    response_id = callback_data["response_id"]
+    queston_service.close_problem_via_response(response_id)
+    await call.answer("Ты закрыл впорос.", show_alert=True)
 
 
 @dp.callback_query_handler(question_detail_cb.filter(), state="*")

@@ -167,6 +167,10 @@ QUESTION_DETAIL_CALLBACK_ERROR_ALERT = """Ошибка! Это действие 
 Выполните команду /detail%id%, где вместо %id% укажите id впороса, который вас интересует."""
 QUESTION_DETAIL_CALLBACK_ERROR_MESSAGE = """Для перехода к ленте вопросов - /feed\nЕсли возникли проблемы - /help"""
 QUESTION_DETAIL_RESPONSE_COMPLETE_MESSAGE = """Спасибо за ответ! Автор вопроса скоро получит уведомление."""
+QUESTION_DETAIL_RESPONSE_FEED_TEMPLATE = """*Ответ от пользователя {r_author} от {date}:*\n{small_body}...
+_Посмотреть подробности /response{p_id}._\n\n"""
+QUESTION_DETAIL_RESPONSE_MESSAGE = """*#{r_id} Ответ от пользователя {r_author} от {date}:*\n\n*Ответ:* {body}\n\n
+Для перехода к ленте вопросов - /feed\nЕсли возникли проблемы - /help"""
 
 # departments aliases, TODO: add full list
 DEPARTMENT_ALIASES = {'Механико Математический Факультет': 'mmf', 'Гуманитарный Институт': 'gi'}

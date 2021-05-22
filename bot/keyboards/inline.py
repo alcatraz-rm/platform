@@ -2,7 +2,7 @@ from aiogram import types
 from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
 from bot.constants import DEPARTMENT_OPTIONS, DEGREE_LEVEL_OPTIONS
 from bot.db.services.queston_service import *
-from bot.handlers.callbacks import question_detail_cb
+from bot.handlers.callbacks import question_detail_cb, response_detail_cb
 import emoji
 
 
@@ -21,16 +21,23 @@ def get_generic_inline_kb(keyboard_data: dict, row_widths: int = 1):
     return keyboard
 
 
-"""
-def get_response_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: bool = False):
-    
-    detail_callback = question_detail_cb.new(problem_id=problem_id, user_id=user_id, action="detail")
-    detail_button = types.InlineKeyboardButton(text="Подробнее", callback_data=detail_callback)
-    keyboard = types.InlineKeyboardMarkup()
-    keyboard.add(detail_button)
+def get_response_detail_inline_kb(response_obj: Response, user_id: int, is_author: bool = False):
+    response_id = response_obj.id
+
+    report_callback = response_detail_cb.new(response_id=response_id, user_id=user_id, action="report")
+
+    buttons = [
+        types.InlineKeyboardButton(text="Пожаловаться", callback_data=report_callback)
+    ]
+
+    if is_author:
+        solve_callback = response_detail_cb.new(response_id=response_id, user_id=user_id, action="solve")
+        buttons.append(types.InlineKeyboardButton(text="Помогло", callback_data=solve_callback))
+
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    keyboard.add(*buttons)
 
     return keyboard
-"""
 
 
 def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: bool = False):
