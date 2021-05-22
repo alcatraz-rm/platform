@@ -39,8 +39,8 @@ def get_user(t_id: int) -> Optional[UserModel]:
     user = UserModel.get_or_none(t_id=t_id)
 
     if user:
-        user.department = {value: key for key, value in DEPARTMENT_ALIASES.items()}.get(user.department)
-        user.degree_level = {value: key for key, value in DEGREES_ALIASES.items()}.get(user.degree_level)
+        user.department = {value: key for key, value in DEPARTMENT_ALIASES.items()}[user.department]
+        user.degree_level = {value: key for key, value in DEGREES_ALIASES.items()}[user.degree_level]
 
     return user
 
@@ -70,6 +70,7 @@ def remove_interest(user: UserModel, subject_name: str):
         raise DoesNotExist("Subject \"{}\" doesn't exist.".format(subject_name))
 
 
+# TODO: fix this (must return science as key and subjects LIST as value)
 def get_all_interests_for_user(user_id: int) -> dict:
     """
         Returns a dict of pairs {subject_name, science_name (linked to the subject)}.
@@ -86,11 +87,15 @@ def get_all_interests_for_user(user_id: int) -> dict:
     for record in query_interests:
         subjects[record.subject.name] = record.subject.science.name
 
-    return subjects
+    # TODO: fix this bullshit
+    return {value: key for key, value in subjects.items()}
 
 
 def alter_user_info(user: UserModel, name: str = None, email: str = None,
                     department: str = None, degree_level: str = None):
+    user.department = DEPARTMENT_ALIASES[user.department]
+    user.degree_level = DEGREES_ALIASES[user.degree_level]
+
     if name is not None:
         user.name = name
     if email is not None:

@@ -7,7 +7,7 @@ PROBLEM_TYPE_OPTIONS = [
 
 DEPARTMENT_OPTIONS = [
     ('nsu_mmf', 'Механико Математический Факультет'),
-    ('nsu_gi', 'Гуманитарный институт'),
+    ('nsu_gi', 'Гуманитарный Институт'),
 ]
 
 DEGREE_LEVEL_OPTIONS = [

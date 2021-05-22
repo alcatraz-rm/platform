@@ -1,17 +1,15 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
+import bot.keyboards.replay as kb
 from bot import constants
 from bot.config import dp, ADMINS_IDS
-
-from bot.db.services.queston_service import get_all_sciences, get_all_subjects, add_new_problem, assign_topic
+from bot.constants import *
+from bot.db.services import account_service, queston_service
+from bot.db.services.queston_service import add_new_problem, assign_topic
+from bot.handlers.commands import send_welcome, handle_admin
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
     SettingsChangeStates, QuestionDetailStates
-
-import bot.keyboards.replay as kb
-from bot.db.services import account_service, queston_service
-from bot.handlers.commands import send_welcome, handle_admin
-from bot.constants import *
 from bot.utils import remove_non_service_data
 
 '''
@@ -149,33 +147,34 @@ async def registration_name(message: types.Message, state: FSMContext):
                          reply_markup=kb.ReplyKeyboardRemove())
     await RegistrationProcessStates.next()
 
+
 # /settings process:
 
 @dp.message_handler(state=SettingsChangeStates.waiting_for_name)
-async def handle_settings_option(message:types.Message):
+async def handle_settings_option(message: types.Message):
     user = account_service.get_user(message.from_user.id)
     account_service.alter_user_info(user, name=message.text)
-    message.answer(SETTINGS_NAME_CHANGED_MESSAGE.format(name=message.text))
+    await message.answer(SETTINGS_NAME_CHANGED_MESSAGE.format(name=message.text))
     await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
-    SettingsChangeStates.waiting_for_option.set()
+    await SettingsChangeStates.waiting_for_option.set()
 
 
 @dp.message_handler(state=SettingsChangeStates.waiting_for_department)
-async def handle_settings_option(message:types.Message):
+async def handle_settings_option(message: types.Message):
     user = account_service.get_user(message.from_user.id)
     account_service.alter_user_info(user, department=message.text)
-    message.answer(SETTINGS_FACULTY_CHANGED_MESSAGE.format(faculty=message.text))
+    await message.answer(SETTINGS_FACULTY_CHANGED_MESSAGE.format(faculty=message.text))
     await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
-    SettingsChangeStates.waiting_for_option.set()
+    await SettingsChangeStates.waiting_for_option.set()
 
 
 @dp.message_handler(state=SettingsChangeStates.waiting_for_degree_level)
-async def handle_settings_option(message:types.Message):
+async def handle_settings_option(message: types.Message):
     user = account_service.get_user(message.from_user.id)
     account_service.alter_user_info(user, degree_level=message.text)
-    message.answer(SETTINGS_DEGREE_CHANGED_MESSAGE.format(degree=message.text))
+    await message.answer(SETTINGS_DEGREE_CHANGED_MESSAGE.format(degree=message.text))
     await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
-    SettingsChangeStates.waiting_for_option.set()
+    await SettingsChangeStates.waiting_for_option.set()
 
 
 @dp.message_handler(state=SettingsChangeStates.waiting_for_new_subject)
@@ -220,11 +219,11 @@ async def handle_deleting_interest(message: types.Message):
         account_service.remove_interest(user, science_subject[1])
         await message.answer(SETTINGS_DELETE_FINISH_MESSAGE.format(interest=message.text))
         await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
-        SettingsChangeStates.waiting_for_option.set()
+        await SettingsChangeStates.waiting_for_option.set()
     else:
         await message.answer("Такого интереса у вас нет!")
         await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
-        SettingsChangeStates.waiting_for_option.set()
+        await SettingsChangeStates.waiting_for_option.set()
 
 
 @dp.message_handler(state=SettingsChangeStates.waiting_for_option)
@@ -234,15 +233,16 @@ async def handle_settings_option(message: types.Message, state: FSMContext):
         await message.answer(SETTINGS_NAME_MESSAGE)
         await SettingsChangeStates.waiting_for_name.set()
     elif message.text == 'Department':
-        await message.answer(SETTINGS_FACULTY_MESSAGE)
+        await message.answer(SETTINGS_FACULTY_MESSAGE, reply_markup=kb.get_department_km())
         await SettingsChangeStates.waiting_for_department.set()
     elif message.text == 'Degree':
-        await message.answer(SETTINGS_DEGREE_MESSAGE)
+        await message.answer(SETTINGS_DEGREE_MESSAGE, reply_markup=kb.get_degree_km())
         await SettingsChangeStates.waiting_for_degree_level.set()
     elif message.text == 'Add interest':
-        await message.answer(SETTINGS_NAME_MESSAGE)
-        await state.set_data({})
-        await SettingsChangeStates.waiting_for_name.set()
+        await message.answer(SETTINGS_NAME_MESSAGE, reply_markup=kb.get_science_list_km())
+        data = await state.get_data()
+        await state.set_data(remove_non_service_data(data))
+        await SettingsChangeStates.waiting_for_new_science.set()
     elif message.text == 'Delete interest':
         await message.answer(SETTINGS_DELETE_MESSAGE, reply_markup=kb.get_interests_km(user_id))
         await SettingsChangeStates.waiting_for_del_interest.set()
@@ -305,7 +305,7 @@ async def new_question_body(message: types.Message, state: FSMContext):
 
     await message.answer(select_topics_message)
     await message.answer(select_science_message, reply_markup=kb.get_science_list_km())
-    
+
     await NewQuestionStates.waiting_for_science.set()
 
 

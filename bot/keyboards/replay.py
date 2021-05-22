@@ -5,7 +5,6 @@ import typing
 from bot.db.services import account_service
 
 
-
 def get_department_km():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 
@@ -106,8 +105,11 @@ def get_interests_km(user_id: int):
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     interests = account_service.get_all_interests_for_user(user_id)
     for science in interests:
-        for subject in interests[science]:
-            keyboard.add(science + '/' + subject)
+        if isinstance(interests[science], list):
+            for subject in interests[science]:
+                keyboard.add(science + '/' + subject)
+        else:
+            keyboard.add(science + '/' + interests[science])
 
     return keyboard
 
