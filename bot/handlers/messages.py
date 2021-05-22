@@ -325,7 +325,7 @@ async def new_question_subject(message: types.Message, state: FSMContext):
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
 
-            problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id)
+            problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_=type_)
 
             for topic in problem_data['topics']:
                 assign_topic(problem, topic[1])
@@ -362,7 +362,7 @@ async def handle_new_anonymous_question_answer(message: types.Message, state: FS
     await state.update_data(anonymous_question=anonymous_question)
 
     problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id,
-                              is_anonymous=anonymous_question)
+                              is_anonymous=anonymous_question, type_='question')
 
     for topic in problem_data['topics']:
         assign_topic(problem, topic[1])

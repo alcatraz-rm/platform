@@ -32,7 +32,7 @@ def get_all_subjects(science_name: str):
     return subjects
 
 
-def add_new_problem(title: str, body: str, user_t_id: int, is_anonymous: bool = False) -> Problem:
+def add_new_problem(title: str, body: str, user_t_id: int, type_, is_anonymous: bool = False) -> Problem:
     user = UserModel.get_or_none(t_id=user_t_id)
 
     new_problem = Problem.create(title=title,
@@ -40,6 +40,7 @@ def add_new_problem(title: str, body: str, user_t_id: int, is_anonymous: bool = 
                                  user=user,
                                  is_anonymous=is_anonymous,
                                  created_at=dt.now(),
+                                 type=type_
                                  )
 
     return new_problem

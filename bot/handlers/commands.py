@@ -24,6 +24,7 @@ from bot.utils import remove_non_service_data, generate_topic_str
 # TODO: validate degree and department
 # TODO: Change /exit from Add interest
 # TODO: fix loading department and degree from db in author info
+# TODO: add user id validating and alerting
 
 
 @dp.message_handler(user_id=ADMINS_IDS,
@@ -134,7 +135,7 @@ async def handle_add_or_finish(message: types.Message, state: FSMContext):
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
             # TODO: set type 'discussion'
-            problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id)
+            problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_=type_)
 
             for topic in problem_data['topics']:
                 assign_topic(problem, topic[1])
@@ -155,7 +156,12 @@ async def handle_detail_without_id(message: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda message: message.text.startswith("/detail"), state="*")
 async def handle_detail(message: types.Message, state: FSMContext):
-    q_id = int(message.text.replace("/detail", ''))
+    try:
+        q_id = int(message.text.replace("/detail", ''))
+    except ValueError:
+        await message.answer('Некорректный ID вопроса')
+        return
+
     problem_obj = queston_service.get_problem_by_id(q_id)
     if problem_obj is not None:
         is_liked = queston_service.is_problem_liked_by_user(problem_id=q_id, user_t_id=message.from_user.id)

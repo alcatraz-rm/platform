@@ -53,6 +53,8 @@ class Problem(BaseModel):
 
     is_anonymous = BooleanField(default=False)
 
+    type = CharField(choices=('question', 'discussion', ))
+
     class Meta:
         db_table = 'Problem'
 

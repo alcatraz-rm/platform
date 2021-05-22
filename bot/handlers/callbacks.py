@@ -1,17 +1,16 @@
-from aiogram import types, Bot, Dispatcher
+import emoji
+from aiogram import types
 from aiogram.dispatcher import FSMContext
-
-from bot import constants
-from bot.config import dp, ADMINS_IDS
-from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, QuestionDetailStates
-from bot.db.services import account_service, queston_service
-from bot.constants import *
-from bot.utils import remove_non_service_data
 from aiogram.utils.callback_data import CallbackData
+
 import bot.keyboards.inline as inline_kb
 import bot.keyboards.replay as kb
-from bot.utils import remove_non_service_data, generate_topic_str
-import emoji
+from bot import constants
+from bot.config import dp
+from bot.constants import *
+from bot.db.services import account_service, queston_service
+from bot.states import QuestionDetailStates
+from bot.utils import generate_topic_str
 
 # user_id is telegram_id
 question_detail_cb = CallbackData("problem", "problem_id", "user_id", "action")
@@ -59,8 +58,12 @@ async def send_author_info(call: types.CallbackQuery, callback_data: dict):
 
     answer = constants.QUESTION_DETAIL_AUTHOR_INFO.format(name=author.name,
                                                           interests=interests_str,
-                                                          department=DEPARTMENT_ALIASES[author.department],
-                                                          degree_level=DEGREES_ALIASES[author.degree_level])
+                                                          department=
+                                                          {value: key for key, value in DEPARTMENT_ALIASES.items()}[
+                                                              author.department],
+                                                          degree_level=
+                                                          {value: key for key, value in DEGREES_ALIASES.items()}[
+                                                              author.degree_level])
 
     await call.message.answer(emoji.emojize(answer),
                               reply_markup=kb.ReplyKeyboardRemove(),
