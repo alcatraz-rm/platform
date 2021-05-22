@@ -10,6 +10,9 @@ class Science(BaseModel):
     def __str__(self):
         return self.name
 
+    class Meta:
+        db_table = 'Science'
+
 
 class Subject(BaseModel):
     science = ForeignKeyField(Science)
@@ -18,6 +21,9 @@ class Subject(BaseModel):
 
     def __str__(self):
         return self.name + ' | ' + self.science.name
+
+    class Meta:
+        db_table = 'Subject'
 
 
 class UserModel(BaseModel):
