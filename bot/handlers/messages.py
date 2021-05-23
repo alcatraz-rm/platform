@@ -7,7 +7,7 @@ from bot.config import dp, ADMINS_IDS
 from bot.constants import *
 from bot.db.services import account_service, queston_service
 from bot.db.services.account_service import email_is_valid
-from bot.db.services.queston_service import add_new_problem, assign_topic
+from bot.db.services.queston_service import add_new_problem, assign_topic, department_is_valid, degree_is_valid
 from bot.handlers.commands import send_welcome, handle_admin, handle_detail
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
     SettingsChangeStates, QuestionDetailStates
@@ -98,27 +98,36 @@ async def registration_add_interests_science(message: types.Message, state: FSMC
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_degree_level)
 async def registration_complete(message: types.Message, state: FSMContext):
-    telegram_data = message.from_user
-    user_data = await state.get_data()
-    user_data['degree_level'] = message.text
-    account_service.add_new_user(t_id=telegram_data.id,
-                                 t_username=telegram_data.username,
-                                 name=user_data['name'],
-                                 email=user_data['email'],
-                                 department=user_data['department'],
-                                 degree_level=user_data['degree_level'],
-                                 )
-    await message.answer("Давай выберем интересы. Выбери хотя бы один интересный тебе предмет.\n"
-                         "Сначала выбери науку, потом предмет.", reply_markup=kb.get_science_list_km())
-    await RegistrationProcessStates.waiting_for_interests_science.set()
+  if degree_is_valid(message.text):
+      telegram_data = message.from_user
+      user_data = await state.get_data()
+      user_data['degree_level'] = message.text
+      account_service.add_new_user(t_id=telegram_data.id,
+                                   t_username=telegram_data.username,
+                                   name=user_data['name'],
+                                   email=user_data['email'],
+                                   department=user_data['department'],
+                                   degree_level=user_data['degree_level'],
+                                   )
+      await message.answer("Давай выберем интересы. Выбери хотя бы один интересный тебе предмет.\n"
+                           "Сначала выбери науку, потом предмет.", reply_markup=kb.get_science_list_km())
+      await RegistrationProcessStates.waiting_for_interests_science.set()
+
+    else:
+        await message.answer("У нас нет такой степени обучения! Выберите её из списка:",
+                             reply_markup=kb.get_degree_km())
 
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_department)
 async def registration_department(message: types.Message, state: FSMContext):
-    await state.update_data(department=message.text)
-    await message.answer("На каком ты уровне обучения?" + constants.REGISTRATION_EXIT_SENTENCES,
-                         reply_markup=kb.get_degree_km())
-    await RegistrationProcessStates.next()
+    if department_is_valid(message.text):
+        await state.update_data(department=message.text)
+        await message.answer("На каком ты уровне обучения?" + constants.REGISTRATION_EXIT_SENTENCES,
+                             reply_markup=kb.get_degree_km())
+        await RegistrationProcessStates.next()
+    else:
+        await message.answer("У нас нет такого факультета! Выберите его из списка:" + constants.REGISTRATION_EXIT_SENTENCES,
+                             reply_markup=kb.get_department_km())
 
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_email)
@@ -156,20 +165,26 @@ async def handle_settings_option(message: types.Message):
 @dp.message_handler(state=SettingsChangeStates.waiting_for_department)
 async def handle_settings_option(message: types.Message):
     user = account_service.get_user(message.from_user.id)
-    account_service.alter_user_info(user, department=message.text)
-    await message.answer(SETTINGS_FACULTY_CHANGED_MESSAGE.format(faculty=message.text))
-    await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
-    await SettingsChangeStates.waiting_for_option.set()
+    if department_is_valid(message.text):
+        account_service.alter_user_info(user, department=message.text)
+        await message.answer(SETTINGS_FACULTY_CHANGED_MESSAGE.format(faculty=message.text))
+        await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
+        await SettingsChangeStates.waiting_for_option.set()
+    else:
+        await message.answer("У нас нет такого факультета! Выберите его из списка:", reply_markup=kb.get_department_km())
+
 
 
 @dp.message_handler(state=SettingsChangeStates.waiting_for_degree_level)
 async def handle_settings_option(message: types.Message):
-    user = account_service.get_user(message.from_user.id)
-    account_service.alter_user_info(user, degree_level=message.text)
-    await message.answer(SETTINGS_DEGREE_CHANGED_MESSAGE.format(degree=message.text))
-    await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
-    await SettingsChangeStates.waiting_for_option.set()
-
+    if degree_is_valid(message.text):
+        user = account_service.get_user(message.from_user.id)
+        account_service.alter_user_info(user, degree_level=message.text)
+        await message.answer(SETTINGS_DEGREE_CHANGED_MESSAGE.format(degree=message.text))
+        await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
+        await SettingsChangeStates.waiting_for_option.set()
+    else:
+        await message.answer("У нас нет такой степени обучения! Выберите её из списка:", reply_markup=kb.get_degree_km())
 
 @dp.message_handler(state=SettingsChangeStates.waiting_for_new_subject)
 async def add_interests_subject(message: types.Message, state: FSMContext):

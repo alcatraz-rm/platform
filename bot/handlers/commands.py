@@ -1,18 +1,17 @@
-from aiogram import types, Bot, Dispatcher
+from aiogram import types
 from aiogram.dispatcher import FSMContext
 
+import bot.keyboards.inline as inline_kb
+import bot.keyboards.replay as kb
 from bot import constants
 from bot.config import dp, ADMINS_IDS
-from bot.db.services.queston_service import get_all_open_questions, add_new_problem, assign_topic
-
+from bot.constants import *
+from bot.db.services import account_service, queston_service
+from bot.db.services.queston_service import get_all_open_questions, add_new_problem, assign_topic, get_user_problems
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
     SettingsChangeStates, QuestionDetailStates
+from bot.utils import remove_non_service_data, generate_topic_str, generate_feed
 
-import bot.keyboards.replay as kb
-import bot.keyboards.inline as inline_kb
-from bot.db.services import account_service, queston_service
-from bot.constants import *
-from bot.utils import remove_non_service_data, generate_topic_str
 
 # TODO: logging to file
 # TODO: send message if someone answered your question, add user id validating and alerting
@@ -37,7 +36,6 @@ async def handle_admin_add_interest(message: types.Message, state: FSMContext):
 
 @dp.message_handler(user_id=ADMINS_IDS, commands=["add"], state=AdminPanelStates.waiting_for_command)
 async def handle_admin_add(message: types.Message, state: FSMContext):
-
     await message.answer("Что добавить? /science, /subject.", reply_markup=kb.ReplyKeyboardRemove())
 
 
@@ -70,7 +68,6 @@ async def handle_new_exit(message: types.Message, state: FSMContext):
 
 @dp.message_handler(user_id=ADMINS_IDS, commands=["exit"], state=AdminPanelStates.all_states)
 async def handle_admin_exit(message: types.Message, state: FSMContext):
-
     await message.answer("Выход из админки.", reply_markup=kb.ReplyKeyboardRemove())
     await state.reset_state(with_data=False)
 
@@ -81,6 +78,13 @@ async def handle_admin_exit(message: types.Message, state: FSMContext):
 async def handle_admin(message: types.Message, state: FSMContext):
     await message.answer("Админ команды: /add, /exit.", reply_markup=kb.ReplyKeyboardRemove())
     await AdminPanelStates.waiting_for_command.set()
+
+
+@dp.message_handler(commands=["exit"], state=SettingsChangeStates.waiting_for_new_subject)
+async def handle_exit(message: types.Message, state: FSMContext):
+    await message.answer("Йоу, бро, нахуй предметы.", reply_markup=kb.ReplyKeyboardRemove())
+    await state.set_data(remove_non_service_data(await state.get_data()))
+    await SettingsChangeStates.waiting_for_new_science.set()
 
 
 @dp.message_handler(commands=["exit"], state=SettingsChangeStates.all_states)
@@ -128,7 +132,6 @@ async def handle_add_or_finish(message: types.Message, state: FSMContext):
     elif command == '/finish':
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
-            # TODO: set type 'discussion'
             problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_=type_)
 
             for topic in problem_data['topics']:
@@ -159,9 +162,12 @@ async def handle_detail(message: types.Message, state: FSMContext):
     problem_obj = queston_service.get_problem_by_id(q_id)
     if problem_obj is not None:
         is_liked = queston_service.is_problem_liked_by_user(problem_id=q_id, user_t_id=message.from_user.id)
+        is_closed = problem_obj.is_closed
+
         reply_markup = inline_kb.get_question_detail_inline_kb(problem_obj, message.from_user.id, is_liked=is_liked)
         topics_str = generate_topic_str(queston_service.get_all_topics_for_problem(q_id))
         author_name = problem_obj.user.name if not problem_obj.is_anonymous else "Anonymous"
+
         answer = constants.QUESTION_DETAIL_MESSAGE.format(id=problem_obj.id,
                                                           title=problem_obj.title,
                                                           author_name=author_name,
@@ -169,6 +175,10 @@ async def handle_detail(message: types.Message, state: FSMContext):
                                                           topics=topics_str)
         if is_liked:
             answer += "\n" + constants.QUESTION_DETAIL_LIKED_MESSAGE
+
+        if is_closed:
+            answer += '\nВопрос закрыт автором и доступен только для чтения.'
+
         await message.answer(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
         await QuestionDetailStates.waiting_for_choose_option.set()
     else:
@@ -245,12 +255,7 @@ async def handle_me(message: types.Message):
 async def handle_feed(message: types.Message):
     questions = get_all_open_questions()
 
-    questions_str = ''
-
-    for question in questions:
-        questions_str += f'{question.id} {question.title}\n'
-
-    await message.answer(questions_str)
+    await message.answer(generate_feed(questions), parse_mode=types.ParseMode.MARKDOWN)
 
 
 @dp.message_handler(commands=["about"], state="*")
@@ -295,3 +300,10 @@ async def handle_settings(message: types.Message):
     else:
         await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
         await SettingsChangeStates.waiting_for_option.set()
+
+
+@dp.message_handler(commands=["my_questions"], state="*")
+async def handle_my_questions(message: types.Message):
+    questions = get_user_problems(message.from_user.id)
+
+    await message.answer(generate_feed(questions), parse_mode=types.ParseMode.MARKDOWN)
