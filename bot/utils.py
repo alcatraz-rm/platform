@@ -22,9 +22,10 @@ def remove_non_service_data(data: dict):
 
 def generate_topic_str(topics: dict, sep="::") -> str:
     topics_str = ""
-    for t in topics.keys():
-        tag = topics[t] + sep + t + "; "
-        topics_str += tag
+    for science in topics.keys():
+        for t in topics[science]:
+            tag = science + sep + t + "; "
+            topics_str += tag
 
     return topics_str
 

@@ -59,6 +59,7 @@ async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_d
 
     await call.message.answer(message,
                               reply_markup=inline_kb.get_resp_or_disc_inline_kb(problem_obj, user_id))
+    
     await call.answer()
 
     await QuestionDetailStates.response_or_discussion.set()

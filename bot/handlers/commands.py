@@ -250,10 +250,9 @@ async def handle_register(message: types.Message):
 async def handle_me(message: types.Message):
     user = account_service.get_user(t_id=message.from_user.id)
     if user is not None:
-        # TODO: fix this (interests getting)
         interests = account_service.get_all_interests_for_user(message.from_user.id)
 
-        interest_str = ""
+        interest_str = generate_topic_str(interests)
 
         answer = constants.ME_MET_MESSAGE.format(name=user.name,
                                                  email=user.email,
@@ -315,6 +314,16 @@ async def send_welcome(message: types.Message):
         await message.answer(constants.ABOUT_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
         await message.answer('Чтобы начать пользоваться, зарегистрируйся с помощью /register')
         # await handle_register(message)
+
+
+@dp.message_handler(commands=["finish"], state=SettingsChangeStates.waiting_for_new_science)
+async def handle_finish(message: types, state: FSMContext):
+    answer = "Изменения интересо сохранены!"
+    reply_markup = kb.get_settings_option_km()
+    await message.answer(answer, reply_markup=reply_markup)
+    await SettingsChangeStates.waiting_for_option.set()
+    await state.set_data(remove_non_service_data(await state.get_data()))
+    await handle_settings(message, state)
 
 
 @dp.message_handler(commands=["settings"], state="*")

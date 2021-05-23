@@ -45,7 +45,6 @@ def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: 
     author_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="author_info")
     resp_or_disc_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="resp_or_disc")
     report_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="send_report_keys")
-
     buttons = [
         types.InlineKeyboardButton(text=emoji.emojize("Отписаться :cross_mark:" if is_liked else "Отслеживать :eyes:",
                                                       use_aliases=True), callback_data=like_callback),
@@ -55,14 +54,13 @@ def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: 
                                    callback_data=resp_or_disc_callback),
     ]
 
-    keyboard = types.InlineKeyboardMarkup(row_width=2)
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(*buttons)
 
     return keyboard
 
 
-def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int):
-    discussion_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="discussion")
+def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int, url: str):
     response_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="response")
     others_responses_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id,
                                                        action="other_responses")
@@ -75,8 +73,9 @@ def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int):
         buttons = [
             types.InlineKeyboardButton(text="Ответы других пользователей", callback_data=others_responses_callback),
             types.InlineKeyboardButton(text="Написать свой ответ", callback_data=response_callback),
-            types.InlineKeyboardButton(text="Перейти к обсуждению", callback_data=discussion_callback),
+            types.InlineKeyboardButton(text="Перейти к обсуждению", url=url),
         ]
+
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(*buttons)
