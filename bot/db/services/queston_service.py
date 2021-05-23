@@ -63,6 +63,10 @@ def assign_topic(problem: Problem, subject_name: str):
 
     problem_topics = get_all_topics_for_problem(problem_id=problem.id)
 
+    if subject.science.name not in problem_topics:
+        Topic.create(problem=problem, subject=subject)
+        return
+
     if subject_name not in problem_topics.get(subject):
         Topic.create(problem=problem, subject=subject)
 

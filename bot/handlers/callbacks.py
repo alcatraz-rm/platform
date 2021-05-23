@@ -19,11 +19,6 @@ response_detail_cb = CallbackData("response", "response_id", "user_id", "action"
 report_cb = CallbackData("report", "problem_id", "user_id", "reason")
 
 
-@dp.callback_query_handler(question_detail_cb.filter(action="discussion"))
-async def handle_discussion_action(call: types.CallbackQuery, callback_data: dict):
-    await call.answer("Функция еще недоступна :(", show_alert=True)
-
-
 @dp.callback_query_handler(question_detail_cb.filter(action=["response"]),
                            state=QuestionDetailStates.response_or_discussion)
 async def send_response_form(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
@@ -51,14 +46,14 @@ async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_d
     user_id = callback_data["user_id"]
     problem_id = callback_data["problem_id"]
     problem_obj = queston_service.get_problem_by_id(problem_id)
-
+    url = None
     if problem_obj.type == 'question':
         message = "Обсудить или ответить?"
     else:
         message = 'С помощью кнопки "Перейти к обсуждению" ты можешь присоединиться к телеграм-чату, посвященному этому проблеме'
-
+        url = problem_obj.invite_link
     await call.message.answer(message,
-                              reply_markup=inline_kb.get_resp_or_disc_inline_kb(problem_obj, user_id))
+                              reply_markup=inline_kb.get_resp_or_disc_inline_kb(problem_obj, user_id, url))
     
     await call.answer()
 
