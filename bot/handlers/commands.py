@@ -1,18 +1,17 @@
-from aiogram import types, Bot, Dispatcher
+from aiogram import types
 from aiogram.dispatcher import FSMContext
 
+import bot.keyboards.inline as inline_kb
+import bot.keyboards.replay as kb
 from bot import constants
 from bot.config import dp, ADMINS_IDS
+from bot.constants import *
+from bot.db.services import account_service, queston_service
 from bot.db.services.queston_service import get_all_open_questions, add_new_problem, assign_topic
-
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
     SettingsChangeStates, QuestionDetailStates
-
-import bot.keyboards.replay as kb
-import bot.keyboards.inline as inline_kb
-from bot.db.services import account_service, queston_service
-from bot.constants import *
 from bot.utils import remove_non_service_data, generate_topic_str
+
 
 # TODO: add /exit to /new, /settings
 # TODO: logging to file
@@ -44,7 +43,6 @@ async def handle_admin_add_interest(message: types.Message, state: FSMContext):
 
 @dp.message_handler(user_id=ADMINS_IDS, commands=["add"], state=AdminPanelStates.waiting_for_command)
 async def handle_admin_add(message: types.Message, state: FSMContext):
-
     await message.answer("Что добавить? /science, /subject.", reply_markup=kb.ReplyKeyboardRemove())
 
 
@@ -77,7 +75,6 @@ async def handle_new_exit(message: types.Message, state: FSMContext):
 
 @dp.message_handler(user_id=ADMINS_IDS, commands=["exit"], state=AdminPanelStates.all_states)
 async def handle_admin_exit(message: types.Message, state: FSMContext):
-
     await message.answer("Выход из админки.", reply_markup=kb.ReplyKeyboardRemove())
     await state.reset_state(with_data=False)
 
@@ -250,11 +247,21 @@ async def handle_feed(message: types.Message):
     questions = get_all_open_questions()
 
     questions_str = ''
+    question_info_template = '*Заголовок:* {title}\n' \
+                             '*ID:* {problem_id}\n' \
+                             '*Статус:* {is_open}\n' \
+                             '*Подробнее:* /detail{problem_id}\n' \
+                             '*Темы:* {topics}'
 
     for question in questions:
-        questions_str += f'{question.id} {question.title}\n'
+        questions_str += '\n\n' + question_info_template.format(title=question.title,
+                                                                problem_id=question.id,
+                                                                is_open='Закрыт' if question.is_closed else 'Открыт',
+                                                                topics=generate_topic_str(
+                                                                    queston_service.get_all_topics_for_problem(
+                                                                        question.id)))
 
-    await message.answer(questions_str)
+    await message.answer(questions_str, parse_mode=types.ParseMode.MARKDOWN)
 
 
 @dp.message_handler(commands=["about"], state="*")
