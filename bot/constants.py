@@ -180,7 +180,7 @@ DISCUSSION_DETAIL_MESSAGE = """*#{id} {title}*\n\n*Автор:* {author_name}\n\
 Для перехода к ленте вопросов - /feed\nЕсли возникли проблемы - /help"""
 
 QUESTION_DETAIL_LIKED_MESSAGE = """_Ты отслеживаешь этот вопрос._"""
-QUESTION_DETAIL_LIKED_ALERT = "Ты поставили лайк. Теперь ты отслеживаешь этот вопрос"
+QUESTION_DETAIL_LIKED_ALERT = "Теперь ты отслеживаешь этот вопрос"
 QUESTION_DETAIL_DISLIKED_ALERT = "Ты убрал лайк. Ты больше не отслеживаешь этот вопрос"
 QUESTION_DETAIL_AUTHOR_INFO = """*Информация об авторе:*
 :white_small_square:*Имя:* {name}
