@@ -80,14 +80,6 @@ async def handle_admin(message: types.Message, state: FSMContext):
     await AdminPanelStates.waiting_for_command.set()
 
 
-@dp.message_handler(commands=["exit"], state=SettingsChangeStates.waiting_for_new_subject)
-async def handle_exit(message: types.Message, state: FSMContext):
-    # TODO: warning
-    await message.answer("Йоу, бро, нахуй предметы.", reply_markup=kb.ReplyKeyboardRemove())
-    await state.set_data(remove_non_service_data(await state.get_data()))
-    await SettingsChangeStates.waiting_for_new_science.set()
-
-
 @dp.message_handler(commands=["exit"], state=SettingsChangeStates.all_states)
 async def handle_exit(message: types.Message, state: FSMContext):
     await message.answer("Настройки сохранены", reply_markup=kb.ReplyKeyboardRemove())
