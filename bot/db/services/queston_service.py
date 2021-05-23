@@ -4,6 +4,9 @@ from bot.db.models import Subject, Science, Problem, Response, Topic, Interest, 
 from bot.constants import *
 import typing
 from bot.constants import REPORT_REASONS_ALIASES
+from bot.config import bot as bot_instance
+from bot.utils import make_broadcast
+from aiogram import types
 
 
 def add_new_science(name: str):
@@ -46,18 +49,6 @@ def add_new_problem(title: str, body: str, user_t_id: int, type_, is_anonymous: 
                                  )
 
     return new_problem
-
-
-def add_new_response(problem_id: int, body: str, user_t_id: int, is_anonymous: bool):
-    user = UserModel.get_or_none(t_id=user_t_id)
-    problem_obj = Problem.get_or_none(id=problem_id)
-
-    Response.create(problem=problem_obj,
-                    body=body,
-                    author=user,
-                    created_at=dt.now(),
-                    is_anonymous=is_anonymous,
-                    )
 
 
 def get_problem_by_id(q_id) -> typing.Optional[Problem]:
@@ -107,6 +98,7 @@ def get_all_topics_for_problem(problem_id: int) -> dict:
 
     return topics
 
+
 # We need to put these check-validity functions into one
 def is_valid(Clazz: Science.__class__, name: str) -> bool:
     """
@@ -120,7 +112,7 @@ def is_valid(Clazz: Science.__class__, name: str) -> bool:
 
 def department_is_valid(name: str) -> bool:
     for department in DEPARTMENT_OPTIONS:
-        if name ==department[1]:
+        if name == department[1]:
             return True
     return False
 
@@ -151,6 +143,29 @@ def is_problem_liked_by_user(problem_id: int, user_t_id: int) -> bool:
     if user_t_id in liked_by_users:
         return True
     return False
+
+
+async def add_new_response(problem_id: int, body: str, user_t_id: int, is_anonymous: bool):
+    user = UserModel.get_or_none(t_id=user_t_id)
+    problem_obj = Problem.get_or_none(id=problem_id)
+
+    resp = Response.create(problem=problem_obj,
+                           body=body,
+                           author=user,
+                           created_at=dt.now(),
+                           is_anonymous=is_anonymous,
+                           )
+    chat_id = problem_obj.user.t_id
+    mes = QUESTION_DETAIL_UPDATE_NOTIFICATION_FOR_AUTHOR.format(title=problem_obj.title,
+                                                                problem_id=problem_id,
+                                                                response_id=resp.id)
+    await bot_instance.send_message(chat_id=chat_id, text=mes, parse_mode=types.ParseMode.MARKDOWN)
+    tracker_list = get_list_of_users_who_liked(problem_id)
+    broadcast_message = QUESTION_DETAIL_UPDATE_NOTIFICATION.format(title=problem_obj.title,
+                                                                   problem_id=problem_id,
+                                                                   response_id=resp.id)
+
+    await make_broadcast(broadcast_message, tracker_list)
 
 
 def like_problem(problem_id: int, user_t_id: int):
@@ -191,7 +206,6 @@ def get_list_of_users_who_reported_problem(problem_id: int):
 
 
 def is_problem_reported_by_user(problem_id: int, user_id: int):
-
     return user_id in get_list_of_users_who_reported_problem(problem_id)
 
 
@@ -223,7 +237,7 @@ def get_response_by_id(response_id: int) -> typing.Optional[Response]:
     return Response.get_or_none(id=response_id)
 
 
-def close_problem_via_response(response_id: int):
+async def close_problem_via_response(response_id: int):
     response_obj = Response.get_or_none(id=response_id)
     if response_obj is not None:
         problem_obj = response_obj.problem
@@ -231,4 +245,10 @@ def close_problem_via_response(response_id: int):
         problem_obj.save()
         response_obj.is_final = True
         response_obj.save()
-        # TODO: SEND NOTIFICATION TO RESPONSE_AUTHOR
+        # sending notification
+        r_author = response_obj.author
+        mes = QUESTION_DETAIL_CLOSED_NOTIFICATION_MESSAGE.format(problem_id=problem_obj.id,
+                                                                 title=problem_obj.title,
+                                                                 response_id=response_id)
+
+        await bot_instance.send_message(chat_id=r_author.t_id, text=mes, parse_mode=types.ParseMode.MARKDOWN)

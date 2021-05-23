@@ -19,6 +19,7 @@ from bot.utils import remove_non_service_data
         print(cs.split(':')[1])
 '''
 
+
 # /admin
 
 
@@ -99,19 +100,19 @@ async def registration_add_interests_science(message: types.Message, state: FSMC
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_degree_level)
 async def registration_complete(message: types.Message, state: FSMContext):
     if degree_is_valid(message.text):
-      telegram_data = message.from_user
-      user_data = await state.get_data()
-      user_data['degree_level'] = message.text
-      account_service.add_new_user(t_id=telegram_data.id,
-                                   t_username=telegram_data.username,
-                                   name=user_data['name'],
-                                   email=user_data['email'],
-                                   department=user_data['department'],
-                                   degree_level=user_data['degree_level'],
-                                   )
-      await message.answer("Давай выберем интересы. Выбери хотя бы один интересный тебе предмет.\n"
-                           "Сначала выбери науку, потом предмет.", reply_markup=kb.get_science_list_km())
-      await RegistrationProcessStates.waiting_for_interests_science.set()
+        telegram_data = message.from_user
+        user_data = await state.get_data()
+        user_data['degree_level'] = message.text
+        account_service.add_new_user(t_id=telegram_data.id,
+                                     t_username=telegram_data.username,
+                                     name=user_data['name'],
+                                     email=user_data['email'],
+                                     department=user_data['department'],
+                                     degree_level=user_data['degree_level'],
+                                     )
+        await message.answer("Давай выберем интересы. Выбери хотя бы один интересный тебе предмет.\n"
+                             "Сначала выбери науку, потом предмет.", reply_markup=kb.get_science_list_km())
+        await RegistrationProcessStates.waiting_for_interests_science.set()
 
     else:
         await message.answer("У нас нет такой степени обучения! Выберите её из списка:",
@@ -126,8 +127,9 @@ async def registration_department(message: types.Message, state: FSMContext):
                              reply_markup=kb.get_degree_km())
         await RegistrationProcessStates.next()
     else:
-        await message.answer("У нас нет такого факультета! Выберите его из списка:" + constants.REGISTRATION_EXIT_SENTENCES,
-                             reply_markup=kb.get_department_km())
+        await message.answer(
+            "У нас нет такого факультета! Выберите его из списка:" + constants.REGISTRATION_EXIT_SENTENCES,
+            reply_markup=kb.get_department_km())
 
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_email)
@@ -171,8 +173,8 @@ async def handle_settings_option(message: types.Message):
         await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
         await SettingsChangeStates.waiting_for_option.set()
     else:
-        await message.answer("У нас нет такого факультета! Выберите его из списка:", reply_markup=kb.get_department_km())
-
+        await message.answer("У нас нет такого факультета! Выберите его из списка:",
+                             reply_markup=kb.get_department_km())
 
 
 @dp.message_handler(state=SettingsChangeStates.waiting_for_degree_level)
@@ -184,7 +186,9 @@ async def handle_settings_option(message: types.Message):
         await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
         await SettingsChangeStates.waiting_for_option.set()
     else:
-        await message.answer("У нас нет такой степени обучения! Выберите её из списка:", reply_markup=kb.get_degree_km())
+        await message.answer("У нас нет такой степени обучения! Выберите её из списка:",
+                             reply_markup=kb.get_degree_km())
+
 
 @dp.message_handler(state=SettingsChangeStates.waiting_for_new_subject)
 async def add_interests_subject(message: types.Message, state: FSMContext):
@@ -427,19 +431,6 @@ async def handle_new_anonymous_question_answer(message: types.Message, state: FS
 
 
 # Question detail
-@dp.message_handler(state=QuestionDetailStates.waiting_for_report)
-async def handle_report_message(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    author = message.from_user.id
-    problem_id = data.get("problem_id")
-    report_body = message.text
-    queston_service.report_problem(problem_id=problem_id, report_body=report_body, report_author_id=author)
-    # TODO: ADD KB_MARKUP
-    await state.set_data(remove_non_service_data(data))
-    await message.answer(constants.QUESTION_DETAIL_REPORT_SUBMITTED, reply_markup=kb.ReplyKeyboardRemove())
-    # await state.reset_state(with_data=False)
-    await QuestionDetailStates.waiting_for_choose_option.set()
-
 
 @dp.message_handler(state=QuestionDetailStates.waiting_for_problem_id)
 async def handle_detail_without_id(message: types.Message, state: FSMContext):
@@ -455,12 +446,13 @@ async def handle_response_body(message: types.Message, state: FSMContext):
     problem_id = data["problem_id"]
     response_body = message.text
     user_t_id = message.from_user.id
-    queston_service.add_new_response(problem_id=problem_id,
-                                     body=response_body,
-                                     user_t_id=user_t_id,
-                                     is_anonymous=False)
+    await queston_service.add_new_response(problem_id=problem_id,
+                                           body=response_body,
+                                           user_t_id=user_t_id,
+                                           is_anonymous=False)
 
     await message.answer(constants.QUESTION_DETAIL_RESPONSE_COMPLETE_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
+
     await state.set_data(remove_non_service_data(data))
     message.text = "/detail" + problem_id
     await handle_detail(message, state)
