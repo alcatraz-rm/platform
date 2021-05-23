@@ -97,7 +97,10 @@ def get_all_topics_for_problem(problem_id: int) -> dict:
 
     topics = {}
     for record in query_topics:
-        topics[record.subject.name] = record.subject.science.name
+        if topics.__contains__(record.subject.science.name):
+            topics[record.subject.science.name].append(record.subject.name)
+        else:
+            topics[record.subject.science.name] = [record.subject.name]
 
     return topics
 

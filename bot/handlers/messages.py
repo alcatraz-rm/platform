@@ -88,10 +88,7 @@ async def registration_add_interests_science(message: types.Message, state: FSMC
 
     if queston_service.is_valid(queston_service.Science, science_name):
         await state.update_data(science_name=science_name)
-        await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name,
-                                                                            exclude_list=account_service
-                                                                            .get_all_interests_for_user(
-                                                                                message.from_user.id)))
+        await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name))
         await RegistrationProcessStates.waiting_for_interests_subject.set()
     else:
         await message.answer("Ошибка! Такой науки нет. Выберите науку из списка",
@@ -212,10 +209,7 @@ async def add_interests_science(message: types.Message, state: FSMContext):
     science_name = message.text
     if queston_service.is_valid(queston_service.Science, science_name):
         await state.update_data(science_name=science_name)
-        await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name,
-                                                                            exclude_list=account_service
-                                                                            .get_all_interests_for_user(
-                                                                                message.from_user.id)))
+        await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name))
         await SettingsChangeStates.waiting_for_new_subject.set()
     else:
         await message.answer("Ошибка! Такой науки нет. Выбери из списка",

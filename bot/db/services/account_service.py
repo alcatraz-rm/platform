@@ -89,10 +89,12 @@ def get_all_interests_for_user(user_id: int) -> dict:
                         ))
     subjects = {}
     for record in query_interests:
-        subjects[record.subject.name] = record.subject.science.name
+        if subjects.__contains__(record.subject.science.name):
+            subjects[record.subject.science.name].append(record.subject.name)
+        else:
+            subjects[record.subject.science.name] = [record.subject.name]
 
-    # TODO: fix this bullshit
-    return {value: key for key, value in subjects.items()}
+    return subjects
 
 
 def alter_user_info(user: UserModel, name: str = None, email: str = None,

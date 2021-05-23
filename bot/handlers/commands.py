@@ -250,10 +250,9 @@ async def handle_register(message: types.Message):
 async def handle_me(message: types.Message):
     user = account_service.get_user(t_id=message.from_user.id)
     if user is not None:
-        # TODO: fix this (interests getting)
         interests = account_service.get_all_interests_for_user(message.from_user.id)
 
-        interest_str = ""
+        interest_str = generate_topic_str(interests)
 
         answer = constants.ME_MET_MESSAGE.format(name=user.name,
                                                  email=user.email,

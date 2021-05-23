@@ -79,13 +79,10 @@ def get_science_list_km(finish=True):
     return keyboard
 
 
-def get_subject_list_km(science: str, finish: bool = True, exclude_list: typing.Optional[dict] = None):
+def get_subject_list_km(science: str, finish: bool = True):
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 
     subject_list = get_all_subjects(science_name=science)
-
-    if exclude_list is not None:
-        subject_list = list(set(subject_list) - set(exclude_list.values()))
 
     for subject in subject_list:
         keyboard.add(subject)
