@@ -61,7 +61,7 @@ class Problem(BaseModel):
 
     type = CharField(choices=('question', 'discussion', ))
 
-    invite_link = CharField(default=None)
+    invite_link = CharField(default=None, null=True)
 
     class Meta:
         db_table = 'Problem'

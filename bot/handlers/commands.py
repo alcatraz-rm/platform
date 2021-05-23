@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
@@ -9,7 +7,7 @@ from bot import constants
 from bot.config import dp, ADMINS_IDS, bot
 from bot.constants import *
 from bot.db.services import account_service, queston_service
-from bot.db.services.queston_service import get_all_open_questions, get_user_problems, add_new_problem, assign_topic
+from bot.db.services.queston_service import get_user_problems, add_new_problem, assign_topic
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
     SettingsChangeStates, QuestionDetailStates, FeedStates
 from bot.utils import remove_non_service_data, generate_topic_str, generate_feed
@@ -29,10 +27,10 @@ from bot.utils import remove_non_service_data, generate_topic_str, generate_feed
 async def handle_admin_add_interest(message: types.Message, state: FSMContext):
     command = message.text
     if command == '/science':
-        await message.answer("Напишите название науки.", reply_markup=kb.ReplyKeyboardRemove())
+        await message.answer("Напишите название науки", reply_markup=kb.ReplyKeyboardRemove())
         await AdminPanelStates.waiting_for_science.set()
     elif command == '/subject':
-        await message.answer("Напишите название предмета.", reply_markup=kb.ReplyKeyboardRemove())
+        await message.answer("Напишите название предмета", reply_markup=kb.ReplyKeyboardRemove())
         await AdminPanelStates.waiting_for_subject.set()
 
 
@@ -84,6 +82,7 @@ async def handle_admin(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=["exit"], state=SettingsChangeStates.waiting_for_new_subject)
 async def handle_exit(message: types.Message, state: FSMContext):
+    # TODO: warning
     await message.answer("Йоу, бро, нахуй предметы.", reply_markup=kb.ReplyKeyboardRemove())
     await state.set_data(remove_non_service_data(await state.get_data()))
     await SettingsChangeStates.waiting_for_new_science.set()
@@ -135,20 +134,11 @@ async def handle_add_or_finish(message: types.Message, state: FSMContext):
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
 
-            code = uuid4()
-
-            # TODO: waiting for char here
             await message.answer(
                 "Последний этап создания обсуждения - создание чата. Пожалуйста, создай группу в телеграме и добавь туда меня."
                 "Убедись, что у меня есть возможность приглашать других участников.")
-            await state.update_data(verification_code=code)
             await NewQuestionStates.waiting_for_creating_chat.set()
             return
-
-            # problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_=type_)
-            #
-            # for topic in problem_data['topics']:
-            #     assign_topic(problem, topic[1])
 
         elif type_ == 'question':
             await message.answer(NEW_QUESTION_THEME_FINISH_MESSAGE)
@@ -159,6 +149,10 @@ async def handle_add_or_finish(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands="detail", state="*")
 async def handle_detail_without_id(message: types.Message, state: FSMContext):
+    if not account_service.is_user_exist(message.from_user.id):
+        await message.answer('Чтобы просматривать вопросы, зарегистрируйтесь с помощью /register')
+        return
+
     answer = "Укажи номер (id) вопроса, по которому хочешь получить информацию."
     await message.answer(answer, reply_markup=kb.ReplyKeyboardRemove())
     await QuestionDetailStates.waiting_for_problem_id.set()
@@ -166,6 +160,10 @@ async def handle_detail_without_id(message: types.Message, state: FSMContext):
 
 @dp.message_handler(lambda message: message.text.startswith("/detail"), state="*")
 async def handle_detail(message: types.Message, state: FSMContext):
+    if not account_service.is_user_exist(message.from_user.id):
+        await message.answer('Чтобы просматривать вопросы, зарегистрируйтесь с помощью /register')
+        return
+
     try:
         q_id = int(message.text.replace("/detail", ''))
     except ValueError:
@@ -242,10 +240,9 @@ async def handle_register(message: types.Message):
     if account_service.is_user_exist(t_id=message.from_user.id):
         await message.answer(constants.REGISTRATION_SKIP_MESSAGE)
     else:
-        await message.answer(constants.REGISTRATION_START_MESSAGE)
-        await message.answer(constants.REGISTRATION_REGISTER_NECESSARY_ONE_MESSAGE +
-                             constants.REGISTRATION_EXIT_SENTENCES,
-                             reply_markup=kb.ReplyKeyboardRemove())
+        # await message.answer(constants.REGISTRATION_START_MESSAGE)
+        await message.answer(constants.REGISTRATION_REGISTER_NECESSARY_ONE_MESSAGE,
+                             reply_markup=kb.get_exit_km())
         await RegistrationProcessStates.waiting_for_name.set()
 
 
@@ -253,21 +250,36 @@ async def handle_register(message: types.Message):
 async def handle_me(message: types.Message):
     user = account_service.get_user(t_id=message.from_user.id)
     if user is not None:
+        # TODO: fix this (interests getting)
+        interests = account_service.get_all_interests_for_user(message.from_user.id)
+
         interest_str = ""
+
         answer = constants.ME_MET_MESSAGE.format(name=user.name,
                                                  email=user.email,
                                                  interests=interest_str,
                                                  department=user.department,
                                                  degree_level=user.degree_level)
-        await message.answer(answer, reply_markup=kb.get_generic_km(['/register']))
+        await message.answer(answer)
     else:
         await message.answer(constants.ME_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
 
 
 @dp.message_handler(commands=["feed"], state="*")
 async def handle_feed(message: types.Message):
+    if not account_service.is_user_exist(message.from_user.id):
+        await message.answer('Чтобы просматривать вопросы, зарегистрируйтесь с помощью /register')
+        return
+
     await message.answer("Какие проблемы вас интересуют?", reply_markup=kb.problem_type_km())
     await FeedStates.waiting_for_choose_type.set()
+
+
+@dp.message_handler(commands=["exit"], state=FeedStates.all_states)
+async def handle_exit(message: types.Message, state: FSMContext):
+    await state.reset_state(with_data=False)
+    await state.set_data(remove_non_service_data(await state.get_data()))
+    await message.answer('Действие отменено', reply_markup=kb.ReplyKeyboardRemove())
 
 
 @dp.message_handler(commands=["about"], state="*")
@@ -301,13 +313,13 @@ async def send_welcome(message: types.Message):
         await message.answer(constants.HELP_MESSAGE, parse_mode=types.ParseMode.MARKDOWN)
     else:
         await message.answer(constants.ABOUT_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
-        await handle_register(message)
+        await message.answer('Чтобы начать пользоваться, зарегистрируйся с помощью /register')
+        # await handle_register(message)
 
 
 @dp.message_handler(commands=["settings"], state="*")
 async def handle_settings(message: types.Message):
-    user = account_service.is_user_exist(t_id=message.from_user.id)
-    if user is None:
+    if not account_service.is_user_exist(message.from_user.id):
         await message.answer(constants.SETTINGS_UNREGISTERED_MESSAGE)
     else:
         await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
@@ -316,13 +328,23 @@ async def handle_settings(message: types.Message):
 
 @dp.message_handler(commands=["my_questions"], state="*")
 async def handle_my_questions(message: types.Message):
+    if not account_service.is_user_exist(message.from_user.id):
+        await message.answer(
+            'У вас пока нет вопросов или обсуждений. Чтобы их создавать, зарегистрируйтесь с помощью /register')
+        return
+
     questions = get_user_problems(message.from_user.id)
+
+    if not questions:
+        await message.answer(
+            'У вас пока нет вопросов или обсуждений. Чтобы их создать, используйте /new')
+        return
 
     await message.answer(generate_feed(questions), parse_mode=types.ParseMode.MARKDOWN)
 
 
 @dp.message_handler(state=NewQuestionStates.waiting_for_admin)
-async def handle_admin(message: types.Message, state: FSMContext):
+async def handle_bot_chat_admin(message: types.Message, state: FSMContext):
     problem_data = await state.get_data()
 
     if message.text == 'Готово':

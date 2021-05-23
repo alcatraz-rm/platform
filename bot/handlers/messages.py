@@ -1,15 +1,14 @@
-from uuid import uuid4
-
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 import bot.keyboards.replay as kb
 from bot import constants
-from bot.config import dp, ADMINS_IDS, bot
+from bot.config import dp, ADMINS_IDS
 from bot.constants import *
 from bot.db.services import account_service, queston_service
 from bot.db.services.account_service import email_is_valid
-from bot.db.services.queston_service import add_new_problem, assign_topic, department_is_valid, degree_is_valid, get_all_open_questions
+from bot.db.services.queston_service import add_new_problem, assign_topic, department_is_valid, degree_is_valid, \
+    get_all_open_questions
 from bot.handlers.commands import send_welcome, handle_admin, handle_detail
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, SettingsChangeStates, \
     QuestionDetailStates, FeedStates
@@ -21,6 +20,7 @@ from bot.utils import remove_non_service_data, generate_feed
         print(cs.split(':')[1])
 '''
 
+
 # /admin
 
 
@@ -29,7 +29,7 @@ async def handle_admin_add_subject(message: types.Message, state: FSMContext):
     subject = message.text
     # go to science selection and save subject here
     await state.update_data(subject=subject)
-    await message.answer("Выберите науку из списка.", reply_markup=kb.get_science_list_km())
+    await message.answer("Выберите науку из списка", reply_markup=kb.get_science_list_km(finish=False))
     await state.set_state(AdminPanelStates.waiting_for_science)
 
 
@@ -59,7 +59,7 @@ async def handle_admin_add_science(message: types.Message, state: FSMContext):
         queston_service.add_new_science(name=science)
         await message.answer("Наука \"{}\" добавлена.".format(science), reply_markup=kb.ReplyKeyboardRemove())
         await state.set_data(remove_non_service_data(data))
-        await state.set_state(AdminPanelStates.waiting_for_command)
+        await state.set_state(state=AdminPanelStates.waiting_for_command)
         await handle_admin(message, state)
 
 
@@ -74,11 +74,11 @@ async def registration_add_interests_subject(message: types.Message, state: FSMC
         user_obj = account_service.get_user(t_id=message.from_user.id)
         account_service.assign_interest(user_obj, subject_name)
         await message.answer(constants.SETTINGS_ADD_FINISH_MESSAGE.format(interest=subject_name) +
-                             "\nДля завершения выбора интересов напишите /finish.",
+                             "\nДля завершения выбора интересов напишите /finish",
                              reply_markup=kb.get_science_list_km())
         await RegistrationProcessStates.waiting_for_interests_science.set()
     else:
-        await message.answer("Ошибка! Такого предмета нет. Выбири из списка.",
+        await message.answer("Ошибка! Такого предмета нет. Выберите предмет из списка",
                              reply_markup=kb.get_subject_list_km(science=science_name))
 
 
@@ -94,29 +94,30 @@ async def registration_add_interests_science(message: types.Message, state: FSMC
                                                                                 message.from_user.id)))
         await RegistrationProcessStates.waiting_for_interests_subject.set()
     else:
-        await message.answer("Ошибка! Такой науки нет. Выбири из списка.",
+        await message.answer("Ошибка! Такой науки нет. Выберите науку из списка",
                              reply_markup=kb.get_science_list_km())
 
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_degree_level)
 async def registration_complete(message: types.Message, state: FSMContext):
     if degree_is_valid(message.text):
-      telegram_data = message.from_user
-      user_data = await state.get_data()
-      user_data['degree_level'] = message.text
-      account_service.add_new_user(t_id=telegram_data.id,
-                                   t_username=telegram_data.username,
-                                   name=user_data['name'],
-                                   email=user_data['email'],
-                                   department=user_data['department'],
-                                   degree_level=user_data['degree_level'],
-                                   )
-      await message.answer("Давай выберем интересы. Выбери хотя бы один интересный тебе предмет.\n"
-                           "Сначала выбери науку, потом предмет.", reply_markup=kb.get_science_list_km())
-      await RegistrationProcessStates.waiting_for_interests_science.set()
+        telegram_data = message.from_user
+        user_data = await state.get_data()
+        user_data['degree_level'] = message.text
+        account_service.add_new_user(t_id=telegram_data.id,
+                                     t_username=telegram_data.username,
+                                     name=user_data['name'],
+                                     email=user_data['email'],
+                                     department=user_data['department'],
+                                     degree_level=user_data['degree_level'],
+                                     )
+
+        await message.answer("Что вам интересно? Сначала выберите науку, а затем предмет",
+                             reply_markup=kb.get_science_list_km())
+        await RegistrationProcessStates.waiting_for_interests_science.set()
 
     else:
-        await message.answer("У нас нет такой степени обучения! Выберите её из списка:",
+        await message.answer("У нас нет такой степени обучения! Выберите степень обучения из списка ",
                              reply_markup=kb.get_degree_km())
 
 
@@ -124,21 +125,22 @@ async def registration_complete(message: types.Message, state: FSMContext):
 async def registration_department(message: types.Message, state: FSMContext):
     if department_is_valid(message.text):
         await state.update_data(department=message.text)
-        await message.answer("На каком ты уровне обучения?" + constants.REGISTRATION_EXIT_SENTENCES,
+        await message.answer("На каком вы уровне обучения?",
                              reply_markup=kb.get_degree_km())
         await RegistrationProcessStates.next()
     else:
-        await message.answer("У нас нет такого факультета! Выберите его из списка:" + constants.REGISTRATION_EXIT_SENTENCES,
-                             reply_markup=kb.get_department_km())
+        await message.answer(
+            "У нас нет такого факультета! Выберите факультет из списка",
+            reply_markup=kb.get_department_km())
 
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_email)
 async def registration_email(message: types.Message, state: FSMContext):
     if not email_is_valid(message.text):
-        await message.answer("Используй корректный адрес электронной почты НГУ")
+        await message.answer("Используйте корректный адрес электронной почты НГУ")
         return
 
-    answer = "Выбери свой факультет." + constants.REGISTRATION_EXIT_SENTENCES
+    answer = "Выберите свой факультет"
 
     await message.answer(answer, reply_markup=kb.get_department_km())
     await state.update_data(email=message.text)
@@ -148,8 +150,8 @@ async def registration_email(message: types.Message, state: FSMContext):
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_name)
 async def registration_name(message: types.Message, state: FSMContext):
     await state.set_data({'name': message.text, })
-    await message.answer("Твой адрес эл. почты (только для лохов из НГУ)." + constants.REGISTRATION_EXIT_SENTENCES,
-                         reply_markup=kb.ReplyKeyboardRemove())
+    await message.answer("Введите корректный адрес эл. почты НГУ",
+                         reply_markup=kb.get_exit_km())
     await RegistrationProcessStates.next()
 
 
@@ -173,8 +175,8 @@ async def handle_settings_option(message: types.Message):
         await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
         await SettingsChangeStates.waiting_for_option.set()
     else:
-        await message.answer("У нас нет такого факультета! Выберите его из списка:", reply_markup=kb.get_department_km())
-
+        await message.answer("У нас нет такого факультета! Выберите его из списка:",
+                             reply_markup=kb.get_department_km())
 
 
 @dp.message_handler(state=SettingsChangeStates.waiting_for_degree_level)
@@ -186,7 +188,9 @@ async def handle_settings_option(message: types.Message):
         await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
         await SettingsChangeStates.waiting_for_option.set()
     else:
-        await message.answer("У нас нет такой степени обучения! Выберите её из списка:", reply_markup=kb.get_degree_km())
+        await message.answer("У нас нет такой степени обучения! Выберите её из списка:",
+                             reply_markup=kb.get_degree_km())
+
 
 @dp.message_handler(state=SettingsChangeStates.waiting_for_new_subject)
 async def add_interests_subject(message: types.Message, state: FSMContext):
@@ -197,11 +201,11 @@ async def add_interests_subject(message: types.Message, state: FSMContext):
         user_obj = account_service.get_user(t_id=message.from_user.id)
         account_service.assign_interest(user_obj, subject_name)
         await message.answer(constants.SETTINGS_ADD_FINISH_MESSAGE.format(interest=subject_name) +
-                             "\nДля выхода напишите /exit.",
+                             "\nДля выхода напишите /exit",
                              reply_markup=kb.get_science_list_km())
         await SettingsChangeStates.waiting_for_new_science.set()
     else:
-        await message.answer("Ошибка! Такого предмета нет. Выбири из списка.",
+        await message.answer("Ошибка! Такого предмета нет. Выбири из списка",
                              reply_markup=kb.get_subject_list_km(science=science_name))
 
 
@@ -216,7 +220,7 @@ async def add_interests_science(message: types.Message, state: FSMContext):
                                                                                 message.from_user.id)))
         await SettingsChangeStates.waiting_for_new_subject.set()
     else:
-        await message.answer("Ошибка! Такой науки нет. Выбири из списка.",
+        await message.answer("Ошибка! Такой науки нет. Выбери из списка",
                              reply_markup=kb.get_science_list_km())
 
 
@@ -315,7 +319,7 @@ async def new_question_body(message: types.Message, state: FSMContext):
         select_science_message = NEW_DISCUSSION_SCIENCE_MESSAGE
 
     await message.answer(select_topics_message)
-    await message.answer(select_science_message, reply_markup=kb.get_science_list_km())
+    await message.answer(select_science_message, reply_markup=kb.get_science_list_km(finish=False))
 
     await NewQuestionStates.waiting_for_science.set()
 
@@ -326,7 +330,7 @@ async def new_question_science(message: types.Message, state: FSMContext):
     current_science = message.text.strip()
 
     if current_science not in sciences:
-        await message.answer('Такой науки нет! Выбери из списка', reply_markup=kb.get_science_list_km())
+        await message.answer('Такой науки нет! Выбери из списка', reply_markup=kb.get_science_list_km(finish=False))
         return
 
     problem_data = await state.get_data()
@@ -341,7 +345,7 @@ async def new_question_science(message: types.Message, state: FSMContext):
     elif type_ == 'discussion':
         answer = NEW_DISCUSSION_DISCIPLINE_MESSAGE
 
-    await message.answer(answer, reply_markup=kb.get_subject_list_km(current_science))
+    await message.answer(answer, reply_markup=kb.get_subject_list_km(current_science, finish=False))
     await NewQuestionStates.waiting_for_subject.set()
 
 
@@ -354,7 +358,8 @@ async def new_question_subject(message: types.Message, state: FSMContext):
     current_subject = message.text.strip()
 
     if current_subject not in subjects:
-        await message.answer('Такого предмета нет! Выбери из списка', reply_markup=kb.get_subject_list_km(science))
+        await message.answer('Такого предмета нет! Выбери из списка',
+                             reply_markup=kb.get_subject_list_km(science, finish=False))
         return
 
     problem_data = await state.get_data()
@@ -388,15 +393,6 @@ async def new_question_subject(message: types.Message, state: FSMContext):
             await NewQuestionStates.waiting_for_creating_chat.set()
             return
 
-            # problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_=type_)
-            #
-            # for topic in problem_data['topics']:
-            #     assign_topic(problem, topic[1])
-            #
-            # await message.answer(NEW_DISCUSSION_END_MESSAGE.format(id=problem.get_id()))
-            # await state.set_data(remove_non_service_data(problem_data))
-            # await state.reset_state(with_data=False)
-
         elif type_ == 'question':
             await message.answer(NEW_QUESTION_THEME_FINISH_MESSAGE)
             await message.answer(NEW_QUESTION_ANON_MESSAGE, reply_markup=kb.get_yes_no_km())
@@ -407,27 +403,6 @@ async def new_question_subject(message: types.Message, state: FSMContext):
 
     await message.answer(new_topic_message, reply_markup=kb.get_add_finish_exit_km())
     await NewQuestionStates.waiting_for_new_topic_or_quit.set()
-
-
-# @dp.message_handler(state=NewQuestionStates.waiting_for_creating_chat)
-# async def handle_creating_chat(message: types.Message, state: FSMContext):
-#     problem_data = await state.get_data()
-#     code = problem_data.get('verification_code')
-#
-#     from_chat = message.chat.id
-#     invite_link = message.chat.invite_link
-#
-#     if from_chat != message.from_user.id and message.text == code:
-#         problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_='discussion', invite_link=invite_link)
-#
-#         for topic in problem_data['topics']:
-#             assign_topic(problem, topic[1])
-#
-#         await message.answer(NEW_DISCUSSION_END_MESSAGE.format(id=problem.get_id()))
-#         await state.set_data(remove_non_service_data(problem_data))
-#         await state.reset_state(with_data=False)
-#
-#         await bot.send_message(message.from_user.id, 'Обсуждение сохранено.')
 
 
 @dp.message_handler(state=NewQuestionStates.waiting_for_anonymous_or_not_answer)
@@ -502,20 +477,38 @@ async def handle_problem_type(message: types.Message):
     if message.text == 'Вопросы':
         problems = list()
         for problem in get_all_open_questions():
-            if problem.type == 'Question':
+            if problem.type == 'question':
                 problems.append(problem)
+
+        if not problems:
+            await message.answer('Кажется, тут пока ничего нет. Задай вопрос или создай обсуждение с помощью /new')
+            return
+
         await message.answer(generate_feed(problems), parse_mode=types.ParseMode.MARKDOWN)
+
     elif message.text == 'Обсуждения':
         problems = list()
         for problem in get_all_open_questions():
-            if problem.type == 'Request':
+            if problem.type == 'discussion':
                 problems.append(problem)
+
+        if not problems:
+            await message.answer('Кажется, тут пока ничего нет. Задай вопрос или создай обсуждение с помощью /new')
+            return
+
         await message.answer(generate_feed(problems), parse_mode=types.ParseMode.MARKDOWN)
+
     elif message.text == 'Показать всё':
         problems = get_all_open_questions()
+
+        if not problems:
+            await message.answer('Кажется, тут пока ничего нет. Задай вопрос или создай обсуждение с помощью /new')
+            return
+
         await message.answer(generate_feed(problems), parse_mode=types.ParseMode.MARKDOWN)
     else:
         await message.answer("Некорректно выбран тип проблемы.", reply_markup=kb.problem_type_km())
+
 
 @dp.message_handler(state="*")
 async def handle_any_other_message(message: types.Message, state: FSMContext):

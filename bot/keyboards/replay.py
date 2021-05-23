@@ -11,6 +11,8 @@ def get_department_km():
     for dep in DEPARTMENT_OPTIONS:
         keyboard.add(dep[1])
 
+    keyboard.add('/exit')
+
     return keyboard
 
 
@@ -19,6 +21,8 @@ def get_degree_km():
 
     for dep in DEGREE_LEVEL_OPTIONS:
         keyboard.add(dep[1])
+
+    keyboard.add('/exit')
 
     return keyboard
 
@@ -60,7 +64,7 @@ def get_yes_no_km():
     return keyboard
 
 
-def get_science_list_km():
+def get_science_list_km(finish=True):
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 
     science_list = get_all_sciences()
@@ -68,12 +72,14 @@ def get_science_list_km():
     for science in science_list:
         keyboard.add(science)
 
-    keyboard.add('/finish')
+    if finish:
+        keyboard.add('/finish')
+    keyboard.add('/exit')
 
     return keyboard
 
 
-def get_subject_list_km(science: str, exclude_list: typing.Optional[dict] = None):
+def get_subject_list_km(science: str, finish: bool = True, exclude_list: typing.Optional[dict] = None):
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
 
     subject_list = get_all_subjects(science_name=science)
@@ -84,7 +90,9 @@ def get_subject_list_km(science: str, exclude_list: typing.Optional[dict] = None
     for subject in subject_list:
         keyboard.add(subject)
 
-    keyboard.add('/finish')
+    if finish:
+        keyboard.add('/finish')
+    keyboard.add('/exit')
 
     return keyboard
 
