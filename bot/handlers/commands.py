@@ -323,7 +323,7 @@ async def handle_finish(message: types, state: FSMContext):
     await message.answer(answer, reply_markup=reply_markup)
     await SettingsChangeStates.waiting_for_option.set()
     await state.set_data(remove_non_service_data(await state.get_data()))
-    await handle_settings(message, state)
+    await handle_settings(message)
 
 
 @dp.message_handler(commands=["settings"], state="*")

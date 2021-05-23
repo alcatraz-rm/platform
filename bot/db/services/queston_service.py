@@ -60,18 +60,10 @@ def get_problem_by_id(q_id) -> typing.Optional[Problem]:
 
 def assign_topic(problem: Problem, subject_name: str):
     subject = Subject.get_or_none(name=subject_name)
-    predicate = (Problem.id == problem.id)
 
-    query_topics = (Topic
-                    .select(Topic, Problem, Subject)
-                    .join(Problem, on=(Topic.problem == Problem.id))
-                    .switch(Topic)
-                    .join(Subject, on=(Topic.subject == Subject.id))
-                    .where(predicate)
-                    )
-    problem_topics = [record.subject.name for record in query_topics]
+    problem_topics = get_all_topics_for_problem(problem_id=problem.id)
 
-    if subject_name not in problem_topics:
+    if subject_name not in problem_topics.get(subject):
         Topic.create(problem=problem, subject=subject)
 
 
