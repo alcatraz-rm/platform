@@ -19,6 +19,8 @@ from bot.utils import remove_non_service_data
         print(cs.split(':')[1])
 '''
 
+# /admin
+
 
 @dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_subject)
 async def handle_admin_add_subject(message: types.Message, state: FSMContext):
@@ -33,7 +35,7 @@ async def handle_admin_add_subject(message: types.Message, state: FSMContext):
 async def handle_admin_add_science(message: types.Message, state: FSMContext):
     science = message.text
     data = await state.get_data()
-
+    # TODO: MAKE MESSAGE TEMPLATES  FOR ADMIN PANEL
     subject = data.get('subject')
     if subject is not None:
         # checking if its from handle_admin_add_subject
@@ -59,6 +61,41 @@ async def handle_admin_add_science(message: types.Message, state: FSMContext):
         await handle_admin(message, state)
 
 
+# /register
+
+@dp.message_handler(state=RegistrationProcessStates.waiting_for_interests_subject)
+async def registration_add_interests_subject(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    science_name = data['science_name']
+    subject_name = message.text
+    if queston_service.is_valid(queston_service.Subject, subject_name):
+        user_obj = account_service.get_user(t_id=message.from_user.id)
+        account_service.assign_interest(user_obj, subject_name)
+        await message.answer(constants.SETTINGS_ADD_FINISH_MESSAGE.format(interest=subject_name) +
+                             "\nДля завершения выбора интересов напишите /finish.",
+                             reply_markup=kb.get_science_list_km())
+        await RegistrationProcessStates.waiting_for_interests_science.set()
+    else:
+        await message.answer("Ошибка! Такого предмета нет. Выбири из списка.",
+                             reply_markup=kb.get_subject_list_km(science=science_name))
+
+
+@dp.message_handler(state=RegistrationProcessStates.waiting_for_interests_science)
+async def registration_add_interests_science(message: types.Message, state: FSMContext):
+    science_name = message.text
+
+    if queston_service.is_valid(queston_service.Science, science_name):
+        await state.update_data(science_name=science_name)
+        await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name,
+                                                                            exclude_list=account_service
+                                                                            .get_all_interests_for_user(
+                                                                                message.from_user.id)))
+        await RegistrationProcessStates.waiting_for_interests_subject.set()
+    else:
+        await message.answer("Ошибка! Такой науки нет. Выбири из списка.",
+                             reply_markup=kb.get_science_list_km())
+
+
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_degree_level)
 async def registration_complete(message: types.Message, state: FSMContext):
     telegram_data = message.from_user
@@ -71,9 +108,9 @@ async def registration_complete(message: types.Message, state: FSMContext):
                                  department=user_data['department'],
                                  degree_level=user_data['degree_level'],
                                  )
-    await message.answer("Регистрация прошла успешно! Добро пожаловать!", reply_markup=kb.ReplyKeyboardRemove())
-    await state.finish()
-    await send_welcome(message)
+    await message.answer("Давай выберем интересы. Выбери хотя бы один интересный тебе предмет.\n"
+                         "Сначала выбери науку, потом предмет.", reply_markup=kb.get_science_list_km())
+    await RegistrationProcessStates.waiting_for_interests_science.set()
 
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_department)
@@ -90,10 +127,10 @@ async def registration_email(message: types.Message, state: FSMContext):
         await message.answer("Используй корректный адрес электронной почты НГУ")
         return
 
-    await state.update_data(email=message.text)
+    answer = "Выбери свой факультет." + constants.REGISTRATION_EXIT_SENTENCES
 
-    await message.answer("С какого ты факультета?" + constants.REGISTRATION_EXIT_SENTENCES,
-                         reply_markup=kb.get_department_km())
+    await message.answer(answer, reply_markup=kb.get_department_km())
+    await state.update_data(email=message.text)
     await RegistrationProcessStates.next()
 
 

@@ -68,7 +68,7 @@ def get_science_list_km():
     for science in science_list:
         keyboard.add(science)
 
-    keyboard.add('/exit')
+    keyboard.add('/finish')
 
     return keyboard
 
@@ -79,12 +79,12 @@ def get_subject_list_km(science: str, exclude_list: typing.Optional[dict] = None
     subject_list = get_all_subjects(science_name=science)
 
     if exclude_list is not None:
-        subject_list = list(set(subject_list) - set(exclude_list.keys()))
+        subject_list = list(set(subject_list) - set(exclude_list.values()))
 
     for subject in subject_list:
         keyboard.add(subject)
 
-    keyboard.add('/exit')
+    keyboard.add('/finish')
 
     return keyboard
 

@@ -18,16 +18,8 @@ from bot.utils import remove_non_service_data, generate_topic_str
 # TODO: send message if someone answered your question, add user id validating and alerting
 
 # TODO: fix messages
-# TODO: fix register (adding interests)
-# TODO: handle anonymous question detail
-# TODO: implement discussions
-
-# TODO: highlight closed question and delete answer button
-# TODO: implement interactive report using inline buttons (report only once)
 
 # TODO: speed up email validation
-# TODO: validate degree and department
-# TODO: Change /exit from Add interest
 
 
 @dp.message_handler(user_id=ADMINS_IDS,
@@ -134,7 +126,6 @@ async def handle_add_or_finish(message: types.Message, state: FSMContext):
         await NewQuestionStates.waiting_for_science.set()
 
     elif command == '/finish':
-        print('finish')
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
             # TODO: set type 'discussion'
@@ -206,6 +197,16 @@ async def handle_response(message: types.Message, state: FSMContext):
                                                            is_author=(current_user_id == problem_author_id))
 
     await message.answer(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
+
+
+@dp.message_handler(commands=["finish"], state=RegistrationProcessStates.waiting_for_interests_science)
+async def handle_finish(message: types, state: FSMContext):
+    answer = "Интересы добавлены! Регистрация прошла успешно! Добро пожаловать!"
+    reply_markup = kb.ReplyKeyboardRemove()
+    await message.answer(answer, reply_markup=reply_markup)
+    await state.reset_state(with_data=False)
+    await state.set_data(remove_non_service_data(await state.get_data()))
+    await send_welcome(message)
 
 
 @dp.message_handler(commands=["register"], state="*")
