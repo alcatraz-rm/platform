@@ -1,6 +1,7 @@
 from peewee import DoesNotExist
 from datetime import datetime as dt
 from bot.db.models import Subject, Science, Problem, Response, Topic, Interest, UserModel, ProblemLike, ProblemReport
+from bot.constants import *
 import typing
 
 
@@ -100,7 +101,7 @@ def get_all_topics_for_problem(problem_id: int) -> dict:
 
     return topics
 
-
+# We need to put these check-validity functions into one
 def is_valid(Clazz: Science.__class__, name: str) -> bool:
     """
         Validates Science by name. If science with given name presents in db True is being returned.
@@ -109,6 +110,20 @@ def is_valid(Clazz: Science.__class__, name: str) -> bool:
     if Clazz.get_or_none(name=name) is None:
         return False
     return True
+
+
+def department_is_valid(name: str) -> bool:
+    for department in DEPARTMENT_OPTIONS:
+        if name ==department[1]:
+            return True
+    return False
+
+
+def degree_is_valid(name: str) -> bool:
+    for degree in DEGREE_LEVEL_OPTIONS:
+        if name == degree[1]:
+            return True
+    return False
 
 
 def get_list_of_users_who_liked(problem_id: int) -> list:
