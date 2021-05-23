@@ -1,9 +1,7 @@
-from aiogram import types
-from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
-from bot.constants import REPORT_REASONS_ALIASES
+import emoji
+
 from bot.db.services.queston_service import *
 from bot.handlers.callbacks import question_detail_cb, response_detail_cb, report_cb
-import emoji
 
 
 def get_generic_inline_kb(keyboard_data: dict, row_widths: int = 1):
@@ -45,14 +43,24 @@ def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: 
     author_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="author_info")
     resp_or_disc_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="resp_or_disc")
     report_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="send_report_keys")
-    buttons = [
-        types.InlineKeyboardButton(text=emoji.emojize("Отписаться :cross_mark:" if is_liked else "Отслеживать :eyes:",
-                                                      use_aliases=True), callback_data=like_callback),
-        types.InlineKeyboardButton(text=emoji.emojize("Автор :copyright:"), callback_data=author_callback),
-        types.InlineKeyboardButton(text=emoji.emojize("Пожаловаться :warning:"), callback_data=report_callback),
-        types.InlineKeyboardButton(text=emoji.emojize("Ответы и обсуждение :speech_balloon:"),
-                                   callback_data=resp_or_disc_callback),
-    ]
+
+    buttons = []
+
+    if problem_obj.user.t_id != user_id:
+        buttons.append(types.InlineKeyboardButton(
+            text=emoji.emojize("Отписаться :cross_mark:" if is_liked else "Отслеживать :eyes:",
+                               use_aliases=True), callback_data=like_callback))
+
+    buttons.append(types.InlineKeyboardButton(text=emoji.emojize("Автор :copyright:"), callback_data=author_callback))
+    buttons.append(
+        types.InlineKeyboardButton(text=emoji.emojize("Пожаловаться :warning:"), callback_data=report_callback))
+
+    if problem_obj.type == 'question':
+        buttons.append(types.InlineKeyboardButton(text=emoji.emojize("Ответы :speech_balloon:"),
+                                                  callback_data=resp_or_disc_callback))
+    else:
+        buttons.append(types.InlineKeyboardButton(text=emoji.emojize("Перейти к обсуждению :speech_balloon:"),
+                                                  url=problem_obj.invite_link))
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(*buttons)
@@ -60,20 +68,15 @@ def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: 
     return keyboard
 
 
-def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int, url: str = None):
+def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int):
     response_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="response")
     others_responses_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id,
                                                        action="other_responses")
 
-    if problem_obj.type == 'discussion':
-        buttons = [
-            types.InlineKeyboardButton(text="Перейти к обсуждению", url=url),
-        ]
-    else:
-        buttons = [
-            types.InlineKeyboardButton(text="Ответы других пользователей", callback_data=others_responses_callback),
-            types.InlineKeyboardButton(text="Написать свой ответ", callback_data=response_callback),
-        ]
+    buttons = [
+        types.InlineKeyboardButton(text="Ответы других пользователей", callback_data=others_responses_callback),
+        types.InlineKeyboardButton(text="Написать свой ответ", callback_data=response_callback),
+    ]
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(*buttons)

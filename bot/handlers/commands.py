@@ -168,6 +168,7 @@ async def handle_detail(message: types.Message, state: FSMContext):
         return
 
     problem_obj = queston_service.get_problem_by_id(q_id)
+
     if problem_obj is not None:
         is_liked = queston_service.is_problem_liked_by_user(problem_id=q_id, user_t_id=message.from_user.id)
         is_closed = problem_obj.is_closed
@@ -176,11 +177,16 @@ async def handle_detail(message: types.Message, state: FSMContext):
         topics_str = generate_topic_str(queston_service.get_all_topics_for_problem(q_id))
         author_name = problem_obj.user.name if not problem_obj.is_anonymous else "Anonymous"
 
-        answer = constants.QUESTION_DETAIL_MESSAGE.format(id=problem_obj.id,
-                                                          title=problem_obj.title,
-                                                          author_name=author_name,
-                                                          body=problem_obj.body,
-                                                          topics=topics_str)
+        if problem_obj.type == 'question':
+            base_answer = QUESTION_DETAIL_MESSAGE
+        else:
+            base_answer = DISCUSSION_DETAIL_MESSAGE
+
+        answer = base_answer.format(id=problem_obj.id,
+                                    title=problem_obj.title,
+                                    author_name=author_name,
+                                    body=problem_obj.body,
+                                    topics=topics_str)
         if is_liked:
             answer += "\n" + constants.QUESTION_DETAIL_LIKED_MESSAGE
 
