@@ -54,7 +54,7 @@ def assign_interest(user: UserModel, subject_name: str):
 
     user_interests = get_all_interests_for_user(user.t_id)
 
-    if subject.science.name not in user_interests:
+    if subject.science.name not in user_interests.keys():
         Interest.create(user=user.id, subject=subject)
         return
 
