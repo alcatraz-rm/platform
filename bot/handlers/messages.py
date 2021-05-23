@@ -98,7 +98,7 @@ async def registration_add_interests_science(message: types.Message, state: FSMC
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_degree_level)
 async def registration_complete(message: types.Message, state: FSMContext):
-  if degree_is_valid(message.text):
+    if degree_is_valid(message.text):
       telegram_data = message.from_user
       user_data = await state.get_data()
       user_data['degree_level'] = message.text
