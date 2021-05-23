@@ -1,13 +1,15 @@
+from uuid import uuid4
+
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 import bot.keyboards.inline as inline_kb
 import bot.keyboards.replay as kb
 from bot import constants
-from bot.config import dp, ADMINS_IDS
+from bot.config import dp, ADMINS_IDS, bot
 from bot.constants import *
 from bot.db.services import account_service, queston_service
-from bot.db.services.queston_service import get_all_open_questions, add_new_problem, assign_topic, get_user_problems
+from bot.db.services.queston_service import get_all_open_questions, get_user_problems, add_new_problem, assign_topic
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
     SettingsChangeStates, QuestionDetailStates
 from bot.utils import remove_non_service_data, generate_topic_str, generate_feed
@@ -132,10 +134,21 @@ async def handle_add_or_finish(message: types.Message, state: FSMContext):
     elif command == '/finish':
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
-            problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_=type_)
 
-            for topic in problem_data['topics']:
-                assign_topic(problem, topic[1])
+            code = uuid4()
+
+            # TODO: waiting for char here
+            await message.answer(
+                "Последний этап создания обсуждения - создание чата. Пожалуйста, создай группу в телеграме и добавь туда меня."
+                "Убедись, что у меня есть возможность приглашать других участников.")
+            await state.update_data(verification_code=code)
+            await NewQuestionStates.waiting_for_creating_chat.set()
+            return
+
+            # problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_=type_)
+            #
+            # for topic in problem_data['topics']:
+            #     assign_topic(problem, topic[1])
 
         elif type_ == 'question':
             await message.answer(NEW_QUESTION_THEME_FINISH_MESSAGE)
@@ -307,3 +320,43 @@ async def handle_my_questions(message: types.Message):
     questions = get_user_problems(message.from_user.id)
 
     await message.answer(generate_feed(questions), parse_mode=types.ParseMode.MARKDOWN)
+
+
+@dp.message_handler(state=NewQuestionStates.waiting_for_admin)
+async def handle_admin(message: types.Message, state: FSMContext):
+    problem_data = await state.get_data()
+
+    if message.text == 'Готово':
+        chat = await bot.get_chat(problem_data['chat_id'])
+        invite_link = chat.invite_link
+
+        if not invite_link:
+            await message.answer('Все еще не могу приглашать других пользователей. '
+                                 'Убедись, что сделал меня администратором.')
+            return
+
+        problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_='discussion',
+                                  invite_link=invite_link)
+
+        for topic in problem_data['topics']:
+            assign_topic(problem, topic[1])
+
+        await bot.send_message(message.from_user.id, NEW_DISCUSSION_END_MESSAGE.format(id=problem.get_id()))
+        await state.set_data(remove_non_service_data(problem_data))
+        await state.reset_state(with_data=False)
+    else:
+        await message.answer('Используй кнопку "Готово"')
+
+
+@dp.message_handler(content_types=types.ContentTypes.GROUP_CHAT_CREATED)
+async def handle_chat(chat_member: types.ChatMemberUpdated, state: FSMContext):
+    state_ = await state.storage.get_state(user=chat_member.from_user.id)
+    user_t_id = chat_member.from_user.id
+
+    await state.storage.update_data(user=user_t_id, chat_id=chat_member.chat.id)
+
+    if state_ == 'NewQuestionStates:invite_link':
+        await state.storage.set_state(user=user_t_id, state=NewQuestionStates.waiting_for_admin)
+        await bot.send_message(user_t_id, 'Отлично! Чат создан, теперь осталось сделать меня администратором, '
+                                          'чтобы я мог приглашать пользователей. Как это будет готов, '
+                                          'нажми на кнопку "Готово"', reply_markup=kb.get_ready_km())

@@ -89,6 +89,13 @@ def get_subject_list_km(science: str, exclude_list: typing.Optional[dict] = None
     return keyboard
 
 
+def get_ready_km():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.add('Готово')
+
+    return keyboard
+
+
 def get_settings_option_km():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     keyboard.add('Name')

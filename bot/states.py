@@ -20,6 +20,9 @@ class NewQuestionStates(StatesGroup):
     waiting_for_science = State('science')
     waiting_for_subject = State('subject')
 
+    waiting_for_creating_chat = State('invite_link')
+    waiting_for_admin = State('admin')
+
 
 class InterestsInputStates(StatesGroup):
     waiting_for_science = State('science')

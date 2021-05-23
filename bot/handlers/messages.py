@@ -1,16 +1,18 @@
+from uuid import uuid4
+
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 import bot.keyboards.replay as kb
 from bot import constants
-from bot.config import dp, ADMINS_IDS
+from bot.config import dp, ADMINS_IDS, bot
 from bot.constants import *
 from bot.db.services import account_service, queston_service
 from bot.db.services.account_service import email_is_valid
 from bot.db.services.queston_service import add_new_problem, assign_topic, department_is_valid, degree_is_valid
 from bot.handlers.commands import send_welcome, handle_admin, handle_detail
-from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
-    SettingsChangeStates, QuestionDetailStates
+from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, SettingsChangeStates, \
+    QuestionDetailStates
 from bot.utils import remove_non_service_data
 
 '''
@@ -379,14 +381,21 @@ async def new_question_subject(message: types.Message, state: FSMContext):
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
 
-            problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_=type_)
+            # TODO: waiting for char here
+            await message.answer(
+                "Последний этап создания обсуждения - создание чата. Пожалуйста, создай группу в телеграме и добавь туда меня."
+                "Убедись, что у меня есть возможность приглашать других участников.")
+            await NewQuestionStates.waiting_for_creating_chat.set()
+            return
 
-            for topic in problem_data['topics']:
-                assign_topic(problem, topic[1])
-
-            await message.answer(NEW_DISCUSSION_END_MESSAGE.format(id=problem.get_id()))
-            await state.set_data(remove_non_service_data(problem_data))
-            await state.reset_state(with_data=False)
+            # problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_=type_)
+            #
+            # for topic in problem_data['topics']:
+            #     assign_topic(problem, topic[1])
+            #
+            # await message.answer(NEW_DISCUSSION_END_MESSAGE.format(id=problem.get_id()))
+            # await state.set_data(remove_non_service_data(problem_data))
+            # await state.reset_state(with_data=False)
 
         elif type_ == 'question':
             await message.answer(NEW_QUESTION_THEME_FINISH_MESSAGE)
@@ -398,6 +407,27 @@ async def new_question_subject(message: types.Message, state: FSMContext):
 
     await message.answer(new_topic_message, reply_markup=kb.get_add_finish_exit_km())
     await NewQuestionStates.waiting_for_new_topic_or_quit.set()
+
+
+# @dp.message_handler(state=NewQuestionStates.waiting_for_creating_chat)
+# async def handle_creating_chat(message: types.Message, state: FSMContext):
+#     problem_data = await state.get_data()
+#     code = problem_data.get('verification_code')
+#
+#     from_chat = message.chat.id
+#     invite_link = message.chat.invite_link
+#
+#     if from_chat != message.from_user.id and message.text == code:
+#         problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_='discussion', invite_link=invite_link)
+#
+#         for topic in problem_data['topics']:
+#             assign_topic(problem, topic[1])
+#
+#         await message.answer(NEW_DISCUSSION_END_MESSAGE.format(id=problem.get_id()))
+#         await state.set_data(remove_non_service_data(problem_data))
+#         await state.reset_state(with_data=False)
+#
+#         await bot.send_message(message.from_user.id, 'Обсуждение сохранено.')
 
 
 @dp.message_handler(state=NewQuestionStates.waiting_for_anonymous_or_not_answer)
