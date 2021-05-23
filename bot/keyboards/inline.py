@@ -64,12 +64,11 @@ def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int, url: str):
     response_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="response")
     others_responses_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id,
                                                        action="other_responses")
-    url_cleared = "tg://resolve?domain=" + url.replace("https://t.me/", '')
 
     buttons = [
         types.InlineKeyboardButton(text="Ответы других пользователей", callback_data=others_responses_callback),
         types.InlineKeyboardButton(text="Написать свой ответ", callback_data=response_callback),
-        types.InlineKeyboardButton(text="Перейти к обсуждению", url=url_cleared),
+        types.InlineKeyboardButton(text="Перейти к обсуждению", url=url),
     ]
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
