@@ -316,6 +316,16 @@ async def send_welcome(message: types.Message):
         # await handle_register(message)
 
 
+@dp.message_handler(commands=["finish"], state=SettingsChangeStates.waiting_for_new_science)
+async def handle_finish(message: types, state: FSMContext):
+    answer = "Изменения интересо сохранены!"
+    reply_markup = kb.get_settings_option_km()
+    await message.answer(answer, reply_markup=reply_markup)
+    await SettingsChangeStates.waiting_for_option.set()
+    await state.set_data(remove_non_service_data(await state.get_data()))
+    await handle_settings(message, state)
+
+
 @dp.message_handler(commands=["settings"], state="*")
 async def handle_settings(message: types.Message):
     if not account_service.is_user_exist(message.from_user.id):

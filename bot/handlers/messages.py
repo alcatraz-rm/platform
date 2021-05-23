@@ -222,7 +222,8 @@ async def handle_deleting_interest(message: types.Message):
     user = account_service.get_user(user_id)
     user_interests = account_service.get_all_interests_for_user(user_id)
     science_subject = message.text.split(sep='/')
-    if user_interests[science_subject[0]] == science_subject[1]:
+
+    if science_subject[1] in user_interests[science_subject[0]]:
         account_service.remove_interest(user, science_subject[1])
         await message.answer(SETTINGS_DELETE_FINISH_MESSAGE.format(interest=message.text))
         await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
