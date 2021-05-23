@@ -114,7 +114,7 @@ class ProblemReport(BaseModel):
 
     author = ForeignKeyField(UserModel)
 
-    report_message = TextField()
+    report_reason = CharField(choices=constants.REPORT_REASONS_OPTIONS)
 
     time_stamp = DateTimeField(default=datetime.now)
 
@@ -129,7 +129,7 @@ class UserReport(BaseModel):
 
     author = ForeignKeyField(UserModel)
 
-    report_message = TextField()
+    report_reason = CharField(choices=constants.REPORT_REASONS_OPTIONS)
 
     time_stamp = DateTimeField(default=datetime.now)
 

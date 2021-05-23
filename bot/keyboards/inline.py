@@ -1,8 +1,8 @@
 from aiogram import types
 from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButton
-from bot.constants import DEPARTMENT_OPTIONS, DEGREE_LEVEL_OPTIONS
+from bot.constants import REPORT_REASONS_ALIASES
 from bot.db.services.queston_service import *
-from bot.handlers.callbacks import question_detail_cb, response_detail_cb
+from bot.handlers.callbacks import question_detail_cb, response_detail_cb, report_cb
 import emoji
 
 
@@ -44,7 +44,7 @@ def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: 
     like_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="like")
     author_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="author_info")
     resp_or_disc_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="resp_or_disc")
-    report_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="report")
+    report_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="send_report_keys")
 
     buttons = [
         types.InlineKeyboardButton(text=emoji.emojize("Отписаться :cross_mark:" if is_liked else "Отслеживать :eyes:",
@@ -78,3 +78,15 @@ def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int):
 
     return keyboard
 
+
+def get_report_options_inline_kb(problem_id: int, user_id: int):
+    buttons = []
+
+    for reason in REPORT_REASONS_ALIASES.keys():
+        cb = report_cb.new(problem_id=problem_id, user_id=user_id, reason=REPORT_REASONS_ALIASES[reason])
+        buttons.append(types.InlineKeyboardButton(text=reason, callback_data=cb))
+
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    keyboard.add(*buttons)
+
+    return keyboard

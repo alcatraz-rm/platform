@@ -14,19 +14,20 @@ from bot.db.services import account_service, queston_service
 from bot.constants import *
 from bot.utils import remove_non_service_data, generate_topic_str
 
-# TODO: add /exit to /new, /settings
 # TODO: logging to file
+# TODO: send message if someone answered your question, add user id validating and alerting
+
 # TODO: fix messages
 # TODO: fix register (adding interests)
+# TODO: handle anonymous question detail
+# TODO: implement discussions
+
 # TODO: highlight closed question and delete answer button
-# TODO: implement interactive report using inline buttons
+# TODO: implement interactive report using inline buttons (report only once)
+
 # TODO: speed up email validation
 # TODO: validate degree and department
 # TODO: Change /exit from Add interest
-# TODO: fix loading department and degree from db in author info
-# TODO: add user id validating and alerting
-# TODO: handle anonymous question detail
-# TODO: resend keyboard markup if error occurred
 
 
 @dp.message_handler(user_id=ADMINS_IDS,

@@ -2,6 +2,7 @@ from peewee import DoesNotExist
 from datetime import datetime as dt
 from bot.db.models import Subject, Science, Problem, Response, Topic, Interest, UserModel, ProblemLike, ProblemReport
 import typing
+from bot.constants import REPORT_REASONS_ALIASES
 
 
 def add_new_science(name: str):
@@ -153,14 +154,42 @@ def dislike_problem(problem_id: int, user_t_id: int):
         raise DoesNotExist("Problem with given id doesn't exist.")
 
 
-def report_problem(problem_id: int, report_body, report_author_id: int):
+def get_list_of_users_who_reported_problem(problem_id: int):
+    """
+        Returns a list of t_ids of users who reported this problem.
+    """
+    predicate = (Problem.id == problem_id)
+    query = (ProblemReport
+             .select(ProblemReport, Problem, UserModel)
+             .join(Problem, on=(ProblemReport.report_problem == Problem.id))
+             .switch(UserModel)
+             .join(UserModel, on=(ProblemReport.author == UserModel.id))
+             .where(predicate)
+             )
+    print([record.author.t_id for record in query])
+    return [record.author.t_id for record in query]
+
+
+def is_problem_reported_by_user(problem_id: int, user_id: int):
+
+    return user_id in get_list_of_users_who_reported_problem(problem_id)
+
+
+def report_problem(problem_id: int, report_reason, report_author_id: int):
     problem = Problem.get_or_none(id=problem_id)
+    report_reason_cleared = ""
+    if report_reason in REPORT_REASONS_ALIASES.values():
+        report_reason_cleared = report_reason
+    elif report_reason in REPORT_REASONS_ALIASES.keys():
+        report_reason_cleared = REPORT_REASONS_ALIASES[report_reason]
+    else:
+        raise KeyError("Incorrect report_reason.")
 
     if problem is not None:
         author_obj = UserModel.get_or_none(t_id=report_author_id)
         ProblemReport.create(report_problem=problem,
                              author=author_obj,
-                             report_message=report_body,
+                             report_reason=report_reason_cleared,
                              )
 
 

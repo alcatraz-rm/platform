@@ -15,6 +15,7 @@ from bot.utils import generate_topic_str
 # user_id is telegram_id
 question_detail_cb = CallbackData("problem", "problem_id", "user_id", "action")
 response_detail_cb = CallbackData("response", "response_id", "user_id", "action")
+report_cb = CallbackData("report", "problem_id", "user_id", "reason")
 
 
 @dp.callback_query_handler(question_detail_cb.filter(action="discussion"))
@@ -71,13 +72,28 @@ async def send_author_info(call: types.CallbackQuery, callback_data: dict):
     await call.answer()
 
 
-@dp.callback_query_handler(question_detail_cb.filter(action=["report"]),
+@dp.callback_query_handler(report_cb.filter(), state=QuestionDetailStates.waiting_for_report)
+async def handle_report(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
+    problem_id = callback_data["problem_id"]
+    user_id = call.from_user.id
+    report_reason = callback_data["reason"]
+    queston_service.report_problem(problem_id=problem_id, report_reason=report_reason, report_author_id=user_id)
+    await call.answer(constants.QUESTION_DETAIL_REPORT_SUBMITTED, show_alert=True)
+    await QuestionDetailStates.waiting_for_choose_option.set()
+    await call.message.delete()
+
+
+@dp.callback_query_handler(question_detail_cb.filter(action=["send_report_keys"]),
                            state=QuestionDetailStates.waiting_for_choose_option)
 async def send_report(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
-    await call.message.answer(constants.QUESTION_DETAIL_REPORT_INIT, reply_markup=kb.ReplyKeyboardRemove())
-    await call.answer()
+    problem_id = callback_data["problem_id"]
+    if queston_service.is_problem_reported_by_user(problem_id=problem_id, user_id=call.from_user.id):
+        await call.answer("Вы уже отправляли жалобу на этот вопрос.", show_alert=True)
+        return
+    reply_markup = inline_kb.get_report_options_inline_kb(problem_id=problem_id, user_id=callback_data["user_id"])
+    await call.message.answer(constants.QUESTION_DETAIL_REPORT_INIT, reply_markup=reply_markup)
     await QuestionDetailStates.waiting_for_report.set()
-    await state.update_data(problem_id=callback_data["problem_id"])
+    await call.answer()
 
 
 @dp.callback_query_handler(question_detail_cb.filter(action=["like"]),

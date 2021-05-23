@@ -15,6 +15,30 @@ DEGREE_LEVEL_OPTIONS = [
     ('master', 'Магистр'),
 ]
 
+
+# departments aliases, TODO: add full list
+DEPARTMENT_ALIASES = {'Механико Математический Факультет': 'mmf', 'Гуманитарный Институт': 'gi'}
+
+# degrees aliases, TODO: add full list
+DEGREES_ALIASES = {'Бакалавр': 'bachelor', 'Магистр': 'master'}
+
+
+REPORT_REASONS_OPTIONS = [
+    ('Реклама', 'spam'),
+    ('offensive_content', 'Оскорбительное содержание'),
+    ('wrong_topics', 'Несовпадение тем с содержанием вопроса'),
+    ('incorrect_question', 'Некорректный вопрос'),
+]
+
+
+REPORT_REASONS_ALIASES = {
+    'Реклама': 'spam',
+    'Оскорбительное содержание': 'offensive_content',
+    'Несовпадение тем с содержанием вопроса': 'wrong_topics',
+    'Некорректный вопрос': 'incorrect_question',
+}
+
+
 # Messages
 
 WELCOME_MESSAGE = """Добро пожаловать. Для подробной информации напишите /help."""
@@ -162,9 +186,8 @@ QUESTION_DETAIL_AUTHOR_INFO = """*Информация об авторе:*
 :white_small_square:*Факультет:* {department}
 :white_small_square:*Степень обучения:* {degree_level}
 """
-QUESTION_DETAIL_REPORT_INIT = "Опиши проблему с этим постом."
-QUESTION_DETAIL_REPORT_SUBMITTED = """Спасибо за жалобу. Мы рассмотрим ее в кратчайшие сроки и прием взвешанное решение.
-\nДля перехода к ленте вопросов - /feed\nЕсли возникли проблемы - /help"""
+QUESTION_DETAIL_REPORT_INIT = "Выбери причину жалобы."
+QUESTION_DETAIL_REPORT_SUBMITTED = "Спасибо за жалобу. Мы рассмотрим ее в кратчайшие сроки и примем взвешанное решение."
 QUESTION_DETAIL_CALLBACK_ERROR_ALERT = """Ошибка! Это действие уже нельзя выполнить. 
 Выполните команду /detail%id%, где вместо %id% укажите id впороса, который вас интересует."""
 QUESTION_DETAIL_CALLBACK_ERROR_MESSAGE = """Для перехода к ленте вопросов - /feed\nЕсли возникли проблемы - /help"""
@@ -174,8 +197,3 @@ _Посмотреть подробности /response{p_id}._\n\n"""
 QUESTION_DETAIL_RESPONSE_MESSAGE = """*#{r_id} Ответ от пользователя {r_author} от {date}:*\n\n*Ответ:* {body}\n\n
 Для перехода к ленте вопросов - /feed\nЕсли возникли проблемы - /help"""
 
-# departments aliases, TODO: add full list
-DEPARTMENT_ALIASES = {'Механико Математический Факультет': 'mmf', 'Гуманитарный Институт': 'gi'}
-
-# degrees aliases, TODO: add full list
-DEGREES_ALIASES = {'Бакалавр': 'bachelor', 'Магистр': 'master'}
