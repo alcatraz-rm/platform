@@ -84,6 +84,11 @@ def get_all_open_questions() -> list:
     return list(Problem.select().where(Problem.is_closed == False))
 
 
+def get_user_problems(user_t_id: int) -> list:
+    user_obj = UserModel.get_or_none(t_id=user_t_id)
+    return list(Problem.select().where(Problem.user == user_obj))
+
+
 def get_all_topics_for_problem(problem_id: int) -> dict:
     predicate = (Problem.id == problem_id)
 

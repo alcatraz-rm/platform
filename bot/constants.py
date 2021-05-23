@@ -29,11 +29,13 @@ HELP_MESSAGE = """*Доступные команды:*
 
 *4.*\t\t/detail - детализация вопроса (укажи его id)
 
-*5.*\t\t/me - что я о тебе знаю и видят другие пользователи 
+*5.*\t\t/me - что я о тебе знаю и видят другие пользователи
 
-*6.*\t\t/settings - настройки профиля
+*6.*\t\t/my\_questions - твои вопросы
 
-*7.*\t\t/help - описание доступных команд
+*7.*\t\t/settings - настройки профиля
+
+*8.*\t\t/help - описание доступных команд
 """
 
 REGISTRATION_EXIT_SENTENCES = " Type /exit to cancel registration."
@@ -81,6 +83,7 @@ ME_MET_MESSAGE = """Твой профиль:
 Интересы: {interests}
 Факультет: {department}
 Степень обучения: {degree_level}
+Твои вопросы: /my_questions
 """
 
 ME_MESSAGE = """ У тебя еще нет профиля, тебе нужно зарегистрировться /register """  # кнопка register

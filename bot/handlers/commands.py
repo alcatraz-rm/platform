@@ -7,10 +7,10 @@ from bot import constants
 from bot.config import dp, ADMINS_IDS
 from bot.constants import *
 from bot.db.services import account_service, queston_service
-from bot.db.services.queston_service import get_all_open_questions, add_new_problem, assign_topic
+from bot.db.services.queston_service import get_all_open_questions, add_new_problem, assign_topic, get_user_problems
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
     SettingsChangeStates, QuestionDetailStates
-from bot.utils import remove_non_service_data, generate_topic_str
+from bot.utils import remove_non_service_data, generate_topic_str, generate_feed
 
 
 # TODO: add /exit to /new, /settings
@@ -246,22 +246,7 @@ async def handle_me(message: types.Message):
 async def handle_feed(message: types.Message):
     questions = get_all_open_questions()
 
-    questions_str = ''
-    question_info_template = '*Заголовок:* {title}\n' \
-                             '*ID:* {problem_id}\n' \
-                             '*Статус:* {is_open}\n' \
-                             '*Подробнее:* /detail{problem_id}\n' \
-                             '*Темы:* {topics}'
-
-    for question in questions:
-        questions_str += '\n\n' + question_info_template.format(title=question.title,
-                                                                problem_id=question.id,
-                                                                is_open='Закрыт' if question.is_closed else 'Открыт',
-                                                                topics=generate_topic_str(
-                                                                    queston_service.get_all_topics_for_problem(
-                                                                        question.id)))
-
-    await message.answer(questions_str, parse_mode=types.ParseMode.MARKDOWN)
+    await message.answer(generate_feed(questions), parse_mode=types.ParseMode.MARKDOWN)
 
 
 @dp.message_handler(commands=["about"], state="*")
@@ -306,3 +291,10 @@ async def handle_settings(message: types.Message):
     else:
         await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
         await SettingsChangeStates.waiting_for_option.set()
+
+
+@dp.message_handler(commands=["my_questions"], state="*")
+async def handle_my_questions(message: types.Message):
+    questions = get_user_problems(message.from_user.id)
+
+    await message.answer(generate_feed(questions), parse_mode=types.ParseMode.MARKDOWN)
