@@ -362,7 +362,7 @@ async def handle_bot_chat_admin(message: types.Message, state: FSMContext):
 
         if not invite_link:
             await message.answer('Все еще не могу приглашать других пользователей. '
-                                 'Убедись, что сделал меня администратором.')
+                                 'Убедись, что сделал меня администратором.', reply_markup=kb.get_ready_km())
             return
 
         problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_='discussion',
@@ -390,3 +390,5 @@ async def handle_chat(chat_member: types.ChatMemberUpdated, state: FSMContext):
         await bot.send_message(user_t_id, 'Отлично! Чат создан, теперь осталось сделать меня администратором, '
                                           'чтобы я мог приглашать пользователей. Как это будет готов, '
                                           'нажми на кнопку "Готово"', reply_markup=kb.get_ready_km())
+
+# TODO: add deleting bot from chat catching

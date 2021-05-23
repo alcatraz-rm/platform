@@ -4,7 +4,7 @@ import logging
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 
-from bot.middlewares import StateValidationMiddleware
+from bot.middlewares import StateValidationMiddleware, MessageSourceValidationMiddleware
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils.executor import Executor
@@ -45,5 +45,6 @@ bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 dp.middleware.setup(StateValidationMiddleware())
+dp.middleware.setup(MessageSourceValidationMiddleware())
 executor = Executor(dp, skip_updates=True)
 
