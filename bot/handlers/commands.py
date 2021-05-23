@@ -90,10 +90,7 @@ async def handle_exit(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=["exit"], state=SettingsChangeStates.all_states)
 async def handle_exit(message: types.Message, state: FSMContext):
-    # TODO: remove dat shit!!!
-    # TODO: save changes here
-
-    await message.answer("Йоу, бро с настройками покончено. Мне похуй.", reply_markup=kb.ReplyKeyboardRemove())
+    await message.answer("Настройки сохранены", reply_markup=kb.ReplyKeyboardRemove())
     await state.set_data(remove_non_service_data(await state.get_data()))
     await state.finish()
 
@@ -316,9 +313,10 @@ async def send_welcome(message: types.Message):
         # await handle_register(message)
 
 
-@dp.message_handler(commands=["finish"], state=SettingsChangeStates.waiting_for_new_science)
+@dp.message_handler(commands=["finish"], state=[SettingsChangeStates.waiting_for_new_science,
+                                                SettingsChangeStates.waiting_for_del_interest])
 async def handle_finish(message: types, state: FSMContext):
-    answer = "Изменения интересо сохранены!"
+    answer = "Изменения интересов сохранены!"
     reply_markup = kb.get_settings_option_km()
     await message.answer(answer, reply_markup=reply_markup)
     await SettingsChangeStates.waiting_for_option.set()

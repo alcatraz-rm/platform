@@ -209,7 +209,7 @@ async def add_interests_science(message: types.Message, state: FSMContext):
     science_name = message.text
     if queston_service.is_valid(queston_service.Science, science_name):
         await state.update_data(science_name=science_name)
-        await message.answer("Предмет", reply_markup=kb.get_subject_list_km(science=science_name))
+        await message.answer(SETTINGS_ADD_MESSAGE_2, reply_markup=kb.get_subject_list_km(science=science_name))
         await SettingsChangeStates.waiting_for_new_subject.set()
     else:
         await message.answer("Ошибка! Такой науки нет. Выберите науку из списка",
@@ -237,21 +237,21 @@ async def handle_deleting_interest(message: types.Message):
 @dp.message_handler(state=SettingsChangeStates.waiting_for_option)
 async def handle_settings_option(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
-    if message.text == 'Name':
+    if message.text == 'Имя':
         await message.answer(SETTINGS_NAME_MESSAGE)
         await SettingsChangeStates.waiting_for_name.set()
-    elif message.text == 'Department':
+    elif message.text == 'Факультет':
         await message.answer(SETTINGS_FACULTY_MESSAGE, reply_markup=kb.get_department_km())
         await SettingsChangeStates.waiting_for_department.set()
-    elif message.text == 'Degree':
+    elif message.text == 'Степень обучения':
         await message.answer(SETTINGS_DEGREE_MESSAGE, reply_markup=kb.get_degree_km())
         await SettingsChangeStates.waiting_for_degree_level.set()
-    elif message.text == 'Add interest':
-        await message.answer(SETTINGS_NAME_MESSAGE, reply_markup=kb.get_science_list_km())
+    elif message.text == 'Добавить интерес':
+        await message.answer(SETTINGS_ADD_MESSAGE_1, reply_markup=kb.get_science_list_km())
         data = await state.get_data()
         await state.set_data(remove_non_service_data(data))
         await SettingsChangeStates.waiting_for_new_science.set()
-    elif message.text == 'Delete interest':
+    elif message.text == 'Удалить интерес':
         await message.answer(SETTINGS_DELETE_MESSAGE, reply_markup=kb.get_interests_km(user_id))
         await SettingsChangeStates.waiting_for_del_interest.set()
 

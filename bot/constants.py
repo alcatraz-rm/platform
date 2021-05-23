@@ -125,19 +125,19 @@ FEED_NUMBER_QUESTION_DETAIL_REPORT_MESSAGE = """вопрос отправлен 
 # Настройки:
 
 SETTINGS_UNREGISTERED_MESSAGE = """Вы пока что не зарегистрированы. Чтобы зарегистрироваться, отправьте /register"""
-SETTINGS_MESSAGE = """Выбери, что хочешь изменить: """  # кнопки имя / факультет / степень обучения / добавить
+SETTINGS_MESSAGE = """Выбери, что хочешь изменить (для выхода из настроек используй /exit):"""  # кнопки имя / факультет / степень обучения / добавить
 # интерес / удалить интерес / exit
 SETTINGS_EXIT_MESSAGE = """Ты вышел из настроек"""
 SETTINGS_NAME_MESSAGE = """Введи новое имя: """  # кнопка exit
 SETTINGS_NAME_CHANGED_MESSAGE = """Ты изменил имя на {name}"""
-SETTINGS_FACULTY_MESSAGE = """Введи свой факультет: """  # кнопка exit
+SETTINGS_FACULTY_MESSAGE = """Выбери свой факультет: """  # кнопка exit
 SETTINGS_FACULTY_CHANGED_MESSAGE = """Твой факультет изменён на {faculty}"""
-SETTINGS_DEGREE_MESSAGE = """Введи свою степень обучения: """  # кнопка exit
+SETTINGS_DEGREE_MESSAGE = """Выбери свою степень обучения: """  # кнопка exit
 SETTINGS_DEGREE_CHANGED_MESSAGE = """Твоя степень обучения изменена на {degree}"""
 SETTINGS_DELETE_MESSAGE = """Выбери интерес, который хочешь удалить:"""  # кнопка exit
 SETTINGS_DELETE_FINISH_MESSAGE = """Интерес {interest} удалён"""
-SETTINGS_ADD_MESSAGE_1 = """Выбери науку {list of sciences}"""  # кнопка exit
-SETTINGS_ADD_MESSAGE_2 = """Выбери дисциплину {list of disciplines}"""  # кнопка exit / skip
+SETTINGS_ADD_MESSAGE_1 = """Выбери науку (для возвращения к настройкам используй /finish)"""  # кнопка exit
+SETTINGS_ADD_MESSAGE_2 = """Выбери дисциплину (для возвращения к настройкам используй /finish)"""  # кнопка exit / skip
 SETTINGS_ADD_FINISH_MESSAGE = """Интерес {interest} добавлен"""
 SETTINGS_EXIT_MESSAGE_1 = """Настройка прервана"""
 

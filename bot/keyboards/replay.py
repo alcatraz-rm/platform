@@ -113,11 +113,11 @@ def problem_type_km():
 
 def get_settings_option_km():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    keyboard.add('Name')
-    keyboard.add('Department')
-    keyboard.add('Degree')
-    keyboard.add('Add interest')
-    keyboard.add('Delete interest')
+    keyboard.add('Имя')
+    keyboard.add('Факультет')
+    keyboard.add('Степень обучения')
+    keyboard.add('Добавить интерес')
+    keyboard.add('Удалить интерес')
     keyboard.add('/exit')
 
     return keyboard
@@ -132,6 +132,9 @@ def get_interests_km(user_id: int):
                 keyboard.add(science + '/' + subject)
         else:
             keyboard.add(science + '/' + interests[science])
+
+    keyboard.add('/finish')
+    keyboard.add('/exit')
 
     return keyboard
 
