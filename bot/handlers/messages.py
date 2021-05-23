@@ -116,7 +116,7 @@ async def registration_complete(message: types.Message, state: FSMContext):
         await RegistrationProcessStates.waiting_for_interests_science.set()
 
     else:
-        await message.answer("У нас нет такой степени обучения! Выберите степень обучения из списка ",
+        await message.answer("У нас нет такой степени обучения! Выберите степень обучения из списка",
                              reply_markup=kb.get_degree_km())
 
 
@@ -173,7 +173,7 @@ async def handle_settings_option(message: types.Message):
         await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
         await SettingsChangeStates.waiting_for_option.set()
     else:
-        await message.answer("У нас нет такого факультета! Выберите его из списка:",
+        await message.answer("У нас нет такого факультета! Выберите факультет из списка",
                              reply_markup=kb.get_department_km())
 
 
@@ -186,7 +186,7 @@ async def handle_settings_option(message: types.Message):
         await message.answer(constants.SETTINGS_MESSAGE, reply_markup=kb.get_settings_option_km())
         await SettingsChangeStates.waiting_for_option.set()
     else:
-        await message.answer("У нас нет такой степени обучения! Выберите её из списка:",
+        await message.answer("У нас нет такой степени обучения! Выберите науку из списка",
                              reply_markup=kb.get_degree_km())
 
 
@@ -203,7 +203,7 @@ async def add_interests_subject(message: types.Message, state: FSMContext):
                              reply_markup=kb.get_science_list_km())
         await SettingsChangeStates.waiting_for_new_science.set()
     else:
-        await message.answer("Ошибка! Такого предмета нет. Выбири из списка",
+        await message.answer("Ошибка! Такого предмета нет. Выберите предмет из списка",
                              reply_markup=kb.get_subject_list_km(science=science_name))
 
 
@@ -218,7 +218,7 @@ async def add_interests_science(message: types.Message, state: FSMContext):
                                                                                 message.from_user.id)))
         await SettingsChangeStates.waiting_for_new_subject.set()
     else:
-        await message.answer("Ошибка! Такой науки нет. Выбери из списка",
+        await message.answer("Ошибка! Такой науки нет. Выберите науку из списка",
                              reply_markup=kb.get_science_list_km())
 
 
@@ -328,7 +328,8 @@ async def new_question_science(message: types.Message, state: FSMContext):
     current_science = message.text.strip()
 
     if current_science not in sciences:
-        await message.answer('Такой науки нет! Выбери из списка', reply_markup=kb.get_science_list_km(finish=False))
+        await message.answer('Такой науки нет! Выберите науку из списка',
+                             reply_markup=kb.get_science_list_km(finish=False))
         return
 
     problem_data = await state.get_data()
@@ -356,7 +357,7 @@ async def new_question_subject(message: types.Message, state: FSMContext):
     current_subject = message.text.strip()
 
     if current_subject not in subjects:
-        await message.answer('Такого предмета нет! Выбери из списка',
+        await message.answer('Такого предмета нет! Выберите науку из списка',
                              reply_markup=kb.get_subject_list_km(science, finish=False))
         return
 
@@ -384,10 +385,9 @@ async def new_question_subject(message: types.Message, state: FSMContext):
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
 
-            # TODO: waiting for char here
             await message.answer(
                 "Последний этап создания обсуждения - создание чата. Пожалуйста, создай группу в телеграме и добавь туда меня."
-                "Убедись, что у меня есть возможность приглашать других участников.")
+                " Убедись, что у меня есть возможность приглашать других участников.")
             await NewQuestionStates.waiting_for_creating_chat.set()
             return
 

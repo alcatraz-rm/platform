@@ -43,5 +43,5 @@ class MessageSourceValidationMiddleware(BaseMiddleware):
         """
         Check if message from group chat, if so middleware ignores this message
         """
-        if message.chat.id < 0:
+        if message.chat.id < 0 and message.content_type != 'group_chat_created':
             raise SkipHandler()

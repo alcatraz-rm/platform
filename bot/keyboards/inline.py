@@ -67,11 +67,16 @@ def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int):
     others_responses_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id,
                                                        action="other_responses")
 
-    buttons = [
-        types.InlineKeyboardButton(text="Ответы других пользователей", callback_data=others_responses_callback),
-        types.InlineKeyboardButton(text="Написать свой ответ", callback_data=response_callback),
-        types.InlineKeyboardButton(text="Перейти к обсуждению", callback_data=discussion_callback),
-    ]
+    if problem_obj.type == 'discussion':
+        buttons = [
+            types.InlineKeyboardButton(text="Перейти к обсуждению", callback_data=discussion_callback)
+        ]
+    else:
+        buttons = [
+            types.InlineKeyboardButton(text="Ответы других пользователей", callback_data=others_responses_callback),
+            types.InlineKeyboardButton(text="Написать свой ответ", callback_data=response_callback),
+            types.InlineKeyboardButton(text="Перейти к обсуждению", callback_data=discussion_callback),
+        ]
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(*buttons)

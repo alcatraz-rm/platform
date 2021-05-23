@@ -52,7 +52,12 @@ async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_d
     problem_id = callback_data["problem_id"]
     problem_obj = queston_service.get_problem_by_id(problem_id)
 
-    await call.message.answer("Обсудить или ответить?",
+    if problem_obj.type == 'question':
+        message = "Обсудить или ответить?"
+    else:
+        message = 'С помощью кнопки "Перейти к обсуждению" ты можешь присоединиться к телеграм-чату, посвященному этому проблеме'
+
+    await call.message.answer(message,
                               reply_markup=inline_kb.get_resp_or_disc_inline_kb(problem_obj, user_id))
     await call.answer()
 
