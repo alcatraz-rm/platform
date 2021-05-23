@@ -53,7 +53,7 @@ async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_d
     problem_obj = queston_service.get_problem_by_id(problem_id)
 
     await call.message.answer("Обсудить или ответить?",
-                              reply_markup=inline_kb.get_resp_or_disc_inline_kb(problem_obj, user_id))
+                              reply_markup=inline_kb.get_resp_or_disc_inline_kb(problem_obj, user_id, problem_obj.invite_link))
     await call.answer()
 
     await QuestionDetailStates.response_or_discussion.set()
