@@ -96,6 +96,16 @@ def get_ready_km():
     return keyboard
 
 
+def problem_type_km():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.add('Вопросы')
+    keyboard.add('Обсуждения')
+    keyboard.add('Показать всё')
+    keyboard.add('/exit')
+
+    return keyboard
+
+
 def get_settings_option_km():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     keyboard.add('Name')

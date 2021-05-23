@@ -54,3 +54,5 @@ class QuestionDetailStates(StatesGroup):
     response_or_discussion = State()
     waiting_for_response = State()
 
+class FeedStates(StatesGroup):
+    waiting_for_choose_type = State()

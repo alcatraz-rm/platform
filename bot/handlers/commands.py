@@ -11,7 +11,7 @@ from bot.constants import *
 from bot.db.services import account_service, queston_service
 from bot.db.services.queston_service import get_all_open_questions, get_user_problems, add_new_problem, assign_topic
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
-    SettingsChangeStates, QuestionDetailStates
+    SettingsChangeStates, QuestionDetailStates, FeedStates
 from bot.utils import remove_non_service_data, generate_topic_str, generate_feed
 
 
@@ -266,9 +266,8 @@ async def handle_me(message: types.Message):
 
 @dp.message_handler(commands=["feed"], state="*")
 async def handle_feed(message: types.Message):
-    questions = get_all_open_questions()
-
-    await message.answer(generate_feed(questions), parse_mode=types.ParseMode.MARKDOWN)
+    await message.answer("Какие проблемы вас интересуют?", reply_markup=kb.problem_type_km())
+    await FeedStates.waiting_for_choose_type.set()
 
 
 @dp.message_handler(commands=["about"], state="*")

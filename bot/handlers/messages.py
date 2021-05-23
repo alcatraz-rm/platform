@@ -9,11 +9,11 @@ from bot.config import dp, ADMINS_IDS, bot
 from bot.constants import *
 from bot.db.services import account_service, queston_service
 from bot.db.services.account_service import email_is_valid
-from bot.db.services.queston_service import add_new_problem, assign_topic, department_is_valid, degree_is_valid
+from bot.db.services.queston_service import add_new_problem, assign_topic, department_is_valid, degree_is_valid, get_all_open_questions
 from bot.handlers.commands import send_welcome, handle_admin, handle_detail
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, SettingsChangeStates, \
-    QuestionDetailStates
-from bot.utils import remove_non_service_data
+    QuestionDetailStates, FeedStates
+from bot.utils import remove_non_service_data, generate_feed
 
 '''
     Getting current state 'name':
@@ -495,6 +495,27 @@ async def handle_response_body(message: types.Message, state: FSMContext):
     message.text = "/detail" + problem_id
     await handle_detail(message, state)
 
+
+@dp.message_handler(state=FeedStates.waiting_for_choose_type)
+async def handle_problem_type(message: types.Message):
+    # list(Problem.select().where(Problem.is_closed == False))
+    if message.text == 'Вопросы':
+        problems = list()
+        for problem in get_all_open_questions():
+            if problem.type == 'Question':
+                problems.append(problem)
+        await message.answer(generate_feed(problems), parse_mode=types.ParseMode.MARKDOWN)
+    elif message.text == 'Обсуждения':
+        problems = list()
+        for problem in get_all_open_questions():
+            if problem.type == 'Request':
+                problems.append(problem)
+        await message.answer(generate_feed(problems), parse_mode=types.ParseMode.MARKDOWN)
+    elif message.text == 'Показать всё':
+        problems = get_all_open_questions()
+        await message.answer(generate_feed(problems), parse_mode=types.ParseMode.MARKDOWN)
+    else:
+        await message.answer("Некорректно выбран тип проблемы.", reply_markup=kb.problem_type_km())
 
 @dp.message_handler(state="*")
 async def handle_any_other_message(message: types.Message, state: FSMContext):
