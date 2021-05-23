@@ -357,7 +357,7 @@ async def handle_bot_chat_admin(message: types.Message, state: FSMContext):
             return
 
         problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_='discussion',
-                                  invite_link=invite_link)
+                                  invite_link=invite_link, group_id=chat.id)
 
         for topic in problem_data['topics']:
             assign_topic(problem, topic[1])

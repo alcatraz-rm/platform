@@ -63,6 +63,8 @@ class Problem(BaseModel):
 
     invite_link = CharField(default=None, null=True)
 
+    group_id = IntegerField(null=True, default=None)
+
     class Meta:
         db_table = 'Problem'
 
