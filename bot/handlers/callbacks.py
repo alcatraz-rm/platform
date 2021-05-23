@@ -53,7 +53,7 @@ async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_d
         message = 'С помощью кнопки "Перейти к обсуждению" ты можешь присоединиться к телеграм-чату, посвященному этому проблеме'
         
     await call.message.answer(message,
-                              reply_markup=inline_kb.get_resp_or_disc_inline_kb(problem_obj, user_id)
+                              reply_markup=inline_kb.get_resp_or_disc_inline_kb(problem_obj, user_id))
     
     await call.answer()
 
