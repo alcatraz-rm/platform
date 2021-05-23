@@ -9,6 +9,7 @@ from bot import constants
 from bot.config import dp
 from bot.constants import *
 from bot.db.services import account_service, queston_service
+from bot.db.services.queston_service import get_problem_by_id
 from bot.states import QuestionDetailStates
 from bot.utils import generate_topic_str
 
@@ -27,6 +28,12 @@ async def handle_discussion_action(call: types.CallbackQuery, callback_data: dic
 async def send_response_form(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     problem_id = callback_data["problem_id"]
 
+    problem = get_problem_by_id(problem_id)
+
+    if problem.is_closed:
+        await call.answer("Вопрос был закрыт автором и доступен только для чтения.", show_alert=True)
+        return
+
     await call.message.answer("Напиши свой ответ в следующем сообщении.", reply_markup=kb.ReplyKeyboardRemove())
     await QuestionDetailStates.waiting_for_response.set()
     await state.update_data(problem_id=problem_id)
@@ -43,16 +50,24 @@ async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_d
     user_id = callback_data["user_id"]
     problem_id = callback_data["problem_id"]
     problem_obj = queston_service.get_problem_by_id(problem_id)
+
     await call.message.answer("Обсудить или ответить?",
                               reply_markup=inline_kb.get_resp_or_disc_inline_kb(problem_obj, user_id))
     await call.answer()
+
     await QuestionDetailStates.response_or_discussion.set()
 
 
 @dp.callback_query_handler(question_detail_cb.filter(action=["author_info"]),
                            state=QuestionDetailStates.waiting_for_choose_option)
 async def send_author_info(call: types.CallbackQuery, callback_data: dict):
-    author = queston_service.get_problem_by_id(callback_data["problem_id"]).user
+    problem = queston_service.get_problem_by_id(callback_data["problem_id"])
+
+    if problem.is_anonymous:
+        await call.answer("Вопрос задан анонимно, информация об авторе скрыта.", show_alert=True)
+        return
+
+    author = problem.user
 
     interests_str = generate_topic_str(account_service.get_all_interests_for_user(author.t_id))
 
@@ -87,6 +102,10 @@ async def handle_like(call: types.CallbackQuery, callback_data: dict):
     problem_id = callback_data["problem_id"]
 
     problem_obj = queston_service.get_problem_by_id(problem_id)
+
+    if problem_obj.is_closed:
+        await call.answer("Вопрос был закрыт автором, нельзя отслеживать закрытые вопросы.", show_alert=True)
+        return
 
     topics_str = generate_topic_str(queston_service.get_all_topics_for_problem(problem_id))
     author_name = problem_obj.user.name if not problem_obj.is_anonymous else "Anonymous"

@@ -25,7 +25,7 @@ from bot.utils import remove_non_service_data, generate_topic_str
 # TODO: Change /exit from Add interest
 # TODO: fix loading department and degree from db in author info
 # TODO: add user id validating and alerting
-# TODO: handle anonymous question detail
+# TODO: handle anonymous question detail - DONE
 # TODO: resend keyboard markup if error occurred
 
 
@@ -136,7 +136,6 @@ async def handle_add_or_finish(message: types.Message, state: FSMContext):
         print('finish')
         if type_ == 'discussion':
             await message.answer(NEW_DISCUSSION_THEME_FINISH_MESSAGE)
-            # TODO: set type 'discussion'
             problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_=type_)
 
             for topic in problem_data['topics']:
@@ -167,9 +166,12 @@ async def handle_detail(message: types.Message, state: FSMContext):
     problem_obj = queston_service.get_problem_by_id(q_id)
     if problem_obj is not None:
         is_liked = queston_service.is_problem_liked_by_user(problem_id=q_id, user_t_id=message.from_user.id)
+        is_closed = problem_obj.is_closed
+
         reply_markup = inline_kb.get_question_detail_inline_kb(problem_obj, message.from_user.id, is_liked=is_liked)
         topics_str = generate_topic_str(queston_service.get_all_topics_for_problem(q_id))
         author_name = problem_obj.user.name if not problem_obj.is_anonymous else "Anonymous"
+
         answer = constants.QUESTION_DETAIL_MESSAGE.format(id=problem_obj.id,
                                                           title=problem_obj.title,
                                                           author_name=author_name,
@@ -177,6 +179,10 @@ async def handle_detail(message: types.Message, state: FSMContext):
                                                           topics=topics_str)
         if is_liked:
             answer += "\n" + constants.QUESTION_DETAIL_LIKED_MESSAGE
+
+        if is_closed:
+            answer += '\nВопрос закрыт автором и доступен только для чтения.'
+
         await message.answer(answer, reply_markup=reply_markup, parse_mode=types.ParseMode.MARKDOWN)
         await QuestionDetailStates.waiting_for_choose_option.set()
     else:

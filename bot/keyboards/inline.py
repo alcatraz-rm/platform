@@ -40,7 +40,7 @@ def get_response_detail_inline_kb(response_obj: Response, user_id: int, is_autho
     return keyboard
 
 
-def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: bool = False):
+def get_question_detail_inline_kb(problem_obj: Problem, user_id: int, is_liked: bool = False, is_closed: bool = False):
     like_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="like")
     author_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="author_info")
     resp_or_disc_callback = question_detail_cb.new(problem_id=problem_obj.id, user_id=user_id, action="resp_or_disc")
