@@ -54,7 +54,7 @@ def assign_interest(user: UserModel, subject_name: str):
 
     user_interests = get_all_interests_for_user(user.t_id)
 
-    if subject_name not in user_interests.values():
+    if subject_name not in user_interests.get(subject.science.name):
         Interest.create(user=user.id, subject=subject)
 
 
@@ -74,7 +74,6 @@ def remove_interest(user: UserModel, subject_name: str):
         raise DoesNotExist("Subject \"{}\" doesn't exist.".format(subject_name))
 
 
-# TODO: fix this (must return science as key and subjects LIST as value)
 def get_all_interests_for_user(user_id: int) -> dict:
     """
         Returns a dict of pairs {subject_name, science_name (linked to the subject)}.
