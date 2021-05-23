@@ -33,3 +33,15 @@ class StateValidationMiddleware(BaseMiddleware):
         await state.update_data(_time=n)
         # print("For user {} time set to {}.".format(message.from_user.username, n))
         # print(await state.get_state())
+
+
+class MessageSourceValidationMiddleware(BaseMiddleware):
+    def __init__(self):
+        super(MessageSourceValidationMiddleware, self).__init__()
+
+    async def on_process_message(self, message: types.Message, data: dict):
+        """
+        Check if message from group chat, if so middleware ignores this message
+        """
+        if message.chat.id < 0:
+            raise SkipHandler()
