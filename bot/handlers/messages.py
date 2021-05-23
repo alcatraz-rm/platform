@@ -111,7 +111,6 @@ async def registration_complete(message: types.Message, state: FSMContext):
                                      department=user_data['department'],
                                      degree_level=user_data['degree_level'],
                                      )
-
         await message.answer("Что вам интересно? Сначала выберите науку, а затем предмет",
                              reply_markup=kb.get_science_list_km())
         await RegistrationProcessStates.waiting_for_interests_science.set()
@@ -129,9 +128,8 @@ async def registration_department(message: types.Message, state: FSMContext):
                              reply_markup=kb.get_degree_km())
         await RegistrationProcessStates.next()
     else:
-        await message.answer(
-            "У нас нет такого факультета! Выберите факультет из списка",
-            reply_markup=kb.get_department_km())
+        await message.answer("У нас нет такого факультета! Выберите факультет из списка",
+                             reply_markup=kb.get_department_km())
 
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_email)
@@ -432,19 +430,6 @@ async def handle_new_anonymous_question_answer(message: types.Message, state: FS
 
 
 # Question detail
-@dp.message_handler(state=QuestionDetailStates.waiting_for_report)
-async def handle_report_message(message: types.Message, state: FSMContext):
-    data = await state.get_data()
-    author = message.from_user.id
-    problem_id = data.get("problem_id")
-    report_body = message.text
-    queston_service.report_problem(problem_id=problem_id, report_body=report_body, report_author_id=author)
-    # TODO: ADD KB_MARKUP
-    await state.set_data(remove_non_service_data(data))
-    await message.answer(constants.QUESTION_DETAIL_REPORT_SUBMITTED, reply_markup=kb.ReplyKeyboardRemove())
-    # await state.reset_state(with_data=False)
-    await QuestionDetailStates.waiting_for_choose_option.set()
-
 
 @dp.message_handler(state=QuestionDetailStates.waiting_for_problem_id)
 async def handle_detail_without_id(message: types.Message, state: FSMContext):
@@ -460,12 +445,13 @@ async def handle_response_body(message: types.Message, state: FSMContext):
     problem_id = data["problem_id"]
     response_body = message.text
     user_t_id = message.from_user.id
-    queston_service.add_new_response(problem_id=problem_id,
-                                     body=response_body,
-                                     user_t_id=user_t_id,
-                                     is_anonymous=False)
+    await queston_service.add_new_response(problem_id=problem_id,
+                                           body=response_body,
+                                           user_t_id=user_t_id,
+                                           is_anonymous=False)
 
     await message.answer(constants.QUESTION_DETAIL_RESPONSE_COMPLETE_MESSAGE, reply_markup=kb.ReplyKeyboardRemove())
+
     await state.set_data(remove_non_service_data(data))
     message.text = "/detail" + problem_id
     await handle_detail(message, state)

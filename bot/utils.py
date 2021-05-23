@@ -1,4 +1,6 @@
 from bot.db.services import queston_service
+from bot.config import bot as bot_instance
+from aiogram import types
 
 
 def remove_non_service_data(data: dict):
@@ -44,3 +46,11 @@ def generate_feed(questions_list):
                                                                         question.id)))
 
     return questions_str
+
+
+async def make_broadcast(message: str, list_of_users: list):
+    for user in list_of_users:
+        try:
+            await bot_instance.send_message(chat_id=user, text=message, parse_mode=types.ParseMode.MARKDOWN)
+        except Exception:
+            print(f"Can't send message chat_id = {user}")
