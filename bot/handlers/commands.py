@@ -354,6 +354,7 @@ async def handle_bot_chat_admin(message: types.Message, state: FSMContext):
 
     if message.text == 'Готово':
         chat = await bot.get_chat(problem_data['chat_id'])
+        await bot.create_chat_invite_link(problem_data['chat_id'])
         invite_link = chat.invite_link
 
         if not invite_link:
@@ -368,6 +369,16 @@ async def handle_bot_chat_admin(message: types.Message, state: FSMContext):
             assign_topic(problem, topic[1])
 
         await bot.send_message(message.from_user.id, NEW_DISCUSSION_END_MESSAGE.format(id=problem.get_id()))
+        topic_str = generate_topic_str(queston_service.get_all_topics_for_problem(problem.id))
+        mes = constants.DISCUSSION_DETAIL_MESSAGE.format(id=problem.id,
+                                                         title=problem.title,
+                                                         author_name=problem.user.name,
+                                                         body=problem.body,
+                                                         topics=topic_str)
+
+        mes_ = await bot.send_message(chat_id=problem_data["chat_id"], text=mes, parse_mode=types.ParseMode.MARKDOWN)
+        await bot.set_chat_title(chat_id=problem_data["chat_id"], title=problem.title)
+        await bot.pin_chat_message(chat_id=problem_data["chat_id"], message_id=mes_.message_id, disable_notification=False)
         await state.set_data(remove_non_service_data(problem_data))
         await state.reset_state(with_data=False)
     else:
@@ -386,5 +397,6 @@ async def handle_chat(chat_member: types.ChatMemberUpdated, state: FSMContext):
         await bot.send_message(user_t_id, 'Отлично! Чат создан, теперь осталось сделать меня администратором, '
                                           'чтобы я мог приглашать пользователей. Как это будет готов, '
                                           'нажми на кнопку "Готово"', reply_markup=kb.get_ready_km())
+
 
 # TODO: add deleting bot from chat catching
