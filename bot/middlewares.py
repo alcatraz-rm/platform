@@ -1,9 +1,11 @@
-from aiogram.dispatcher.handler import SkipHandler
-from aiogram.dispatcher.middlewares import BaseMiddleware
-from aiogram import Dispatcher, types
 from datetime import datetime as dt
 
-from bot.utils import make_broadcast
+from aiogram import Dispatcher, types
+from aiogram.dispatcher.handler import SkipHandler
+from aiogram.dispatcher.middlewares import BaseMiddleware
+
+# from bot.utils import make_broadcast
+from bot.config import bot
 
 STATE_EXPIRE_TIME_IN_SEC = 24 * 3600
 ADMINS_IDS = [401961508, 187289003, 400693865, 307306471, 441311056]
@@ -59,8 +61,15 @@ class ValidateUserIDMiddleware(BaseMiddleware):
         Check if message from group chat, if so middleware ignores this message
         """
         if message.from_user.id not in ADMINS_IDS:
-            await make_broadcast(f'Сообщение от пользователя не из спика админов: {message.from_user.id}\n'
-                                 f'First name: {message.from_user.first_name}\n'
-                                 f'Last name: {message.from_user.last_name}\n'
-                                 f'Username: {message.from_user.username}\n'
-                                 f'Text: {message.text}', ADMINS_IDS)
+            message = f'Сообщение от пользователя не из спика админов: {message.from_user.id}\n' \
+                      f'First name: {message.from_user.first_name}\n' \
+                      f'Last name: {message.from_user.last_name}\n' \
+                      f'Username: {message.from_user.username}\n' \
+                      f'Text: {message.text}'
+
+            for user in ADMINS_IDS:
+                try:
+                    await bot.send_message(chat_id=user, text=message, parse_mode=types.ParseMode.MARKDOWN)
+                except Exception:
+                    print(f"Can't send message chat_id = {user}")
+
