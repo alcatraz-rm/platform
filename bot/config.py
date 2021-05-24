@@ -18,7 +18,7 @@ DATABASE_HOST = os.getenv('DATABASE_HOST')
 DATABASE_NAME = os.getenv('DATABASE_NAME')
 
 # Cfg related constants
-ADMINS_IDS = [401961508, 187289003, 400693865, 307306471]
+ADMINS_IDS = [401961508, 187289003, 400693865, 307306471, 441311056]
 
 displayed_commands = [
     types.BotCommand(command="/help", description="Список доступынх команд"),
