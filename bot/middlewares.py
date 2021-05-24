@@ -3,6 +3,9 @@ from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram import Dispatcher, types
 from datetime import datetime as dt
 
+from bot.config import ADMINS_IDS
+from bot.utils import make_broadcast
+
 STATE_EXPIRE_TIME_IN_SEC = 24 * 3600
 
 
@@ -45,3 +48,19 @@ class MessageSourceValidationMiddleware(BaseMiddleware):
         """
         if message.chat.id < 0 and message.content_type != 'group_chat_created':
             raise SkipHandler()
+
+
+class ValidateUserIDMiddleware(BaseMiddleware):
+    def __init__(self):
+        super(ValidateUserIDMiddleware, self).__init__()
+
+    async def on_process_message(self, message: types.Message, data: dict):
+        """
+        Check if message from group chat, if so middleware ignores this message
+        """
+        if message.from_user.id not in ADMINS_IDS:
+            await make_broadcast(f'Сообщение от пользователя не из спика админов: {message.from_user.id}\n'
+                                 f'First name: {message.from_user.first_name}\n'
+                                 f'Last name: {message.from_user.last_name}\n'
+                                 f'Username: {message.from_user.username}\n'
+                                 f'Text: {message.text}', ADMINS_IDS)

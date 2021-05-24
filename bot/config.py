@@ -4,7 +4,7 @@ import logging
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 
-from bot.middlewares import StateValidationMiddleware, MessageSourceValidationMiddleware
+from bot.middlewares import StateValidationMiddleware, MessageSourceValidationMiddleware, ValidateUserIDMiddleware
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils.executor import Executor
@@ -18,7 +18,7 @@ DATABASE_HOST = os.getenv('DATABASE_HOST')
 DATABASE_NAME = os.getenv('DATABASE_NAME')
 
 # Cfg related constants
-ADMINS_IDS = [401961508, 187289003]
+ADMINS_IDS = [401961508, 187289003, 400693865, 307306471]
 
 displayed_commands = [
     types.BotCommand(command="/help", description="Список доступынх команд"),
@@ -46,5 +46,6 @@ dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 dp.middleware.setup(StateValidationMiddleware())
 dp.middleware.setup(MessageSourceValidationMiddleware())
+dp.middleware.setup(ValidateUserIDMiddleware())
 executor = Executor(dp, skip_updates=True)
 
