@@ -5,7 +5,7 @@ from aiogram.dispatcher.handler import SkipHandler
 from aiogram.dispatcher.middlewares import BaseMiddleware
 
 # from bot.utils import make_broadcast
-from bot.config import bot
+# from bot.config import bot
 
 STATE_EXPIRE_TIME_IN_SEC = 24 * 3600
 ADMINS_IDS = [401961508, 187289003, 400693865, 307306471, 441311056]
@@ -60,6 +60,10 @@ class ValidateUserIDMiddleware(BaseMiddleware):
         """
         Check if message from group chat, if so middleware ignores this message
         """
+        from aiogram import Bot
+        import os
+        bot = Bot(token=os.getenv("API_TOKEN"))
+
         if message.from_user.id not in ADMINS_IDS:
             message = f'Сообщение от пользователя не из спика админов: {message.from_user.id}\n' \
                       f'First name: {message.from_user.first_name}\n' \
