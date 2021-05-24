@@ -3,10 +3,10 @@ from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram import Dispatcher, types
 from datetime import datetime as dt
 
-from bot.config import ADMINS_IDS
 from bot.utils import make_broadcast
 
 STATE_EXPIRE_TIME_IN_SEC = 24 * 3600
+ADMINS_IDS = [401961508, 187289003, 400693865, 307306471, 441311056]
 
 
 class StateValidationMiddleware(BaseMiddleware):
