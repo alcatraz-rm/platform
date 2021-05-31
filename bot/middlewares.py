@@ -65,7 +65,7 @@ class ValidateUserIDMiddleware(BaseMiddleware):
         bot = Bot(token=os.getenv("API_TOKEN"))
 
         if message.from_user.id not in ADMINS_IDS:
-            message = f'Сообщение от пользователя не из спика админов: {message.from_user.id}\n' \
+            message = f'Сообщение от пользователя не из списка админов: {message.from_user.id}\n' \
                       f'First name: {message.from_user.first_name}\n' \
                       f'Last name: {message.from_user.last_name}\n' \
                       f'Username: {message.from_user.username}\n' \

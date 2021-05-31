@@ -162,7 +162,7 @@ NEW_DISCUSSION_MESSAGE = """Сформулируй название обсужд
 NEW_DISCUSSION_PROBLEM_MESSAGE = """Опиши проблему, которую хочешь вынести на обсуждение. Спрашивай о реальной 
 проблеме, с которой столкнулся. Подробно опиши, чего хочешь добиться, что уже сделал и что предлагаешь обсудить"""  #
 # кнопка exit
-NEW_DISCUSSION_THEME_MESSAGE = """Выбери не более 5 тем для совего вопроса"""  # кнопка exit
+NEW_DISCUSSION_THEME_MESSAGE = """Выбери не более 5 тем для обсуждения"""  # кнопка exit
 NEW_DISCUSSION_SCIENCE_MESSAGE = """Выбери науку"""  # кнопка exit
 NEW_DISCUSSION_DISCIPLINE_MESSAGE = """Выбери дисциплину"""  # кнопка exit / skip
 NEW_DISCUSSION_THEME_SAVED_MESSAGE = """Тема успешно сохранена. Чтобы добавить ещё одну тему, используй кнопку /add. 
