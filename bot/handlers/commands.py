@@ -11,6 +11,7 @@ from bot.db.services.queston_service import get_user_problems, add_new_problem, 
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, InterestsInputStates, \
     SettingsChangeStates, QuestionDetailStates, FeedStates
 from bot.utils import remove_non_service_data, generate_topic_str, generate_feed
+from aiogram.utils import exceptions
 
 
 # TODO: logging to file
@@ -354,8 +355,15 @@ async def handle_bot_chat_admin(message: types.Message, state: FSMContext):
 
     if message.text == 'Готово':
         chat = await bot.get_chat(problem_data['chat_id'])
-        await bot.create_chat_invite_link(problem_data['chat_id'])
-        invite_link = chat.invite_link
+
+        # test this logic
+        try:
+            invite_link = await bot.create_chat_invite_link(problem_data['chat_id'])
+            invite_link = invite_link.invite_link
+        except exceptions.MigrateToChat as exc:
+            new_chat_id = str(exc).split()[-1][:-1]
+            invite_link = await bot.create_chat_invite_link(new_chat_id)
+            invite_link = invite_link.invite_link
 
         if not invite_link:
             await message.answer('Все еще не могу приглашать других пользователей. '
