@@ -362,6 +362,7 @@ async def handle_bot_chat_admin(message: types.Message, state: FSMContext):
             invite_link = invite_link.invite_link
         except exceptions.MigrateToChat as exc:
             new_chat_id = str(exc).split()[-1][:-1]
+            problem_data['chat_id'] = new_chat_id
             invite_link = await bot.create_chat_invite_link(new_chat_id)
             invite_link = invite_link.invite_link
 
