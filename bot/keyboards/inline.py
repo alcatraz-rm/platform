@@ -74,7 +74,7 @@ def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int):
                                                        action="other_responses")
 
     buttons = [
-        types.InlineKeyboardButton(text=emoji.emojize("Ответы других пользователей :mortar_board:"),
+        types.InlineKeyboardButton(text=emoji.emojize("Ответы других пользователей :bulb:"),
                                    callback_data=others_responses_callback),
         types.InlineKeyboardButton(text=emoji.emojize("Написать свой ответ :pencil:"), callback_data=response_callback),
     ]
