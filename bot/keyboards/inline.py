@@ -6,8 +6,9 @@ from bot.handlers.callbacks import question_detail_cb, response_detail_cb, repor
 
 def get_generic_inline_kb(keyboard_data: dict, row_widths: int = 1):
     """
-        Pass a keyboard_data parameter - a dict of [button_text, callback data] pairs.
+    Pass a keyboard_data parameter - a dict of [button_text, callback data] pairs.
     """
+
     buttons = []
     for button_text in keyboard_data:
         buttons.append(types.InlineKeyboardButton(text=button_text,
@@ -25,12 +26,12 @@ def get_response_detail_inline_kb(response_obj: Response, user_id: int, is_autho
     report_callback = response_detail_cb.new(response_id=response_id, user_id=user_id, action="report")
 
     buttons = [
-        types.InlineKeyboardButton(text="Пожаловаться", callback_data=report_callback)
+        types.InlineKeyboardButton(text="Пожаловаться :warning:", callback_data=report_callback)
     ]
 
     if is_author:
         solve_callback = response_detail_cb.new(response_id=response_id, user_id=user_id, action="solve")
-        buttons.append(types.InlineKeyboardButton(text="Помогло", callback_data=solve_callback))
+        buttons.append(types.InlineKeyboardButton(text="Помогло :white_check_mark:", callback_data=solve_callback))
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(*buttons)
@@ -74,8 +75,8 @@ def get_resp_or_disc_inline_kb(problem_obj: Problem, user_id: int):
                                                        action="other_responses")
 
     buttons = [
-        types.InlineKeyboardButton(text="Ответы других пользователей", callback_data=others_responses_callback),
-        types.InlineKeyboardButton(text="Написать свой ответ", callback_data=response_callback),
+        types.InlineKeyboardButton(text=emoji.emojize("Ответы других пользователей :mortar_board:"), callback_data=others_responses_callback),
+        types.InlineKeyboardButton(text=emoji.emojize("Написать свой ответ :pencil:"), callback_data=response_callback),
     ]
 
     keyboard = types.InlineKeyboardMarkup(row_width=1)

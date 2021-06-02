@@ -27,10 +27,10 @@ async def send_response_form(call: types.CallbackQuery, callback_data: dict, sta
     problem = get_problem_by_id(problem_id)
 
     if problem.is_closed:
-        await call.answer("Вопрос был закрыт автором и доступен только для чтения.", show_alert=True)
+        await call.answer("Вопрос был закрыт автором и доступен только для чтения", show_alert=True)
         return
 
-    await call.message.answer("Напиши свой ответ в следующем сообщении.", reply_markup=kb.ReplyKeyboardRemove())
+    await call.message.answer("Напиши свой ответ в следующем сообщении", reply_markup=kb.ReplyKeyboardRemove())
     await QuestionDetailStates.waiting_for_response.set()
     await state.update_data(problem_id=problem_id)
     await call.answer()
@@ -48,7 +48,7 @@ async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_d
     problem_obj = queston_service.get_problem_by_id(problem_id)
     
     if problem_obj.type == 'question':
-        message = "Обсудить или ответить?"
+        message = "Посмотреть ответы других или написать свой ответ?"
     else:
         message = 'С помощью кнопки "Перейти к обсуждению" ты можешь присоединиться к телеграм-чату, посвященному этому проблеме'
         
@@ -104,7 +104,7 @@ async def handle_report(call: types.CallbackQuery, callback_data: dict, state: F
 async def send_report(call: types.CallbackQuery, callback_data: dict, state: FSMContext):
     problem_id = callback_data["problem_id"]
     if queston_service.is_problem_reported_by_user(problem_id=problem_id, user_id=call.from_user.id):
-        await call.answer("Вы уже отправляли жалобу на этот вопрос.", show_alert=True)
+        await call.answer("Вы уже отправляли жалобу на этот вопрос", show_alert=True)
         return
     reply_markup = inline_kb.get_report_options_inline_kb(problem_id=problem_id, user_id=callback_data["user_id"])
     await call.message.answer(constants.QUESTION_DETAIL_REPORT_INIT, reply_markup=reply_markup)
@@ -121,7 +121,7 @@ async def handle_like(call: types.CallbackQuery, callback_data: dict):
     problem_obj = queston_service.get_problem_by_id(problem_id)
 
     if problem_obj.is_closed:
-        await call.answer("Вопрос был закрыт автором, нельзя отслеживать закрытые вопросы.", show_alert=True)
+        await call.answer("Вопрос был закрыт автором, нельзя отслеживать закрытые вопросы", show_alert=True)
         return
 
     topics_str = generate_topic_str(queston_service.get_all_topics_for_problem(problem_id))
@@ -176,7 +176,7 @@ async def handle_report_response(call: types.CallbackQuery, callback_data: dict)
 async def resolve_problem(call: types.CallbackQuery, callback_data: dict):
     response_id = callback_data["response_id"]
     await queston_service.close_problem_via_response(response_id)
-    await call.answer("Ты закрыл впорос.", show_alert=True)
+    await call.answer("Ты закрыл вопрос", show_alert=True)
 
 
 @dp.callback_query_handler(question_detail_cb.filter(), state="*")
