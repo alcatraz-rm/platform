@@ -1,4 +1,5 @@
 # constants
+import emoji as emoji
 
 PROBLEM_TYPE_OPTIONS = [
     ('REQUEST', 'Request'),
@@ -100,14 +101,14 @@ START_MET_MESSAGE = """С возращением, {name}. Все команды 
 # ME_SENTENCES:
 
 
-ME_MET_MESSAGE = """Твой профиль:
+ME_MET_MESSAGE = emoji.emojize("""Твой профиль:
 :white_small_square: Имя: {name}
 :white_small_square: Почта (НГУ): {email}
 :white_small_square: Интересы: {interests}
 :white_small_square: Факультет: {department}
 :white_small_square: Степень обучения: {degree_level}
 :white_small_square: Твои вопросы: /my_questions
-"""
+""")
 
 ME_MESSAGE = """ У вас еще нет профиля, нужно зарегистрировться с помощью /register """  # кнопка register
 
