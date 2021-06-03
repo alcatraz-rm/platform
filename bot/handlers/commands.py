@@ -415,4 +415,14 @@ async def handle_chat(chat_member: types.ChatMemberUpdated, state: FSMContext):
                                           'нажми на кнопку "Готово"', reply_markup=kb.get_ready_km())
 
 
+@dp.message_handler(commands=["friends"], state="*")
+async def show_friends(message: types.Message):
+    """
+    This handler will be called when user sends `/friends` command
+    """
+
+    await message.answer(constants.FRIENDS_MESSAGE, reply_markup=kb.ReplyKeyboardRemove(),
+                         parse_mode=types.ParseMode.MARKDOWN)
+
+
 # TODO: add deleting bot from chat catching

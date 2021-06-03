@@ -57,7 +57,14 @@ HELP_MESSAGE = """*Доступные команды:*
 
 *6.*\t\t/settings - настройки профиля
 
-*7.*\t\t/help - это сообщение
+*7.*\t\t/friends - список наших друзей
+
+*8.*\t\t/help - это сообщение
+"""
+
+FRIENDS_MESSAGE = """*Наши друзья:*
+
+*1. Новое из старого - https://vk.com/novoe_iz_starogo
 """
 
 REGISTRATION_EXIT_SENTENCES = "Введите /exit, чтобы прервать регистрацию"
