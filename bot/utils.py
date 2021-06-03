@@ -34,7 +34,7 @@ def generate_topic_str(topics: dict, sep="::") -> str:
 def generate_feed(questions_list):
     questions_str = ''
     question_info_template = '*Заголовок:* {title}\n' \
-                             '*Тип проблемы:* {type}' \
+                             '*Тип проблемы:* {type}\n' \
                              '*Статус:* {is_open}\n' \
                              '*Подробная информация:* /detail{problem_id}\n' \
                              '*Темы:* {topics}'
