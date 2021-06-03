@@ -41,7 +41,7 @@ logging.basicConfig(format=u'%(filename)+13s [ LINE:%(lineno)-4s] %(levelname)-8
 
 # storage = MemoryStorage()
 REDIS_HOST = os.getenv("REDIS_HOST")
-REDIS_PORT = int(os.getenv("REDIS_PORT"))
+REDIS_PORT = int(os.getenv("REDIS_PORT", 0))
 
 if REDIS_HOST:
     storage = RedisStorage(REDIS_HOST, REDIS_PORT, db=5)
