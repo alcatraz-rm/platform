@@ -1,5 +1,7 @@
 from peewee import DoesNotExist, InternalError
 
+from bot import utils
+from bot.config import ADMINS_IDS
 from bot.constants import DEPARTMENT_ALIASES, DEGREES_ALIASES
 from bot.db.models import UserModel, Interest, Subject
 
@@ -29,7 +31,9 @@ def add_new_user(t_id, t_username, name, email, department, degree_level):
             department=DEPARTMENT_ALIASES[department],
             degree_level=DEGREES_ALIASES[degree_level],
         )
-    except InternalError:
+    except InternalError as exc:
+        await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+
         UserModel.create(
             t_id=t_id,
             t_username=t_username,
@@ -45,6 +49,13 @@ def is_user_exist(t_id) -> bool:
         UserModel.get(t_id=t_id)
     except DoesNotExist:
         return False
+    except InternalError as exc:
+        await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+
+        try:
+            UserModel.get(t_id=t_id)
+        except DoesNotExist:
+            return False
 
     return True
 
@@ -52,7 +63,9 @@ def is_user_exist(t_id) -> bool:
 def get_user(t_id: int) -> Optional[UserModel]:
     try:
         user = UserModel.get_or_none(t_id=t_id)
-    except InternalError:
+    except InternalError as exc:
+        await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+
         user = UserModel.get_or_none(t_id=t_id)
 
     if user:
@@ -70,14 +83,18 @@ def assign_interest(user: UserModel, subject_name: str):
         try:
             Interest.create(user=user.id, subject=subject)
             return
-        except InternalError:
+        except InternalError as exc:
+            await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+
             Interest.create(user=user.id, subject=subject)
             return
 
     if subject_name not in user_interests.get(subject.science.name):
         try:
             Interest.create(user=user.id, subject=subject)
-        except InternalError:
+        except InternalError as exc:
+            await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+
             Interest.create(user=user.id, subject=subject)
 
 
@@ -86,6 +103,7 @@ def remove_interest(user: UserModel, subject_name: str):
         Removes interest for user. If subject with given name wasn't found DoesNotExist exception is being thrown.
     """
     subject = Subject.get_or_none(name=subject_name)
+
     if subject is not None:
         interest = Interest.get_or_none(user=user, subject=subject)
 
@@ -110,6 +128,7 @@ def get_all_interests_for_user(user_id: int) -> dict:
                         .where(predicate)
                         ))
     subjects = {}
+
     for record in query_interests:
         if subjects.__contains__(record.subject.science.name):
             subjects[record.subject.science.name].append(record.subject.name)
@@ -135,5 +154,7 @@ def alter_user_info(user: UserModel, name: str = None, email: str = None,
 
     try:
         user.save()
-    except InternalError:
+    except InternalError as exc:
+        await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+
         user.save()

@@ -4,7 +4,7 @@ from datetime import datetime as dt
 from aiogram import types
 from peewee import DoesNotExist, InternalError
 
-from bot.config import bot as bot_instance
+from bot.config import bot as bot_instance, ADMINS_IDS
 from bot.constants import *
 from bot.constants import REPORT_REASONS_ALIASES
 from bot.db.models import Subject, Science, Problem, Response, Topic, UserModel, ProblemLike, ProblemReport
@@ -14,7 +14,9 @@ from bot.utils import make_broadcast
 def add_new_science(name: str):
     try:
         Science.create(name=name)
-    except InternalError:
+    except InternalError as exc:
+        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+
         Science.create(name=name)
 
 
@@ -24,7 +26,9 @@ def add_new_subject(name: str, science_name: str):
     if science_obj is not None:
         try:
             Subject.create(name=name, science=science_obj)
-        except InternalError:
+        except InternalError as exc:
+            await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+
             Subject.create(name=name, science=science_obj)
     else:
         raise DoesNotExist("Science with name {} doesn't exist.".format(science_name))
@@ -67,7 +71,9 @@ def add_new_problem(title: str, body: str, user_t_id: int, type_, is_anonymous: 
                                      type=type_,
                                      invite_link=invite_link,
                                      group_id=group_id)
-    except InternalError:
+    except InternalError as exc:
+        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+
         new_problem = Problem.create(title=title,
                                      body=body,
                                      user=user,
@@ -83,7 +89,8 @@ def add_new_problem(title: str, body: str, user_t_id: int, type_, is_anonymous: 
 def get_problem_by_id(q_id) -> typing.Optional[Problem]:
     try:
         return Problem.get_or_none(id=q_id)
-    except:
+    except InternalError as exc:
+        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
         return Problem.get_or_none(id=q_id)
 
 
@@ -94,7 +101,8 @@ def assign_topic(problem: Problem, subject_name: str):
     if subject.science.name not in problem_topics.keys():
         try:
             Topic.create(problem=problem, subject=subject)
-        except InternalError:
+        except InternalError as exc:
+            await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
             Topic.create(problem=problem, subject=subject)
 
         return
@@ -102,14 +110,16 @@ def assign_topic(problem: Problem, subject_name: str):
     if subject_name not in problem_topics.get(subject):
         try:
             Topic.create(problem=problem, subject=subject)
-        except InternalError:
+        except InternalError as exc:
+            await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
             Topic.create(problem=problem, subject=subject)
 
 
 def get_all_open_questions() -> list:
     try:
         return list(Problem.select().where(Problem.is_closed == False))
-    except InternalError:
+    except InternalError as exc:
+        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
         return list(Problem.select().where(Problem.is_closed == False))
 
 
@@ -117,7 +127,8 @@ def get_user_problems(user_t_id: int) -> list:
     try:
         user_obj = UserModel.get_or_none(t_id=user_t_id)
         return list(Problem.select().where(Problem.user == user_obj))
-    except InternalError:
+    except InternalError as exc:
+        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
         user_obj = UserModel.get_or_none(t_id=user_t_id)
         return list(Problem.select().where(Problem.user == user_obj))
 
@@ -134,6 +145,7 @@ def get_all_topics_for_problem(problem_id: int) -> dict:
                     )
 
     topics = {}
+
     for record in query_topics:
         if topics.__contains__(record.subject.science.name):
             topics[record.subject.science.name].append(record.subject.name)
@@ -185,7 +197,8 @@ def get_list_of_users_who_liked(problem_id: int) -> list:
 def is_problem_liked_by_user(problem_id: int, user_t_id: int) -> bool:
     try:
         liked_by_users = get_list_of_users_who_liked(problem_id)
-    except InternalError:
+    except InternalError as exc:
+        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
         liked_by_users = get_list_of_users_who_liked(problem_id)
 
     if user_t_id in liked_by_users:
@@ -197,7 +210,8 @@ async def add_new_response(problem_id: int, body: str, user_t_id: int, is_anonym
     try:
         user = UserModel.get_or_none(t_id=user_t_id)
         problem_obj = Problem.get_or_none(id=problem_id)
-    except InternalError:
+    except InternalError as exc:
+        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
         user = UserModel.get_or_none(t_id=user_t_id)
         problem_obj = Problem.get_or_none(id=problem_id)
 
@@ -208,7 +222,8 @@ async def add_new_response(problem_id: int, body: str, user_t_id: int, is_anonym
                                created_at=dt.now(),
                                is_anonymous=is_anonymous,
                                )
-    except:
+    except InternalError as exc:
+        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
         resp = Response.create(problem=problem_obj,
                                body=body,
                                author=user,
@@ -236,7 +251,8 @@ def like_problem(problem_id: int, user_t_id: int):
         try:
             user = UserModel.get_or_none(t_id=user_t_id)
             ProblemLike.create(problem=problem, liked_by=user)
-        except InternalError:
+        except InternalError as exc:
+            await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
             user = UserModel.get_or_none(t_id=user_t_id)
             ProblemLike.create(problem=problem, liked_by=user)
     else:
@@ -246,7 +262,8 @@ def like_problem(problem_id: int, user_t_id: int):
 def dislike_problem(problem_id: int, user_t_id: int):
     try:
         problem = Problem.get_or_none(id=problem_id)
-    except InternalError:
+    except InternalError as exc:
+        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
         problem = Problem.get_or_none(id=problem_id)
 
     if problem is not None:
@@ -254,7 +271,8 @@ def dislike_problem(problem_id: int, user_t_id: int):
             user = UserModel.get_or_none(t_id=user_t_id)
             like = ProblemLike.get_or_none(problem=problem, liked_by=user)
             ProblemLike.delete_by_id(like.id)
-        except InternalError:
+        except InternalError as exc:
+            await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
             user = UserModel.get_or_none(t_id=user_t_id)
             like = ProblemLike.get_or_none(problem=problem, liked_by=user)
             ProblemLike.delete_by_id(like.id)
@@ -300,7 +318,8 @@ def report_problem(problem_id: int, report_reason, report_author_id: int):
                                  author=author_obj,
                                  report_reason=report_reason_cleared,
                                  )
-        except InternalError:
+        except InternalError as exc:
+            await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
             ProblemReport.create(report_problem=problem,
                                  author=author_obj,
                                  report_reason=report_reason_cleared,
