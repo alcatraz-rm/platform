@@ -82,7 +82,7 @@ async def send_author_info(call: types.CallbackQuery, callback_data: dict):
                                                           {value: key for key, value in DEGREES_ALIASES.items()}[
                                                               author.degree_level])
 
-    await call.message.answer(emoji.emojize(answer),
+    await call.message.answer(emoji.emojize(answer, use_aliases=True),
                               reply_markup=kb.ReplyKeyboardRemove(),
                               parse_mode=types.ParseMode.MARKDOWN)
     await call.answer()
