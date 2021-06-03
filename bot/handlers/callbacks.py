@@ -176,7 +176,7 @@ async def handle_report_response(call: types.CallbackQuery, callback_data: dict)
 async def resolve_problem(call: types.CallbackQuery, callback_data: dict):
     response_id = callback_data["response_id"]
     await queston_service.close_problem_via_response(response_id)
-    await call.answer("Ты закрыл вопрос", show_alert=True)
+    await call.answer("Ты закрыл(а) вопрос", show_alert=True)
 
 
 @dp.callback_query_handler(question_detail_cb.filter(), state="*")
