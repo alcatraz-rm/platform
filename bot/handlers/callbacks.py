@@ -156,7 +156,7 @@ async def handle_other_users_responses(call: types.CallbackQuery, callback_data:
     answer = "Ответы от пользователей:\n\n"
     for res in responses:
         sb = res.body[:32] if len(res.body) > 32 else res.body
-        formatted_date = res.created_at.strftime("%d %b %Y %H:%M:%S")
+        formatted_date = res.created_at.strftime("%d %b %Y")
 
         t = resp_temp.format(r_author=res.author.name,
                              date=formatted_date,

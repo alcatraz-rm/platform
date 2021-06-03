@@ -202,7 +202,7 @@ async def handle_response_without_id(message: types.Message, state: FSMContext):
 async def handle_response(message: types.Message, state: FSMContext):
     r_id = int(message.text.replace("/response", ''))
     response_obj = queston_service.get_response_by_id(r_id)
-    formatted_date = response_obj.created_at.strftime("%d %b %Y %H:%M:%S")
+    formatted_date = response_obj.created_at.strftime("%d %b %Y")
     answer = constants.QUESTION_DETAIL_RESPONSE_MESSAGE.format(r_id=response_obj.id,
                                                                r_author=response_obj.author.name,
                                                                date=formatted_date,
