@@ -1,3 +1,4 @@
+import asyncio
 import typing
 from datetime import datetime as dt
 
@@ -15,7 +16,8 @@ def add_new_science(name: str):
     try:
         Science.create(name=name)
     except InternalError as exc:
-        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+        asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+        # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
 
         Science.create(name=name)
 
@@ -27,7 +29,8 @@ def add_new_subject(name: str, science_name: str):
         try:
             Subject.create(name=name, science=science_obj)
         except InternalError as exc:
-            await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+            asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+            # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
 
             Subject.create(name=name, science=science_obj)
     else:
@@ -72,7 +75,8 @@ def add_new_problem(title: str, body: str, user_t_id: int, type_, is_anonymous: 
                                      invite_link=invite_link,
                                      group_id=group_id)
     except InternalError as exc:
-        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+        asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+        # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
 
         new_problem = Problem.create(title=title,
                                      body=body,
@@ -90,7 +94,8 @@ def get_problem_by_id(q_id) -> typing.Optional[Problem]:
     try:
         return Problem.get_or_none(id=q_id)
     except InternalError as exc:
-        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+        asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+        # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
         return Problem.get_or_none(id=q_id)
 
 
@@ -102,7 +107,8 @@ def assign_topic(problem: Problem, subject_name: str):
         try:
             Topic.create(problem=problem, subject=subject)
         except InternalError as exc:
-            await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+            asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+            # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
             Topic.create(problem=problem, subject=subject)
 
         return
@@ -111,7 +117,8 @@ def assign_topic(problem: Problem, subject_name: str):
         try:
             Topic.create(problem=problem, subject=subject)
         except InternalError as exc:
-            await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+            asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+            # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
             Topic.create(problem=problem, subject=subject)
 
 
@@ -119,7 +126,8 @@ def get_all_open_questions() -> list:
     try:
         return list(Problem.select().where(Problem.is_closed == False))
     except InternalError as exc:
-        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+        asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+        # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
         return list(Problem.select().where(Problem.is_closed == False))
 
 
@@ -128,7 +136,8 @@ def get_user_problems(user_t_id: int) -> list:
         user_obj = UserModel.get_or_none(t_id=user_t_id)
         return list(Problem.select().where(Problem.user == user_obj))
     except InternalError as exc:
-        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+        asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+        # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
         user_obj = UserModel.get_or_none(t_id=user_t_id)
         return list(Problem.select().where(Problem.user == user_obj))
 
@@ -198,6 +207,7 @@ def is_problem_liked_by_user(problem_id: int, user_t_id: int) -> bool:
     try:
         liked_by_users = get_list_of_users_who_liked(problem_id)
     except InternalError as exc:
+        asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
         await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
         liked_by_users = get_list_of_users_who_liked(problem_id)
 
@@ -252,7 +262,8 @@ def like_problem(problem_id: int, user_t_id: int):
             user = UserModel.get_or_none(t_id=user_t_id)
             ProblemLike.create(problem=problem, liked_by=user)
         except InternalError as exc:
-            await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+            asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+            # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
             user = UserModel.get_or_none(t_id=user_t_id)
             ProblemLike.create(problem=problem, liked_by=user)
     else:
@@ -263,7 +274,8 @@ def dislike_problem(problem_id: int, user_t_id: int):
     try:
         problem = Problem.get_or_none(id=problem_id)
     except InternalError as exc:
-        await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+        asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+        # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
         problem = Problem.get_or_none(id=problem_id)
 
     if problem is not None:
@@ -272,7 +284,8 @@ def dislike_problem(problem_id: int, user_t_id: int):
             like = ProblemLike.get_or_none(problem=problem, liked_by=user)
             ProblemLike.delete_by_id(like.id)
         except InternalError as exc:
-            await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+            asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+            # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
             user = UserModel.get_or_none(t_id=user_t_id)
             like = ProblemLike.get_or_none(problem=problem, liked_by=user)
             ProblemLike.delete_by_id(like.id)
@@ -319,7 +332,8 @@ def report_problem(problem_id: int, report_reason, report_author_id: int):
                                  report_reason=report_reason_cleared,
                                  )
         except InternalError as exc:
-            await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+            asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+            # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
             ProblemReport.create(report_problem=problem,
                                  author=author_obj,
                                  report_reason=report_reason_cleared,

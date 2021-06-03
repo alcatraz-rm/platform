@@ -1,3 +1,5 @@
+import asyncio
+
 from peewee import DoesNotExist, InternalError
 
 from bot import utils
@@ -32,7 +34,7 @@ def add_new_user(t_id, t_username, name, email, department, degree_level):
             degree_level=DEGREES_ALIASES[degree_level],
         )
     except InternalError as exc:
-        await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+        asyncio.run(utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
 
         UserModel.create(
             t_id=t_id,
@@ -50,7 +52,8 @@ def is_user_exist(t_id) -> bool:
     except DoesNotExist:
         return False
     except InternalError as exc:
-        await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+        asyncio.run(utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+        # await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
 
         try:
             UserModel.get(t_id=t_id)
@@ -64,7 +67,8 @@ def get_user(t_id: int) -> Optional[UserModel]:
     try:
         user = UserModel.get_or_none(t_id=t_id)
     except InternalError as exc:
-        await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+        asyncio.run(utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+        # await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
 
         user = UserModel.get_or_none(t_id=t_id)
 
@@ -84,7 +88,8 @@ def assign_interest(user: UserModel, subject_name: str):
             Interest.create(user=user.id, subject=subject)
             return
         except InternalError as exc:
-            await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+            asyncio.run(utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+            # await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
 
             Interest.create(user=user.id, subject=subject)
             return
@@ -93,7 +98,8 @@ def assign_interest(user: UserModel, subject_name: str):
         try:
             Interest.create(user=user.id, subject=subject)
         except InternalError as exc:
-            await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+            asyncio.run(utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+            # await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
 
             Interest.create(user=user.id, subject=subject)
 
@@ -155,6 +161,7 @@ def alter_user_info(user: UserModel, name: str = None, email: str = None,
     try:
         user.save()
     except InternalError as exc:
-        await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+        asyncio.run(utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+        # await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
 
         user.save()
