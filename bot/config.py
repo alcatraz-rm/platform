@@ -30,7 +30,7 @@ displayed_commands = [
     types.BotCommand(command="/me", description="Личные данные"),
     types.BotCommand(command="/settings", description="Настройки профиля"),
     types.BotCommand(command="/about", description="Информация о боте"),
-    types.BotCommand(command="/my_questions", description="Твои вопросы")
+    types.BotCommand(command="/my_questions", description="Твои вопросы/обсуждения")
 ]
 
 

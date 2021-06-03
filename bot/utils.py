@@ -1,6 +1,7 @@
-from bot.db.services import queston_service
-from bot.config import bot as bot_instance
 from aiogram import types
+
+from bot.config import bot as bot_instance
+from bot.db.services import queston_service
 
 
 def remove_non_service_data(data: dict):
@@ -33,14 +34,15 @@ def generate_topic_str(topics: dict, sep="::") -> str:
 def generate_feed(questions_list):
     questions_str = ''
     question_info_template = '*Заголовок:* {title}\n' \
-                             '*ID:* {problem_id}\n' \
+                             '*Тип проблемы:* {type}' \
                              '*Статус:* {is_open}\n' \
-                             '*Подробнее:* /detail{problem_id}\n' \
+                             '*Подробная информация:* /detail{problem_id}\n' \
                              '*Темы:* {topics}'
 
     for question in questions_list:
         questions_str += '\n\n' + question_info_template.format(title=question.title,
                                                                 problem_id=question.id,
+                                                                type='Вопрос' if question.type == 'question' else 'Обсуждение',
                                                                 is_open='Закрыт' if question.is_closed else 'Открыт',
                                                                 topics=generate_topic_str(
                                                                     queston_service.get_all_topics_for_problem(

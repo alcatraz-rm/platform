@@ -47,19 +47,17 @@ HELP_MESSAGE = """*Доступные команды:*
 
 *1.*\t\t/about - информация о боте
 
-*2.*\t\t/new - создание вопроса или обсуждения 
+*2.*\t\t/new - создание вопроса или обсуждения
 
 *3.*\t\t/feed - лента вопросов/обсуждений
 
-*4.*\t\t/detail - детализация вопроса (укажи его id)
+*4.*\t\t/me - что я о тебе знаю и что видят другие пользователи
 
-*5.*\t\t/me - что я о тебе знаю и видят другие пользователи
+*5.*\t\t/my\_questions - твои вопросы
 
-*6.*\t\t/my\_questions - твои вопросы
+*6.*\t\t/settings - настройки профиля
 
-*7.*\t\t/settings - настройки профиля
-
-*8.*\t\t/help - это сообщение
+*7.*\t\t/help - это сообщение
 """
 
 REGISTRATION_EXIT_SENTENCES = "Введите /exit, чтобы прервать регистрацию"
@@ -107,10 +105,10 @@ ME_MET_MESSAGE = emoji.emojize("""Твой профиль:
 :white_small_square: Интересы: {interests}
 :white_small_square: Факультет: {department}
 :white_small_square: Степень обучения: {degree_level}
-:white_small_square: Твои вопросы: /my_questions
+:white_small_square: Твои вопросы/обсуждения: /my_questions
 """)
 
-ME_MESSAGE = """ У вас еще нет профиля, нужно зарегистрировться с помощью /register """  # кнопка register
+ME_MESSAGE = """У вас еще нет профиля, нужно зарегистрировться с помощью /register"""  # кнопка register
 
 # FEED_SENTENCES:
 
