@@ -50,7 +50,10 @@ def is_user_exist(t_id) -> bool:
 
 
 def get_user(t_id: int) -> Optional[UserModel]:
-    user = UserModel.get_or_none(t_id=t_id)
+    try:
+        user = UserModel.get_or_none(t_id=t_id)
+    except InternalError:
+        user = UserModel.get_or_none(t_id=t_id)
 
     if user:
         user.department = {value: key for key, value in DEPARTMENT_ALIASES.items()}[user.department]
@@ -61,7 +64,6 @@ def get_user(t_id: int) -> Optional[UserModel]:
 
 def assign_interest(user: UserModel, subject_name: str):
     subject = Subject.get_or_none(name=subject_name)
-
     user_interests = get_all_interests_for_user(user.t_id)
 
     if subject.science.name not in user_interests.keys():
@@ -130,6 +132,7 @@ def alter_user_info(user: UserModel, name: str = None, email: str = None,
         user.department = DEPARTMENT_ALIASES[department]
     if degree_level is not None:
         user.degree_level = DEGREES_ALIASES[degree_level]
+
     try:
         user.save()
     except InternalError:

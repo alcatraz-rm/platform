@@ -1,22 +1,31 @@
-from peewee import DoesNotExist
-from datetime import datetime as dt
-from bot.db.models import Subject, Science, Problem, Response, Topic, Interest, UserModel, ProblemLike, ProblemReport
-from bot.constants import *
 import typing
-from bot.constants import REPORT_REASONS_ALIASES
-from bot.config import bot as bot_instance
-from bot.utils import make_broadcast
+from datetime import datetime as dt
+
 from aiogram import types
+from peewee import DoesNotExist, InternalError
+
+from bot.config import bot as bot_instance
+from bot.constants import *
+from bot.constants import REPORT_REASONS_ALIASES
+from bot.db.models import Subject, Science, Problem, Response, Topic, UserModel, ProblemLike, ProblemReport
+from bot.utils import make_broadcast
 
 
 def add_new_science(name: str):
-    Science.create(name=name)
+    try:
+        Science.create(name=name)
+    except InternalError:
+        Science.create(name=name)
 
 
 def add_new_subject(name: str, science_name: str):
     science_obj = Science.get_or_none(name=science_name)
+
     if science_obj is not None:
-        Subject.create(name=name, science=science_obj)
+        try:
+            Subject.create(name=name, science=science_obj)
+        except InternalError:
+            Subject.create(name=name, science=science_obj)
     else:
         raise DoesNotExist("Science with name {} doesn't exist.".format(science_name))
 
@@ -41,43 +50,68 @@ def add_new_problem(title: str, body: str, user_t_id: int, type_, is_anonymous: 
                     invite_link: str = None, group_id: int = None) -> Problem:
     user = UserModel.get_or_none(t_id=user_t_id)
 
-    new_problem = Problem.create(title=title,
-                                 body=body,
-                                 user=user,
-                                 is_anonymous=is_anonymous,
-                                 created_at=dt.now(),
-                                 type=type_,
-                                 invite_link=invite_link,
-                                 group_id=group_id
-                                 )
+    try:
+        new_problem = Problem.create(title=title,
+                                     body=body,
+                                     user=user,
+                                     is_anonymous=is_anonymous,
+                                     created_at=dt.now(),
+                                     type=type_,
+                                     invite_link=invite_link,
+                                     group_id=group_id)
+    except InternalError:
+        new_problem = Problem.create(title=title,
+                                     body=body,
+                                     user=user,
+                                     is_anonymous=is_anonymous,
+                                     created_at=dt.now(),
+                                     type=type_,
+                                     invite_link=invite_link,
+                                     group_id=group_id)
 
     return new_problem
 
 
 def get_problem_by_id(q_id) -> typing.Optional[Problem]:
-    return Problem.get_or_none(id=q_id)
+    try:
+        return Problem.get_or_none(id=q_id)
+    except:
+        return Problem.get_or_none(id=q_id)
 
 
 def assign_topic(problem: Problem, subject_name: str):
     subject = Subject.get_or_none(name=subject_name)
-
     problem_topics = get_all_topics_for_problem(problem_id=problem.id)
 
     if subject.science.name not in problem_topics.keys():
-        Topic.create(problem=problem, subject=subject)
+        try:
+            Topic.create(problem=problem, subject=subject)
+        except InternalError:
+            Topic.create(problem=problem, subject=subject)
+
         return
 
     if subject_name not in problem_topics.get(subject):
-        Topic.create(problem=problem, subject=subject)
+        try:
+            Topic.create(problem=problem, subject=subject)
+        except InternalError:
+            Topic.create(problem=problem, subject=subject)
 
 
 def get_all_open_questions() -> list:
-    return list(Problem.select().where(Problem.is_closed == False))
+    try:
+        return list(Problem.select().where(Problem.is_closed == False))
+    except InternalError:
+        return list(Problem.select().where(Problem.is_closed == False))
 
 
 def get_user_problems(user_t_id: int) -> list:
-    user_obj = UserModel.get_or_none(t_id=user_t_id)
-    return list(Problem.select().where(Problem.user == user_obj))
+    try:
+        user_obj = UserModel.get_or_none(t_id=user_t_id)
+        return list(Problem.select().where(Problem.user == user_obj))
+    except InternalError:
+        user_obj = UserModel.get_or_none(t_id=user_t_id)
+        return list(Problem.select().where(Problem.user == user_obj))
 
 
 def get_all_topics_for_problem(problem_id: int) -> dict:
@@ -141,22 +175,39 @@ def get_list_of_users_who_liked(problem_id: int) -> list:
 
 
 def is_problem_liked_by_user(problem_id: int, user_t_id: int) -> bool:
-    liked_by_users = get_list_of_users_who_liked(problem_id)
+    try:
+        liked_by_users = get_list_of_users_who_liked(problem_id)
+    except InternalError:
+        liked_by_users = get_list_of_users_who_liked(problem_id)
+
     if user_t_id in liked_by_users:
         return True
     return False
 
 
 async def add_new_response(problem_id: int, body: str, user_t_id: int, is_anonymous: bool):
-    user = UserModel.get_or_none(t_id=user_t_id)
-    problem_obj = Problem.get_or_none(id=problem_id)
+    try:
+        user = UserModel.get_or_none(t_id=user_t_id)
+        problem_obj = Problem.get_or_none(id=problem_id)
+    except InternalError:
+        user = UserModel.get_or_none(t_id=user_t_id)
+        problem_obj = Problem.get_or_none(id=problem_id)
 
-    resp = Response.create(problem=problem_obj,
-                           body=body,
-                           author=user,
-                           created_at=dt.now(),
-                           is_anonymous=is_anonymous,
-                           )
+    try:
+        resp = Response.create(problem=problem_obj,
+                               body=body,
+                               author=user,
+                               created_at=dt.now(),
+                               is_anonymous=is_anonymous,
+                               )
+    except:
+        resp = Response.create(problem=problem_obj,
+                               body=body,
+                               author=user,
+                               created_at=dt.now(),
+                               is_anonymous=is_anonymous,
+                               )
+
     chat_id = problem_obj.user.t_id
     mes = QUESTION_DETAIL_UPDATE_NOTIFICATION_FOR_AUTHOR.format(title=problem_obj.title,
                                                                 problem_id=problem_id,
@@ -174,19 +225,31 @@ def like_problem(problem_id: int, user_t_id: int):
     problem = Problem.get_or_none(id=problem_id)
 
     if problem is not None:
-        user = UserModel.get_or_none(t_id=user_t_id)
-        ProblemLike.create(problem=problem, liked_by=user)
+        try:
+            user = UserModel.get_or_none(t_id=user_t_id)
+            ProblemLike.create(problem=problem, liked_by=user)
+        except InternalError:
+            user = UserModel.get_or_none(t_id=user_t_id)
+            ProblemLike.create(problem=problem, liked_by=user)
     else:
         raise DoesNotExist("Problem with given id doesn't exist.")
 
 
 def dislike_problem(problem_id: int, user_t_id: int):
-    problem = Problem.get_or_none(id=problem_id)
+    try:
+        problem = Problem.get_or_none(id=problem_id)
+    except InternalError:
+        problem = Problem.get_or_none(id=problem_id)
 
     if problem is not None:
-        user = UserModel.get_or_none(t_id=user_t_id)
-        like = ProblemLike.get_or_none(problem=problem, liked_by=user)
-        ProblemLike.delete_by_id(like.id)
+        try:
+            user = UserModel.get_or_none(t_id=user_t_id)
+            like = ProblemLike.get_or_none(problem=problem, liked_by=user)
+            ProblemLike.delete_by_id(like.id)
+        except InternalError:
+            user = UserModel.get_or_none(t_id=user_t_id)
+            like = ProblemLike.get_or_none(problem=problem, liked_by=user)
+            ProblemLike.delete_by_id(like.id)
     else:
         raise DoesNotExist("Problem with given id doesn't exist.")
 
@@ -223,10 +286,17 @@ def report_problem(problem_id: int, report_reason, report_author_id: int):
 
     if problem is not None:
         author_obj = UserModel.get_or_none(t_id=report_author_id)
-        ProblemReport.create(report_problem=problem,
-                             author=author_obj,
-                             report_reason=report_reason_cleared,
-                             )
+
+        try:
+            ProblemReport.create(report_problem=problem,
+                                 author=author_obj,
+                                 report_reason=report_reason_cleared,
+                                 )
+        except InternalError:
+            ProblemReport.create(report_problem=problem,
+                                 author=author_obj,
+                                 report_reason=report_reason_cleared,
+                                 )
 
 
 def get_all_responses_for_problem(problem_id: int):
