@@ -1,4 +1,4 @@
-from peewee import DoesNotExist
+from peewee import DoesNotExist, InternalError
 
 from bot.constants import DEPARTMENT_ALIASES, DEGREES_ALIASES
 from bot.db.models import UserModel, Interest, Subject
@@ -20,14 +20,24 @@ def email_is_valid(email: str):
 
 
 def add_new_user(t_id, t_username, name, email, department, degree_level):
-    UserModel.create(
-        t_id=t_id,
-        t_username=t_username,
-        name=name,
-        email=email,
-        department=DEPARTMENT_ALIASES[department],
-        degree_level=DEGREES_ALIASES[degree_level],
-    )
+    try:
+        UserModel.create(
+            t_id=t_id,
+            t_username=t_username,
+            name=name,
+            email=email,
+            department=DEPARTMENT_ALIASES[department],
+            degree_level=DEGREES_ALIASES[degree_level],
+        )
+    except InternalError:
+        UserModel.create(
+            t_id=t_id,
+            t_username=t_username,
+            name=name,
+            email=email,
+            department=DEPARTMENT_ALIASES[department],
+            degree_level=DEGREES_ALIASES[degree_level],
+        )
 
 
 def is_user_exist(t_id) -> bool:
@@ -55,11 +65,18 @@ def assign_interest(user: UserModel, subject_name: str):
     user_interests = get_all_interests_for_user(user.t_id)
 
     if subject.science.name not in user_interests.keys():
-        Interest.create(user=user.id, subject=subject)
-        return
+        try:
+            Interest.create(user=user.id, subject=subject)
+            return
+        except InternalError:
+            Interest.create(user=user.id, subject=subject)
+            return
 
     if subject_name not in user_interests.get(subject.science.name):
-        Interest.create(user=user.id, subject=subject)
+        try:
+            Interest.create(user=user.id, subject=subject)
+        except InternalError:
+            Interest.create(user=user.id, subject=subject)
 
 
 def remove_interest(user: UserModel, subject_name: str):
@@ -113,5 +130,7 @@ def alter_user_info(user: UserModel, name: str = None, email: str = None,
         user.department = DEPARTMENT_ALIASES[department]
     if degree_level is not None:
         user.degree_level = DEGREES_ALIASES[degree_level]
-
-    user.save()
+    try:
+        user.save()
+    except InternalError:
+        user.save()
