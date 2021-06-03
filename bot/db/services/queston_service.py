@@ -46,6 +46,14 @@ def get_all_subjects(science_name: str):
     return subjects
 
 
+def response_is_final(response_id: int):
+    response = Response.get_or_none(id=response_id)
+
+    if response and response.is_final:
+        return True
+    return False
+
+
 def add_new_problem(title: str, body: str, user_t_id: int, type_, is_anonymous: bool = False,
                     invite_link: str = None, group_id: int = None) -> Problem:
     user = UserModel.get_or_none(t_id=user_t_id)

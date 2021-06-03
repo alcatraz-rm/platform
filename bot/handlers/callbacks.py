@@ -175,6 +175,12 @@ async def handle_report_response(call: types.CallbackQuery, callback_data: dict)
 @dp.callback_query_handler(response_detail_cb.filter(action="solve"), state="*")
 async def resolve_problem(call: types.CallbackQuery, callback_data: dict):
     response_id = callback_data["response_id"]
+    response_is_final = queston_service.response_is_final(response_id)
+
+    if response_is_final:
+        await call.answer('Ответ уже отмечен как правильный')
+        return
+
     await queston_service.close_problem_via_response(response_id)
     await call.answer("Ты закрыл(а) вопрос", show_alert=True)
 
