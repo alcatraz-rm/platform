@@ -8,6 +8,7 @@ from bot.middlewares import StateValidationMiddleware, MessageSourceValidationMi
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils.executor import Executor
+from aiogram.contrib.fsm_storage.redis import RedisStorage
 
 
 # Getting envs
@@ -38,7 +39,14 @@ logging.basicConfig(format=u'%(filename)+13s [ LINE:%(lineno)-4s] %(levelname)-8
                     level=logging.DEBUG)
 
 
-storage = MemoryStorage()
+# storage = MemoryStorage()
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = int(os.getenv("REDIS_PORT"))
+
+if REDIS_HOST:
+    storage = RedisStorage(REDIS_HOST, REDIS_PORT, db=5)
+else:
+    storage = MemoryStorage()
 
 # Initialize bot and dispatcher
 bot = Bot(token=API_TOKEN)
