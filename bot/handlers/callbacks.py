@@ -1,4 +1,3 @@
-import emoji
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.callback_data import CallbackData
@@ -30,7 +29,8 @@ async def send_response_form(call: types.CallbackQuery, callback_data: dict, sta
         await call.answer("Вопрос был закрыт автором и доступен только для чтения", show_alert=True)
         return
 
-    await call.message.answer("Напиши свой ответ в следующем сообщении", reply_markup=kb.ReplyKeyboardRemove())
+    await call.message.answer("Напиши свой ответ в следующем сообщении (для выхода используй /exit)",
+                              reply_markup=kb.get_exit_km())
     await QuestionDetailStates.waiting_for_response.set()
     await state.update_data(problem_id=problem_id)
     await call.answer()
@@ -46,15 +46,15 @@ async def send_response_or_discussion_poll(call: types.CallbackQuery, callback_d
     user_id = callback_data["user_id"]
     problem_id = callback_data["problem_id"]
     problem_obj = queston_service.get_problem_by_id(problem_id)
-    
+
     if problem_obj.type == 'question':
         message = "Посмотреть ответы других или написать свой ответ?"
     else:
         message = 'С помощью кнопки "Перейти к обсуждению" ты можешь присоединиться к телеграм-чату, посвященному этому проблеме'
-        
+
     await call.message.answer(message,
                               reply_markup=inline_kb.get_resp_or_disc_inline_kb(problem_obj, user_id))
-    
+
     await call.answer()
 
     await QuestionDetailStates.response_or_discussion.set()

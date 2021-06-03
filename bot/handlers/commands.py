@@ -217,13 +217,20 @@ async def handle_response(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(commands=["finish"], state=RegistrationProcessStates.waiting_for_interests_science)
-async def handle_finish(message: types, state: FSMContext):
+async def handle_finish(message: types.Message, state: FSMContext):
     answer = "Интересы добавлены! Регистрация прошла успешно! Добро пожаловать!"
     reply_markup = kb.ReplyKeyboardRemove()
     await message.answer(answer, reply_markup=reply_markup)
     await state.reset_state(with_data=False)
     await state.set_data(remove_non_service_data(await state.get_data()))
     await send_welcome(message)
+
+
+@dp.message_handler(commands=['exit'], state=QuestionDetailStates.waiting_for_response)
+async def handle_exit_response(message: types.Message, state: FSMContext):
+    await message.answer('Действие отменено')
+    await state.reset_state(with_data=False)
+    await state.set_data(remove_non_service_data(await state.get_data()))
 
 
 @dp.message_handler(commands=["register"], state="*")
