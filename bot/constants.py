@@ -60,7 +60,7 @@ HELP_MESSAGE = """*Доступные команды:*
 
 FRIENDS_MESSAGE = """*Наши друзья:*
 
-1. Новое из старого - https://vk.com/novoe_iz_starogo
+1. Новое из старого - https://vk.com/novoe\_iz_\starogo
 """
 
 REGISTRATION_EXIT_SENTENCES = "Введите /exit, чтобы прервать регистрацию"
