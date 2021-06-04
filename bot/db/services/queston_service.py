@@ -389,7 +389,7 @@ async def delete_problem_by_admin(problem_id: int, reason: str):
         reason_mes = f"Ваше обсуждение было удалено!\n\nПричина: {reason}\n\n" + dis_detail_temp
 
         await bot_instance.send_message(chat_id=problem.group_id, text=reason_mes)
-        bot_instance.leave_chat(chat_id=problem.group_id)
+        await bot_instance.leave_chat(chat_id=problem.group_id)
 
     await make_broadcast(sub_mes, users_who_liked_problem)
     await bot_instance.send_message(chat_id=problem.user.t_id, text=reason_mes)
