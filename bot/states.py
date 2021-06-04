@@ -45,6 +45,9 @@ class AdminPanelStates(StatesGroup):
     waiting_for_science = State()
     waiting_for_subject = State()
     waiting_for_section = State()
+    waiting_for_d_id = State()
+    waiting_for_reason = State()
+    waiting_for_user_id = State()
 
 
 class QuestionDetailStates(StatesGroup):
@@ -53,6 +56,7 @@ class QuestionDetailStates(StatesGroup):
     waiting_for_report = State()
     response_or_discussion = State()
     waiting_for_response = State()
+
 
 class FeedStates(StatesGroup):
     waiting_for_choose_type = State()

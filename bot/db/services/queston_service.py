@@ -324,3 +324,116 @@ async def close_problem_via_response(response_id: int):
                                                                  response_id=response_id)
 
         await bot_instance.send_message(chat_id=r_author.t_id, text=mes, parse_mode=types.ParseMode.MARKDOWN)
+
+
+async def delete_problem_by_admin(problem_id: int, reason: str):
+    problem = Problem.get_or_none(id=problem_id)
+    responses = get_all_responses_for_problem(problem_id)
+
+    for response in responses:
+        # delete all responses
+        await delete_response_by_admin(response.id)
+
+    topics = get_all_topics_for_problem(problem_id)
+    # delete all topics related to it
+    delete_topics(topics, problem_id)
+    # delete all problem likes
+    likes = (ProblemLike
+             .select(ProblemLike, Problem, UserModel)
+             .join(Problem, on=(ProblemLike.problem == Problem.id))
+             .switch(UserModel)
+             .join(UserModel, on=(ProblemLike.liked_by == UserModel.id))
+             .where(Problem.id == problem_id))
+    users_who_liked_problem = []
+    for like in likes:
+        try:
+            ProblemLike.delete_by_id(like.id)
+            users_who_liked_problem.append(like.liked_by.t_id)
+
+        except:
+            pass
+
+    # delete all reports
+    reports = (ProblemReport
+               .select(ProblemReport, Problem)
+               .join(Problem, on=(ProblemReport.report_problem == Problem.id))
+               .where(Problem.id == problem_id))
+
+    for report in reports:
+        try:
+            ProblemReport.delete_by_id(report.id)
+        except:
+            pass
+
+    # sending notifications
+    sub_mes = ""
+    reason_mes = ""
+    q_detail_temp = QUESTION_DETAIL_MESSAGE.format(id=problem.id,
+                                                   title=problem.title,
+                                                   author_name=("Anonymous"
+                                                                if problem.is_anonymous else problem.user.name),
+                                                   body=problem.body,
+                                                   topics="Темы удалены.")
+    dis_detail_temp = DISCUSSION_DETAIL_MESSAGE.format(id=problem.id,
+                                                       title=problem.title,
+                                                       author_name=("Anonymous"
+                                                                    if problem.is_anonymous else problem.user.name),
+                                                       body=problem.body,
+                                                       topics="Темы удалены.")
+
+    if problem.type == "question":
+        sub_mes = "Вопрос, который ты отслеживаешь удалили :(\n\n" + q_detail_temp
+        reason_mes = f"Ваш вопрос был удалён!\n\nПричина: {reason}\n\n" + q_detail_temp
+    elif problem.type == "discussion":
+        sub_mes = "Обсуждение, которое ты отслеживаешь удалили :(\n\n" + dis_detail_temp
+        reason_mes = f"Ваше обсуждение было удалено!\n\nПричина: {reason}\n\n" + dis_detail_temp
+
+        await bot_instance.send_message(chat_id=problem.group_id, text=reason_mes)
+        bot_instance.leave_chat(chat_id=problem.group_id)
+
+    await make_broadcast(sub_mes, users_who_liked_problem)
+    await bot_instance.send_message(chat_id=problem.user.t_id, text=reason_mes)
+
+    try:
+        # delete problem
+        Problem.delete_by_id(problem_id)
+    except:
+        pass
+
+
+async def delete_response_by_admin(response_id: int, send_notifications: bool = False, reason: str = None):
+    if send_notifications:
+        response = Response.get_or_none(id=response_id)
+        response_temp = QUESTION_DETAIL_RESPONSE_MESSAGE.format(r_id=response_id,
+                                                                r_author=response.author.name,
+                                                                date=response.created_at,
+                                                                body=response.body)
+        mes = "Ваш ответ был удалён!\n\n" + response_temp + f"\n\nПричина удаления: {reason}"
+        chat_id = response.author.t_id
+        await bot_instance.send_message(chat_id=chat_id, text=mes)
+    try:
+        Response.delete_by_id(response_id)
+    except:
+        pass
+
+
+def delete_topics(topics: dict, problem_id: int):
+    print(topics)
+    for science_name in topics:
+        topic_list = topics[science_name]
+        for topic in topic_list:
+            topic_obj = Topic.get_or_none(problem_id=problem_id, subject__name=topic)
+            try:
+                Topic.delete_by_id(topic_obj.id)
+            except:
+                pass
+
+
+"""
+def test(problem_id: int = 1):
+    reports = (ProblemReport
+               .select(ProblemReport, Problem)
+               .join(Problem, on=(ProblemReport.report_problem == Problem.id))
+               .where(Problem.id == problem_id))
+    print([rep.report_reason for rep in reports])
+"""

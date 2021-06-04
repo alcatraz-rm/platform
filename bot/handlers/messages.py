@@ -63,6 +63,35 @@ async def handle_admin_add_science(message: types.Message, state: FSMContext):
         await handle_admin(message, state)
 
 
+@dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_d_id)
+async def handle_admin_delete_reason(message: types.Message, state: FSMContext):
+    await message.answer("Укажи причину удаления")
+    await state.update_data(d_id=message.text)
+    await AdminPanelStates.waiting_for_reason.set()
+
+
+@dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_reason)
+async def handle_admin_delete_reason(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    action = data.get("action")
+    d_id = int(data.get("d_id"))
+    reason = message.text
+    if action == "problem":
+        await queston_service.delete_problem_by_admin(d_id, reason)
+        await message.answer("Проблема удалена.")
+    elif action == "response":
+        await queston_service.delete_response_by_admin(response_id=d_id, send_notifications=True, reason=reason)
+        await message.answer("Ответ удалён.")
+    await AdminPanelStates.waiting_for_command.set()
+    await handle_admin(message, state)
+
+
+@dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_command)
+async def handle_admin_ban(message: types.Message, state: FSMContext):
+    # TODO: implement ban
+    await message.answer("", reply_markup=kb.ReplyKeyboardRemove())
+
+
 # /register
 
 @dp.message_handler(state=RegistrationProcessStates.waiting_for_interests_subject)
