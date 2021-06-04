@@ -24,6 +24,9 @@ def email_is_valid(email: str):
 
 
 def add_new_user(t_id, t_username, name, email, department, degree_level):
+    if not t_username:
+        t_username = "empty"
+
     try:
         UserModel.create(
             t_id=t_id,
