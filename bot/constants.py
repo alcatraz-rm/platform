@@ -8,6 +8,7 @@ PROBLEM_TYPE_OPTIONS = [
 
 DEPARTMENT_OPTIONS = [
     ('nsu_mmf', 'Механико-Математический Факультет'),
+    ('nsu_phys', 'Физический Факультет')
 ]
 
 DEGREE_LEVEL_OPTIONS = [
@@ -16,7 +17,7 @@ DEGREE_LEVEL_OPTIONS = [
 ]
 
 # departments aliases, TODO: add full list (in MVP only mmf)
-DEPARTMENT_ALIASES = {'Механико-Математический Факультет': 'mmf'}
+DEPARTMENT_ALIASES = {'Механико-Математический Факультет': 'mmf', 'Физический Факультет': 'physf'}
 
 # degrees aliases, TODO: add full list
 DEGREES_ALIASES = {'Бакалавр': 'bachelor', 'Магистр': 'master'}
