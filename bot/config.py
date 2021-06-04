@@ -55,6 +55,6 @@ dp = Dispatcher(bot, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 dp.middleware.setup(StateValidationMiddleware())
 dp.middleware.setup(MessageSourceValidationMiddleware())
-# dp.middleware.setup(ValidateUserIDMiddleware())
+dp.middleware.setup(ValidateUserIDMiddleware())
 executor = Executor(dp, skip_updates=True)
 
