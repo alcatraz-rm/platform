@@ -46,8 +46,10 @@ class AdminPanelStates(StatesGroup):
     waiting_for_subject = State()
     waiting_for_section = State()
     waiting_for_d_id = State()
-    waiting_for_reason = State()
+    waiting_for_delete_reason = State()
+    waiting_for_ban_reason = State()
     waiting_for_user_id = State()
+    waiting_for_duration = State()
 
 
 class QuestionDetailStates(StatesGroup):

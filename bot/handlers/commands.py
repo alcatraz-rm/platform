@@ -43,6 +43,7 @@ async def handle_admin_delete_problem_or_response(message: types.Message, state:
 @dp.message_handler(user_id=ADMINS_IDS, commands=["ban"], state=AdminPanelStates.waiting_for_command)
 async def handle_admin_ban(message: types.Message, state: FSMContext):
     await message.answer("Укажите id пользователя.", reply_markup=kb.ReplyKeyboardRemove())
+    await AdminPanelStates.waiting_for_user_id.set()
 
 
 @dp.message_handler(user_id=ADMINS_IDS,

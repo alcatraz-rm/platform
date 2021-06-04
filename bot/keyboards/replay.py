@@ -144,3 +144,15 @@ def get_generic_km(buttons: list):
     keyboard.add(*buttons)
 
     return keyboard
+
+
+def get_ban_duration_km():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    keyboard.add("30 минут")
+    keyboard.add("1 час")
+    keyboard.add("1 день")
+    keyboard.add("1 неделя")
+    keyboard.add("Навсегда")
+    keyboard.add("/exit")
+
+    return keyboard
