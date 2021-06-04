@@ -1,4 +1,8 @@
-from bot.db.services.queston_service import *
+import emoji
+from aiogram import types
+
+from bot.constants import REPORT_REASONS_ALIASES
+from bot.db.models import Response, Problem
 from bot.handlers.callbacks import question_detail_cb, response_detail_cb, report_cb
 
 

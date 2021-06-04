@@ -141,3 +141,13 @@ class UserReport(BaseModel):
 
     class Meta:
         db_table = 'User_Report'
+
+
+class BannedUsers(BaseModel):
+    user = ForeignKeyField(UserModel)
+
+    reason = TextField()
+
+    banned_until = DateTimeField()
+
+    is_permanent = BooleanField(default=False)

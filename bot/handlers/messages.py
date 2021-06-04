@@ -14,6 +14,8 @@ from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelS
     QuestionDetailStates, FeedStates
 from bot.utils import remove_non_service_data, generate_feed
 
+from datetime import datetime, timedelta
+
 '''
     Getting current state 'name':
         cs = await state.get_state()
@@ -61,6 +63,89 @@ async def handle_admin_add_science(message: types.Message, state: FSMContext):
         await state.set_data(remove_non_service_data(data))
         await state.set_state(state=AdminPanelStates.waiting_for_command)
         await handle_admin(message, state)
+
+
+@dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_d_id)
+async def handle_admin_delete_reason(message: types.Message, state: FSMContext):
+    await message.answer("Укажи причину удаления")
+    await state.update_data(d_id=message.text)
+    await AdminPanelStates.waiting_for_delete_reason.set()
+
+
+@dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_delete_reason)
+async def handle_admin_delete_reason(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    action = data.get("action")
+    d_id = int(data.get("d_id"))
+    reason = message.text
+    if action == "problem":
+        await queston_service.delete_problem_by_admin(d_id, reason)
+        await message.answer("Проблема удалена.")
+    elif action == "response":
+        await queston_service.delete_response_by_admin(response_id=d_id, send_notifications=True, reason=reason)
+        await message.answer("Ответ удалён.")
+    await AdminPanelStates.waiting_for_command.set()
+    await handle_admin(message, state)
+
+
+@dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_user_id)
+async def handle_admin_ban(message: types.Message, state: FSMContext):
+    message.text = "/ban" + message.text
+    await AdminPanelStates.waiting_for_command.set()
+    await handle_admin_direct_ban(message, state)
+
+
+@dp.message_handler(lambda message: message.text.startswith("/ban"),
+                    user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_command)
+async def handle_admin_direct_ban(message: types.Message, state: FSMContext):
+    raw_id = message.text.replace("/ban", '')
+    await message.answer("Укажи причину бана")
+    await state.update_data(user_id=raw_id)
+    await AdminPanelStates.waiting_for_ban_reason.set()
+
+
+@dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_ban_reason)
+async def handle_admin_ban_reason(message: types.Message, state: FSMContext):
+    await state.update_data(reason=message.text)
+
+    await message.answer("Укажи длительность блокировки.", reply_markup=kb.get_ban_duration_km())
+    await AdminPanelStates.waiting_for_duration.set()
+
+
+@dp.message_handler(user_id=ADMINS_IDS, state=AdminPanelStates.waiting_for_duration)
+async def handle_admin_ban_duration(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+
+    user_id = int(data.get("user_id"))
+    reason = data.get("reason")
+    duration_raw = message.text
+    banned_until = datetime.now()
+    is_permanent = False
+
+    if duration_raw == "30 минут":
+        banned_until += timedelta(minutes=30)
+
+    elif duration_raw == "1 час":
+        banned_until += timedelta(hours=1)
+
+    elif duration_raw == "1 день":
+        banned_until += timedelta(days=1)
+
+    elif duration_raw == "1 неделя":
+        banned_until += timedelta(weeks=1)
+
+    elif duration_raw == "Навсегда":
+        banned_until += timedelta(days=10000)
+        is_permanent = True
+
+    await account_service.ban_user(user_id=user_id,
+                                   reason=reason,
+                                   banned_until=banned_until,
+                                   is_permanent=is_permanent)
+
+    await message.answer("Пользователь заблокирован.", reply_markup=kb.get_ban_duration_km())
+    await AdminPanelStates.waiting_for_duration.set()
+    await handle_admin(message, state)
 
 
 # /register

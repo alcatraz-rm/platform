@@ -5,10 +5,12 @@ from peewee import DoesNotExist, InternalError
 from bot import utils
 from bot.config import ADMINS_IDS
 from bot.constants import DEPARTMENT_ALIASES, DEGREES_ALIASES
-from bot.db.models import UserModel, Interest, Subject
+from bot.db.models import UserModel, Interest, Subject, BannedUsers
 
 from typing import Optional
 from email_validator import validate_email, EmailNotValidError
+from bot.config import bot as bot_instance
+from datetime import datetime
 
 
 def email_is_valid(email: str):
@@ -168,3 +170,20 @@ def alter_user_info(user: UserModel, name: str = None, email: str = None,
         # await utils.make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
 
         user.save()
+
+
+async def ban_user(user_id: int, reason: str, banned_until: datetime, is_permanent: bool = False):
+    user = UserModel.get_or_none(id=user_id)
+    try:
+        BannedUsers.create(user=user,
+                           reason=reason,
+                           banned_until=banned_until,
+                           is_permanent=is_permanent)
+    except InternalError:
+        BannedUsers.create(user=user,
+                           reason=reason,
+                           banned_until=banned_until,
+                           is_permanent=is_permanent)
+
+    mes = f"Ваш аккаунт был заблокирован.\n\nПричина: {reason}"
+    await bot_instance.send_message(chat_id=user.t_id, text=mes)

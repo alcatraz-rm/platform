@@ -19,7 +19,31 @@ from aiogram.utils import exceptions
 
 # TODO: fix messages
 
-# TODO: speed up email validation
+@dp.message_handler(user_id=ADMINS_IDS, commands=["delete"], state=AdminPanelStates.waiting_for_command)
+async def handle_admin_delete(message: types.Message, state: FSMContext):
+    mes = "Что удалить?\n\n1. /problem\n2. /response"
+    await message.answer(mes)
+
+
+@dp.message_handler(user_id=ADMINS_IDS, commands=["problem", "response"], state=AdminPanelStates.waiting_for_command)
+async def handle_admin_delete_problem_or_response(message: types.Message, state: FSMContext):
+    mes = ""
+    if message.text == "/problem":
+        mes = "Укажи id проблемы"
+        await state.update_data(action="problem")
+
+    elif message.text == "/response":
+        mes = "Укажи id ответа"
+        await state.update_data(action="response")
+
+    await AdminPanelStates.waiting_for_d_id.set()
+    await message.answer(mes)
+
+
+@dp.message_handler(user_id=ADMINS_IDS, commands=["ban"], state=AdminPanelStates.waiting_for_command)
+async def handle_admin_ban(message: types.Message, state: FSMContext):
+    await message.answer("Укажите id пользователя.", reply_markup=kb.ReplyKeyboardRemove())
+    await AdminPanelStates.waiting_for_user_id.set()
 
 
 @dp.message_handler(user_id=ADMINS_IDS,
@@ -77,7 +101,7 @@ async def handle_admin_exit(message: types.Message, state: FSMContext):
 
 @dp.message_handler(user_id=ADMINS_IDS, commands=["admin"], state="*")
 async def handle_admin(message: types.Message, state: FSMContext):
-    await message.answer("Админ команды: /add, /exit.", reply_markup=kb.ReplyKeyboardRemove())
+    await message.answer("Админ команды:\n\n/add\n\n/delete\n\n/ban\n\n/exit.", reply_markup=kb.ReplyKeyboardRemove())
     await AdminPanelStates.waiting_for_command.set()
 
 
@@ -379,7 +403,7 @@ async def handle_bot_chat_admin(message: types.Message, state: FSMContext):
             return
 
         problem = add_new_problem(problem_data['title'], problem_data['body'], message.from_user.id, type_='discussion',
-                                  invite_link=invite_link, group_id=chat.id)
+                                  invite_link=invite_link, group_id=problem_data['chat_id'])
 
         for topic in problem_data['topics']:
             assign_topic(problem, topic[1])

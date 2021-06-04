@@ -7,7 +7,7 @@ def create_tables():
         db.connect()
         db.create_tables([UserModel, Science, Subject, Problem,
                           Response, Interest, Topic, ProblemLike,
-                          ProblemReport, UserReport, ])
+                          ProblemReport, UserReport, BannedUsers, ])
     except InternalError as px:
         print(str(px))
 
