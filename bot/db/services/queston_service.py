@@ -131,6 +131,16 @@ def get_all_open_questions() -> list:
         return list(Problem.select().where(Problem.is_closed == False))
 
 
+# Copied get_all_open_questions()
+def get_all_closed_questions() -> list:
+    try:
+        return list(Problem.select().where(Problem.is_closed))
+    except InternalError as exc:
+        # asyncio.run(make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS))
+        # await make_broadcast(f"Alert! Problem with database: {exc}", ADMINS_IDS)
+        return list(Problem.select().where(Problem.is_closed))
+
+
 def get_user_problems(user_t_id: int) -> list:
     try:
         user_obj = UserModel.get_or_none(t_id=user_t_id)

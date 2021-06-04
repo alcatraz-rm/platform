@@ -8,7 +8,7 @@ from bot.constants import *
 from bot.db.services import account_service, queston_service
 from bot.db.services.account_service import email_is_valid
 from bot.db.services.queston_service import add_new_problem, assign_topic, department_is_valid, degree_is_valid, \
-    get_all_open_questions
+    get_all_open_questions, get_all_closed_questions
 from bot.handlers.commands import send_welcome, handle_admin, handle_detail
 from bot.states import RegistrationProcessStates, NewQuestionStates, AdminPanelStates, SettingsChangeStates, \
     QuestionDetailStates, FeedStates
@@ -480,6 +480,18 @@ async def handle_problem_type(message: types.Message):
 
         await message.answer(generate_feed(problems), parse_mode=types.ParseMode.MARKDOWN)
 
+    elif message.text == 'Закрытые вопросы':
+        problems = list()
+        for problem in get_all_closed_questions():
+            if problem.type == 'question':
+                problems.append(problem)
+
+        if not problems:
+            await message.answer('Кажется, тут пока ничего нет. Задай вопрос или создай обсуждение с помощью /new')
+            return
+
+        await message.answer(generate_feed(problems), parse_mode=types.ParseMode.MARKDOWN)
+
     elif message.text == 'Показать всё':
         problems = get_all_open_questions()
 
@@ -488,6 +500,7 @@ async def handle_problem_type(message: types.Message):
             return
 
         await message.answer(generate_feed(problems), parse_mode=types.ParseMode.MARKDOWN)
+
     else:
         await message.answer("Некорректно выбран тип проблемы.", reply_markup=kb.problem_type_km())
 

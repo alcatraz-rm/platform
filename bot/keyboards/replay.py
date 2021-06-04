@@ -105,6 +105,7 @@ def problem_type_km():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     keyboard.add('Вопросы')
     keyboard.add('Обсуждения')
+    keyboard.add('Закрытые вопросы')
     keyboard.add('Показать всё')
     keyboard.add('/exit')
 
