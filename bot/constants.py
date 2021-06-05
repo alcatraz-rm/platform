@@ -108,12 +108,13 @@ START_MET_MESSAGE = """С возращением, {name}. Все команды 
 # ME_SENTENCES:
 
 
-ME_MET_MESSAGE = emoji.emojize("""Твой профиль:
+ME_MET_MESSAGE = emoji.emojize("""Это видят все пользователи:
 :white_small_square: Имя: {name}
-:white_small_square: Почта (НГУ): {email}
 :white_small_square: Интересы: {interests}
 :white_small_square: Факультет: {department}
 :white_small_square: Степень обучения: {degree_level}
+Это вижу только я:
+:white_small_square: Почта (НГУ): {email}
 :white_small_square: Твои вопросы/обсуждения: /my_questions
 """)
 
