@@ -113,6 +113,7 @@ ME_MET_MESSAGE = emoji.emojize("""Это видят все пользовате�
 :white_small_square: Интересы: {interests}
 :white_small_square: Факультет: {department}
 :white_small_square: Степень обучения: {degree_level}
+
 Это вижу только я:
 :white_small_square: Почта (НГУ): {email}
 :white_small_square: Твои вопросы/обсуждения: /my_questions
