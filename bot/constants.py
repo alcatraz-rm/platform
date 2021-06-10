@@ -62,6 +62,8 @@ HELP_MESSAGE = """*Доступные команды:*
 FRIENDS_MESSAGE = """*Наши друзья:*
 
 1. Новое из старого - https://vk.com/novoe\_iz\_starogo
+
+2. Совет обучающихся | ОСО НГУ - https://vk.com/oso\_nsu
 """
 
 REGISTRATION_EXIT_SENTENCES = "Введите /exit, чтобы прервать регистрацию"
