@@ -106,7 +106,7 @@ def problem_type_km():
     keyboard.add('Вопросы')
     keyboard.add('Обсуждения')
     keyboard.add('Показать всё')
-    keyboard.add('Закрытые вопросы')
+    # keyboard.add('Закрытые вопросы')
     keyboard.add('/exit')
 
     return keyboard
